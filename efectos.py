@@ -40,16 +40,16 @@ def ease_out_back(x, s=1.9):
 # ---------------------------------------------------------------- sprites
 # Un sprite es un array float32 (h, w, 4) con RGB premultiplicado por alfa.
 @lru_cache(maxsize=None)
-def _fuente(tam):
-    return ImageFont.truetype(FUENTE, tam)
+def _fuente(tam, ruta=None):
+    return ImageFont.truetype(ruta or FUENTE, tam)
 
 
-def ancho_texto(txt, tam):
-    return _fuente(tam).getlength(txt)
+def ancho_texto(txt, tam, ruta=None):
+    return _fuente(tam, ruta).getlength(txt)
 
 
-def texto(txt, tam, color=BLANCO, sombra=True):
-    f = _fuente(tam)
+def texto(txt, tam, color=BLANCO, sombra=True, ruta=None):
+    f = _fuente(tam, ruta)
     pad = 26
     w = int(f.getlength(txt)) + 2 * pad
     h = int(tam * 1.32) + 2 * pad
