@@ -1,0 +1,4 @@
+.venv/
+__pycache__/
+videos_salida/
+fotos/prueba*.jpg
