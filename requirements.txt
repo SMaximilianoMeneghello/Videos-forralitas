@@ -1,3 +1,5 @@
 moviepy>=2.1
 pillow
 numpy
+scipy
+opencv-python-headless
