@@ -1,93 +1,188 @@
-"""Genera un video publicitario vertical (1080x1920) para la forrajería.
+"""Genera el video publicitario vertical (1080x1920) de Forralitas.
 
 Uso:
-    python crear_video.py                 # usa las fotos de ./fotos
-    python crear_video.py mi_config.json  # usa otra configuración
+    python crear_video.py            # genera videos_salida/forralitas.mp4
 
-Poné tus fotos (jpg/png) o videos cortos (mp4) en la carpeta ./fotos.
-Editá los textos en CONFIG (abajo) o en un JSON con las mismas claves.
+Las fotos van en ./fotos (se usan en orden alfabético) y el logo en
+assets/logo.jpg. Los textos de cada foto, el teléfono, etc. se editan en
+CONFIG, abajo.
 """
-import json
-import sys
 from pathlib import Path
 
-from moviepy import (ColorClip, CompositeVideoClip, ImageClip, TextClip,
-                     VideoFileClip, concatenate_videoclips)
+import numpy as np
+from moviepy import VideoClip, concatenate_videoclips
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ANCHO, ALTO = 1080, 1920
+FPS = 30
+VERDE = (11, 77, 35)
+VERDE_OSCURO = (6, 48, 21)
+AMARILLO = (255, 213, 64)
+BLANCO = (255, 255, 255)
 FUENTE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 CONFIG = {
-    "nombre": "FORRAJERÍA",           # nombre del local
-    "slogan": "Todo para tus animales",
-    "frases": ["Alimento balanceado", "Fardos y semillas", "Mascotas y campo"],
-    "contacto": "📞 Tel: 000-0000000  ·  Av. Ejemplo 123",
-    "segundos_por_foto": 3,
-    "musica": None,                   # ej: "musica.mp3"
-    "salida": "videos_salida/publicidad.mp4",
+    "nombre": "FORRALITAS",
+    "rubro": "Forrajería y Semillería",
+    "direccion": "Ruta 305 km 7,5 · Las Talitas",
+    "telefonos": ["381 526 9004", "381 633 4344"],
+    "horarios": ["Lunes a viernes: 8:00 a 19:00", "Sábados: 8:30 a 19:00"],
+    "extras": ["Envíos según la zona", "Venta por mayor y menor"],
+    "segundos_por_foto": 2.6,
+    "salida": "videos_salida/forralitas.mp4",
+    # texto que se muestra sobre cada foto (clave: nombre del archivo)
+    "frases": {
+        "01_perros_sabrositos.jpg": ("Alimento para perros", "Y para todas las mascotas"),
+        "02_perros_gatos.jpg": ("Perros y gatos", "Todas las marcas y tamaños"),
+        "03_alfalfa.jpg": ("Fardos de alfalfa", "Calidad para tus animales"),
+        "04_semillas_aves.jpg": ("Semillas para aves", "Mezclas para cada especie"),
+        "05_sal_lamer.jpg": ("Sal tónica para lamer", "Para caballos y ganado"),
+        "06_sal_bloque.jpg": ("Sal en bloque", "Mineral y natural"),
+        "07_balanceado.jpg": ("Balanceados", "Para todo tipo de animales"),
+        "08_maiz_partido.jpg": ("Maíz partido", "Fresco y de primera"),
+        "09_pellets_maiz.jpg": ("Pellets y maíz", "Rendidor y económico"),
+        "10_afrechillo.jpg": ("Afrechillo y mezclas", "Por kilo o por bolsa"),
+    },
 }
 
 
-def ajustar(clip):
-    """Escala y recorta el medio para llenar la pantalla vertical."""
-    escala = max(ANCHO / clip.w, ALTO / clip.h)
-    return clip.resized(escala).cropped(
-        x_center=clip.w * escala / 2, y_center=clip.h * escala / 2,
-        width=ANCHO, height=ALTO)
+def fuente(tam):
+    return ImageFont.truetype(FUENTE, tam)
 
 
-def texto(msg, tam, color="white", y="center", dur=3):
-    t = TextClip(font=FUENTE, text=msg, font_size=tam, color=color,
-                 stroke_color="black", stroke_width=4, method="caption",
-                 size=(ANCHO - 120, None), text_align="center")
-    return t.with_position(("center", y)).with_duration(dur)
+def ancho_texto(draw, txt, f):
+    return draw.textlength(txt, font=f)
 
 
-def escena(ruta, frase, dur):
-    if ruta.suffix.lower() in {".mp4", ".mov", ".avi", ".mkv"}:
-        base = ajustar(VideoFileClip(str(ruta)).without_audio().subclipped(0, dur))
-    else:
-        base = ajustar(ImageClip(str(ruta)).with_duration(dur))
-    return CompositeVideoClip(
-        [base, texto(frase, 90, "yellow", ALTO - 450, dur)], size=(ANCHO, ALTO))
+def texto_centrado(draw, txt, y, tam, color, sombra=True, max_ancho=ANCHO - 100):
+    f = fuente(tam)
+    while ancho_texto(draw, txt, f) > max_ancho and tam > 20:
+        tam -= 2
+        f = fuente(tam)
+    x = (ANCHO - ancho_texto(draw, txt, f)) / 2
+    if sombra:
+        draw.text((x + 3, y + 3), txt, font=f, fill=(0, 0, 0), stroke_width=0)
+    draw.text((x, y), txt, font=f, fill=color)
+    return y + tam
+
+
+def logo_redondo(lado):
+    """Recorta el logo en círculo (el original tiene fondo blanco)."""
+    im = Image.open("assets/logo.jpg").convert("RGB")
+    mascara = Image.new("L", im.size, 0)
+    ImageDraw.Draw(mascara).ellipse((55, 55, im.width - 55, im.height - 55), fill=255)
+    im.putalpha(mascara)
+    return im.crop((55, 55, im.width - 55, im.height - 55)).resize((lado, lado), Image.LANCZOS)
+
+
+def fondo_verde():
+    """Degradé vertical verde."""
+    t = np.linspace(0, 1, ALTO)[:, None, None]
+    a, b = np.array(VERDE, float), np.array(VERDE_OSCURO, float)
+    col = a * (1 - t) + b * t
+    return Image.fromarray(np.repeat(col, ANCHO, axis=1).astype("uint8"))
+
+
+def pegar_logo(base, lado, y):
+    logo = logo_redondo(lado)
+    base.paste(logo, ((ANCHO - lado) // 2, y), logo)
+
+
+def escena_estatica(imagen, dur):
+    arr = np.array(imagen.convert("RGB"))
+    return VideoClip(lambda t: arr, duration=dur).with_fps(FPS)
+
+
+def pantalla_portada(dur=3):
+    im = fondo_verde()
+    pegar_logo(im, 820, 330)
+    d = ImageDraw.Draw(im)
+    texto_centrado(d, CONFIG["nombre"], 1230, 130, BLANCO)
+    texto_centrado(d, CONFIG["rubro"], 1390, 62, AMARILLO)
+    texto_centrado(d, "Todo para tus animales", 1530, 50, BLANCO)
+    return escena_estatica(im, dur)
+
+
+def pantalla_cierre(dur=6):
+    im = fondo_verde()
+    pegar_logo(im, 360, 110)
+    d = ImageDraw.Draw(im)
+    y = texto_centrado(d, "¡Te esperamos!", 530, 100, AMARILLO)
+    y = texto_centrado(d, CONFIG["nombre"], y + 25, 80, BLANCO)
+    y += 55
+    for e in CONFIG["extras"]:
+        y = texto_centrado(d, e, y + 15, 52, AMARILLO)
+    y += 55
+    y = texto_centrado(d, "WhatsApp / Llamanos", y, 46, BLANCO)
+    for tel in CONFIG["telefonos"]:
+        y = texto_centrado(d, tel, y + 12, 78, AMARILLO)
+    y += 55
+    y = texto_centrado(d, "Ruta 305 km 7,5", y, 62, BLANCO)
+    y = texto_centrado(d, "Las Talitas", y + 8, 62, BLANCO)
+    y += 55
+    for h in CONFIG["horarios"]:
+        y = texto_centrado(d, h, y + 10, 44, BLANCO)
+    return escena_estatica(im, dur)
+
+
+def escena_foto(ruta, dur, linea1, linea2):
+    # foto rellenando la pantalla, con 15% extra para poder hacer zoom
+    escala = 1.15
+    w, h = int(ANCHO * escala), int(ALTO * escala)
+    foto = ImageOps.fit(Image.open(ruta).convert("RGB"), (w, h), Image.LANCZOS)
+
+    # degradé oscuro abajo para que se lea el texto + franja superior con marca
+    arr = np.array(foto, dtype=np.float32)
+    grad = np.clip((np.linspace(0, 1, h) - 0.55) / 0.45, 0, 1)[:, None, None]
+    arr = arr * (1 - 0.72 * grad)
+    top = np.clip((0.12 - np.linspace(0, 1, h)) / 0.12, 0, 1)[:, None, None]
+    arr = arr * (1 - 0.55 * top)
+    foto = Image.fromarray(arr.astype("uint8"))
+    base = np.array(foto)
+
+    def frame(t):
+        p = t / dur
+        # paneo suave: ventana ANCHOxALTO que se desplaza dentro del 115%
+        x = int((w - ANCHO) * (0.2 + 0.6 * p))
+        y = int((h - ALTO) * (0.7 - 0.4 * p))
+        return base[y:y + ALTO, x:x + ANCHO]
+
+    clip = VideoClip(frame, duration=dur).with_fps(FPS)
+
+    # capa de texto fija, dibujada una sola vez
+    capa = Image.new("RGBA", (ANCHO, ALTO), (0, 0, 0, 0))
+    d = ImageDraw.Draw(capa)
+    texto_centrado(d, CONFIG["nombre"], 70, 58, BLANCO)
+    texto_centrado(d, linea1, ALTO - 480, 96, AMARILLO)
+    texto_centrado(d, linea2, ALTO - 350, 52, BLANCO)
+    texto_centrado(d, "Ruta 305 km 7,5 · Las Talitas", ALTO - 150, 40, BLANCO)
+    capa_arr = np.array(capa)
+    alfa = capa_arr[:, :, 3:4].astype(np.float32) / 255
+    rgb = capa_arr[:, :, :3].astype(np.float32)
+
+    def con_texto(get_frame, t):
+        f = get_frame(t).astype(np.float32)
+        return (f * (1 - alfa) + rgb * alfa).astype("uint8")
+
+    return clip.transform(con_texto)
 
 
 def main():
-    cfg = dict(CONFIG)
-    if len(sys.argv) > 1:
-        cfg.update(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")))
+    fotos = sorted(Path("fotos").glob("*.jp*g")) + sorted(Path("fotos").glob("*.png"))
+    fotos = sorted(fotos, key=lambda p: p.name)
+    dur = CONFIG["segundos_por_foto"]
 
-    medios = sorted(p for p in Path("fotos").glob("*")
-                    if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".mp4", ".mov"})
-    dur = cfg["segundos_por_foto"]
+    escenas = [pantalla_portada()]
+    for p in fotos:
+        l1, l2 = CONFIG["frases"].get(p.name, (p.stem.replace("_", " ").title(), ""))
+        escenas.append(escena_foto(p, dur, l1, l2))
+    escenas.append(pantalla_cierre())
 
-    verde = (30, 110, 50)
-    portada = CompositeVideoClip([
-        ColorClip((ANCHO, ALTO), color=verde, duration=3),
-        texto(cfg["nombre"], 140, "white", 700, 3),
-        texto(cfg["slogan"], 70, "yellow", 1000, 3),
-    ], size=(ANCHO, ALTO))
-
-    cierre = CompositeVideoClip([
-        ColorClip((ANCHO, ALTO), color=verde, duration=4),
-        texto("¡Te esperamos!", 120, "yellow", 650, 4),
-        texto(cfg["nombre"], 100, "white", 900, 4),
-        texto(cfg["contacto"], 55, "white", 1150, 4),
-    ], size=(ANCHO, ALTO))
-
-    frases = cfg["frases"]
-    escenas = [escena(m, frases[i % len(frases)], dur) for i, m in enumerate(medios)]
-    video = concatenate_videoclips([portada, *escenas, cierre], method="compose")
-
-    if cfg["musica"] and Path(cfg["musica"]).exists():
-        from moviepy import AudioFileClip
-        audio = AudioFileClip(cfg["musica"]).subclipped(0, video.duration)
-        video = video.with_audio(audio.with_volume_scaled(0.6))
-
-    Path(cfg["salida"]).parent.mkdir(exist_ok=True)
-    video.write_videofile(cfg["salida"], fps=30, codec="libx264",
-                          audio_codec="aac", logger=None)
-    print("Listo:", cfg["salida"])
+    video = concatenate_videoclips(escenas, method="chain")
+    Path(CONFIG["salida"]).parent.mkdir(exist_ok=True)
+    video.write_videofile(CONFIG["salida"], fps=FPS, codec="libx264",
+                          audio=False, preset="veryfast", logger=None)
+    print("Listo:", CONFIG["salida"], f"({video.duration:.0f} s)")
 
 
 if __name__ == "__main__":
