@@ -139,7 +139,7 @@ def escena_intro():
     return fn
 
 
-def escena_producto(ruta, titulo, sub, cam):
+def escena_producto(ruta, titulo, sub, cam, dur=D_FOTO, kicker=None):
     foto = Foto(ruta)
     z0, z1, a, b = cam
     spr_t, xs, tam = fila_palabras(titulo, 112, W - 110)
@@ -152,12 +152,16 @@ def escena_producto(ruta, titulo, sub, cam):
     rubro = texto(CONFIG["rubro"], 28, AMARILLO)
     pie_icono = icono("ubicacion", 56)
     pie = texto(f"{CONFIG['direccion'][0]} · {CONFIG['direccion'][1]}", 36, BLANCO)
+    etiqueta = None
+    if kicker:
+        k = texto(kicker, 40, AMARILLO, sombra=False)
+        etiqueta = sobre(caja(k.shape[1] + 20, k.shape[0] - 14, 40, (3, 34, 14), 0.88), k, 10, -7)
     y_t = 1180
     delay = 0.38
     gmax = float(DIAGONAL.max())
 
     def fn(t):
-        p = t / D_FOTO
+        p = t / dur
         f = foto.frame(p, z0, z1, a, b).astype(np.float32) * MAPA_GRADIENTE
         # destello de luz que cruza la foto al entrar
         ps = prog(t, 0.05, 0.8)
@@ -174,7 +178,11 @@ def escena_producto(ruta, titulo, sub, cam):
         blit(f, rubro, 196 - (1 - ph) * 200, 208, alpha=ph)
 
         # franja amarilla que se abre desde el centro
-        wbar = int(300 * ease_out_cubic(prog(td, 0, 0.45)))
+        if etiqueta is not None:
+            q = prog(td, 0, 0.45)
+            blit(f, etiqueta, W / 2, y_t - 70, alpha=ease_out_cubic(q * 2),
+                 escala=max(ease_out_back(q, 2.2), 0.01), centro=True)
+        wbar = int(300 * ease_out_cubic(prog(td, 0, 0.45))) if etiqueta is None else 0
         if wbar > 0:
             cv2.rectangle(f, (W // 2 - wbar // 2, y_t - 22), (W // 2 + wbar // 2, y_t - 10),
                           AMARILLO, -1, cv2.LINE_AA)
@@ -355,10 +363,10 @@ def construir():
     return segs, inicios, total
 
 
-def hacer_frame_fn(segs, inicios, total):
+def hacer_frame_fn(segs, inicios, total, barra=None):
+    """`barra` = (t_inicio, t_fin) del tramo con barra de progreso; por defecto, todas las fotos."""
     n_fotos = len(segs) - 2
-    t_ini_fotos = inicios[1] + TR
-    t_fin_fotos = inicios[-1]
+    t_ini_fotos, t_fin_fotos = barra if barra else (inicios[1] + TR, inicios[-1])
 
     def make_frame(t):
         t = min(t, total - 1e-3)
