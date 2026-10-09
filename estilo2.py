@@ -33,6 +33,9 @@ SANS_SEMI = "/usr/share/fonts/opentype/inter/Inter-SemiBold.otf"
 PAD = cv.PAD
 
 D_A, D_B, D_PROD, D_MOS = 4.8, 4.6, 2.7, 3.8
+# instantes (s, locales a cada escena) de las animaciones clave; estilo_voz.py los ajusta a la locución
+TM = {"a_top": 0.5, "a_l1": 1.6, "a_l2": 2.2, "b_pin": 1.9, "b_est": 2.2, "b_ruta": 2.5, "b_tal": 3.1,
+      "firma": 6.3, "prod": 0.55}
 CAMARAS = [(1.00, 1.22, (0.5, 0.7), (0.5, 0.3)), (1.22, 1.02, (0.35, 0.4), (0.6, 0.6)),
            (1.05, 1.24, (0.1, 0.5), (0.9, 0.5)), (1.24, 1.04, (0.9, 0.5), (0.15, 0.5)),
            (1.00, 1.26, (0.5, 0.2), (0.5, 0.75)), (1.25, 1.00, (0.6, 0.6), (0.4, 0.3))]
@@ -325,7 +328,7 @@ def escena_producto(ruta, idx, titulo_m, sub, dur, g0, variante, cam):
         cabecera(f, t)
         qm = ease_out_cubic(prog(t, 0.3, 0.5))
         blit(f, mini, W - 56 - (mini.shape[1] - 2 * PAD) - PAD, 118 + (1 - qm) * -40, alpha=qm)
-        bloque_texto(f, titulo, pastilla, kicker, t, 0.55)
+        bloque_texto(f, titulo, pastilla, kicker, t, TM["prod"])
         dibujar_ticker(f, gt, prog(t, 0.2, 0.6))
         return f
     return fn
@@ -397,13 +400,13 @@ def decorado_a():
     l2 = Titulo("*alimentos* para tus *animales?*", 76, W - 60)
 
     def fn(f, t, gt):
-        top.draw(f, 295, t, 0.5, paso=0.16)
+        top.draw(f, 295, t, TM["a_top"], paso=0.16)
         for i in range(3):          # bandada cruzando el cielo
             xx = -80 + ((t * (150 + 40 * i) + i * 260) % (W + 160))
             pajaro(f, xx, 235 + i * 38 + 12 * np.sin(t * 2 + i), 0.8 + 0.2 * i, t * 9 + i)
-        q = ease_out_cubic(prog(t, 1.6, 0.55))
+        q = ease_out_cubic(prog(t, TM["a_l1"], 0.55))
         blit(f, l1, (W - l1.shape[1]) / 2, 1355 + (1 - q) * 30, alpha=q)
-        l2.draw(f, 1425, t, 2.2, paso=0.13)
+        l2.draw(f, 1425, t, TM["a_l2"], paso=0.13)
     return fn
 
 
@@ -434,12 +437,12 @@ def decorado_b():
         for i, (s, x) in enumerate(zip(letras, xs)):
             q = prog(t, 1.05 + 0.06 * i, 0.5)
             blit(f, s, x, 395 + (1 - ease_out_cubic(q)) * 90, alpha=clamp01(q * 2), escala=0.7 + 0.3 * ease_out_back(q, 1.6))
-        qpin = prog(t, 1.9, 0.7)
+        qpin = prog(t, TM["b_pin"], 0.7)
         blit(f, pin, W / 2, 1330 - (1 - ease_out_back(qpin, 1.7)) * 260, alpha=clamp01(qpin * 4), centro=True)
-        q = ease_out_cubic(prog(t, 2.2, 0.5))
+        q = ease_out_cubic(prog(t, TM["b_est"], 0.5))
         blit(f, est, (W - est.shape[1]) / 2, 1370 + (1 - q) * 25, alpha=q)
-        ruta.draw(f, 1430, t, 2.5, paso=0.12)
-        q = ease_out_cubic(prog(t, 3.1, 0.5))
+        ruta.draw(f, 1430, t, TM["b_ruta"], paso=0.12)
+        q = ease_out_cubic(prog(t, TM["b_tal"], 0.5))
         blit(f, tal, (W - tal.shape[1]) / 2, 1560 + (1 - q) * 25, alpha=q)
     return fn
 
@@ -515,7 +518,6 @@ def escena_cierre(g0):
     y_tel, y_hora, y_ubic, y_env, y_may, y_pago, y_chip = 410, 606, 802, 958, 1114, 1236, 1352
     firma1 = T("Forralitas", 84, VERDE_OSC, SERIF)
     firma2 = T("Todo para tus animales", 44, TIERRA, SERIF_IT)
-    T_FIRMA = cv.T_CHIPS[-1] + 0.9
     DIAG = cv.DIAGONAL
 
     def entra(t, t0, dur=0.65):
@@ -571,6 +573,7 @@ def escena_cierre(g0):
             blit(f, ch, 70 + (i % 2) * 490 + 225, y_chip + (i // 2) * 128 + 56, alpha=clamp01(q * 3),
                  escala=max(ease_out_back(q, 2.4), 0.01) * idle, centro=True)
 
+        T_FIRMA = TM["firma"]
         qf = prog(t, T_FIRMA, 0.7)
         if qf > 0:
             cv2.line(f, (int(W / 2 - 230 * ease_out_cubic(qf)), 1668), (int(W / 2 + 230 * ease_out_cubic(qf)), 1668),

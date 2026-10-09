@@ -3,3 +3,4 @@ __pycache__/
 videos_salida/
 fotos/prueba*.jpg
 *TEMP_MPY_*
+voz/cache_*
