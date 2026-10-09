@@ -148,6 +148,25 @@ def icono(nombre, lado=110, fondo=AMARILLO, tinta=VERDE_OSCURO):
         d.polygon([(58 * u, 43 * u), (74 * u, 43 * u), (86 * u, 55 * u), (86 * u, 66 * u), (58 * u, 66 * u)], fill=k)
         for cx in (31, 72):
             d.ellipse(((cx - 8) * u, 59 * u, (cx + 8) * u, 75 * u), fill=k, outline=fondo + (255,), width=int(3 * u))
+    elif nombre == "efectivo":
+        d.rounded_rectangle((13 * u, 29 * u, 87 * u, 71 * u), 6 * u, outline=k, width=int(5 * u))
+        d.ellipse((38 * u, 38 * u, 62 * u, 62 * u), outline=k, width=int(5 * u))
+        for cx, cy in ((24, 40), (76, 60)):
+            d.ellipse(((cx - 3) * u, (cy - 3) * u, (cx + 3) * u, (cy + 3) * u), fill=k)
+    elif nombre == "transferencia":
+        d.line((22 * u, 38 * u, 70 * u, 38 * u), fill=k, width=int(6 * u))
+        d.polygon([(68 * u, 24 * u), (88 * u, 38 * u), (68 * u, 52 * u)], fill=k)
+        d.line((30 * u, 64 * u, 78 * u, 64 * u), fill=k, width=int(6 * u))
+        d.polygon([(32 * u, 50 * u), (12 * u, 64 * u), (32 * u, 78 * u)], fill=k)
+    elif nombre == "debito":
+        d.rounded_rectangle((13 * u, 27 * u, 87 * u, 73 * u), 7 * u, fill=k)
+        d.rectangle((13 * u, 38 * u, 87 * u, 49 * u), fill=fondo + (255,))
+        d.rectangle((22 * u, 59 * u, 42 * u, 65 * u), fill=fondo + (255,))
+    elif nombre == "credito":
+        d.rounded_rectangle((13 * u, 27 * u, 87 * u, 73 * u), 7 * u, outline=k, width=int(5 * u))
+        d.rounded_rectangle((23 * u, 37 * u, 41 * u, 52 * u), 3 * u, fill=k)
+        for x in (24, 40, 56, 72):
+            d.ellipse(((x - 2.5) * u, 60 * u, (x + 2.5) * u, 65 * u), fill=k)
     elif nombre == "tienda":
         d.polygon([(18 * u, 42 * u), (24 * u, 24 * u), (76 * u, 24 * u), (82 * u, 42 * u)], fill=k)
         d.rectangle((24 * u, 44 * u, 76 * u, 76 * u), fill=k)

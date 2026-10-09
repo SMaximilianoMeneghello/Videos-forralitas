@@ -72,6 +72,18 @@ def whoosh(dur=0.7):
     return out * env * 3.0
 
 
+def ding(f=1318.5):
+    t = _t(0.35)
+    return (np.sin(2 * np.pi * f * t) + 0.3 * np.sin(2 * np.pi * f * 2 * t)) * np.exp(-t * 11) * np.minimum(t / 0.003, 1)
+
+
+def timbre_telefono(dur=0.55):
+    t = _t(dur)
+    f = np.where((t * 18) % 2 < 1, 1400.0, 1100.0)
+    s = np.sin(2 * np.pi * np.cumsum(f) / SR)
+    return s * np.minimum(t / 0.01, 1) * np.minimum((dur - t) / 0.03, 1) * 0.5
+
+
 def golpe():
     t = _t(0.9)
     return (np.sin(2 * np.pi * 70 * t) * np.exp(-t * 5)
@@ -87,7 +99,7 @@ def _poner(buf, x, inicio, ganancia=1.0, pan=0.5):
     buf[i:i + n, 1] += x[:n] * ganancia * pan * 2 * 0.5
 
 
-def generar(duracion, t_transiciones, t_drop, t_golpes, ruta="videos_salida/_musica.wav"):
+def generar(duracion, t_transiciones, t_drop, t_golpes, t_dings=(), t_timbres=(), ruta="videos_salida/_musica.wav"):
     buf = np.zeros((int((duracion + 0.5) * SR), 2))
     acordes = [(48, (0, 4, 7)), (55, (0, 4, 7)), (57, (0, 3, 7)), (53, (0, 4, 7))]  # C G Am F
     n_beats = int(duracion / BEAT) + 2
@@ -117,6 +129,10 @@ def generar(duracion, t_transiciones, t_drop, t_golpes, ruta="videos_salida/_mus
         _poner(buf, whoosh(), t, 0.5)
     for t in t_golpes:
         _poner(buf, golpe(), t, 0.7)
+    for t in t_dings:
+        _poner(buf, ding(), t, 0.35)
+    for t in t_timbres:
+        _poner(buf, timbre_telefono(), t, 0.4)
     buf = np.tanh(buf * 1.1)
     n = int(duracion * SR)
     buf = buf[:n]

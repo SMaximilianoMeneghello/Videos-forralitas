@@ -25,7 +25,7 @@ from efectos import (AMARILLO, BLANCO, DIAGONAL, FONDO_VERDE, H, MAPA_GRADIENTE,
 
 FPS = 30
 TR = 0.55            # duración de cada transición (s)
-D_INTRO, D_FOTO, D_CIERRE = 3.8, 2.9, 8.0
+D_INTRO, D_FOTO, D_CIERRE = 3.8, 2.9, 10.5
 PAD = 26             # margen interno de los sprites de texto
 
 CONFIG = {
@@ -38,20 +38,21 @@ CONFIG = {
     "telefonos": ("381 526 9004", "381 633 4344"),
     "horarios": ("Lunes a viernes 8:00 a 19:00", "Sábados 8:30 a 19:00"),
     "servicios": ("Envíos según la zona", "Venta por mayor y menor"),
+    "pagos": ("Efectivo", "Transferencia", "Débito", "Crédito"),
     # archivo -> (título, subtítulo). Las palabras con * salen en amarillo.
     "fotos": {
         "01_perros_sabrositos.jpg": ("Alimento para *perros*", "Sabrositos, Wenüy y más marcas"),
         "02_perros_gatos.jpg": ("Perros y *gatos*", "Bolsas de 10, 15 y 22 kg"),
         "03_alfa.jpg": ("Fardos de *alfa*", "Ideal para tus animales de campo"),
         "04_semillas.jpg": ("Semillas para *aves*", "Mezclas listas para dar"),
-        "05_sal_lamer.jpg": ("Sal tónica para *lamer*", "Para caballos y ganado"),
-        "06_sal_bloque.jpg": ("Sal en *bloque*", "Mineral y natural"),
-        "07_pellets.jpg": ("Balanceado en *pellets*", "Rendidor y económico"),
-        "08_balanceado_mix.jpg": ("Mix *balanceado*", "Pellets y granos para cada animal"),
-        "09_maiz_partido.jpg": ("Maíz *partido*", "Por kilo o por bolsa"),
-        "10_pellets_maiz.jpg": ("Pellets y *maíz*", "Alimento completo"),
-        "11_afrecho.jpg": ("*Afrecho* de maíz", "Vendido por kilo"),
-        "12_maiz_molido.jpg": ("Maíz *molido*", "Fresco y de primera"),
+        "05_sal_lamer.jpg": ("Piedra de sal *iodada*", ""),
+        "06_sal_bloque.jpg": ("Piedra de sal *gris*", ""),
+        "07_pellets.jpg": ("Pellet de *trigo*", "Bolsa x 30 kg y suelto"),
+        "08_balanceado_mix.jpg": ("Mezcla de *caballo*", "Bolsa x 35 kg y suelto"),
+        "09_maiz_partido.jpg": ("Maíz *quebrado*", "Bolsa x 40 kg y suelto"),
+        "10_pellets_maiz.jpg": ("Engorde de *cerdo*", "Bolsa x 30 kg y suelto"),
+        "11_afrecho.jpg": ("Ponedora para *gallinas*", "Por bolsa y suelto"),
+        "12_maiz_molido.jpg": ("Afrecho de *maíz*", "Por bolsa y suelto"),
     },
 }
 
@@ -142,8 +143,10 @@ def escena_producto(ruta, titulo, sub, cam):
     foto = Foto(ruta)
     z0, z1, a, b = cam
     spr_t, xs, tam = fila_palabras(titulo, 112, W - 110)
-    s_sub = texto(sub, 50, BLANCO, sombra=False)
-    pastilla = sobre(caja(s_sub.shape[1] + 30, s_sub.shape[0], 59, VERDE_OSCURO, 0.9), s_sub, 15, 0)
+    pastilla = None
+    if sub:
+        s_sub = texto(sub, 50, BLANCO, sombra=False)
+        pastilla = sobre(caja(s_sub.shape[1] + 30, s_sub.shape[0], 59, VERDE_OSCURO, 0.9), s_sub, 15, 0)
     logo = logo_redondo(120)
     marca = texto(CONFIG["nombre"], 44, BLANCO)
     rubro = texto(CONFIG["rubro"], 28, AMARILLO)
@@ -179,8 +182,9 @@ def escena_producto(ruta, titulo, sub, cam):
 
         # subtítulo en pastilla que se despliega
         ps2 = prog(td, 0.12 * len(spr_t) + 0.2, 0.55)
-        blit(f, pastilla, (W - pastilla.shape[1]) / 2, y_t + 190 + (1 - ease_out_cubic(ps2)) * 25,
-             alpha=ease_out_cubic(ps2 * 2), wipe=ease_out_cubic(ps2))
+        if pastilla is not None:
+            blit(f, pastilla, (W - pastilla.shape[1]) / 2, y_t + 190 + (1 - ease_out_cubic(ps2)) * 25,
+                 alpha=ease_out_cubic(ps2 * 2), wipe=ease_out_cubic(ps2))
 
         # pie con la dirección
         pf = ease_out_cubic(prog(td, 0.9, 0.6))
@@ -192,39 +196,144 @@ def escena_producto(ruta, titulo, sub, cam):
     return fn
 
 
+# tiempos (s, locales al cierre) en que aparece cada elemento
+T_TEL, T_HORA, T_UBIC, T_ENVIO, T_MAYOR, T_PAGOS = 1.3, 2.0, 2.7, 3.2, 3.8, 4.5
+T_CHIPS = (4.8, 5.0, 5.2, 5.4)
+T_TIMBRE0, PERIODO_TIMBRE = T_TEL + 0.5, 1.8
+
+
+def dibujar_reloj(f, cx, cy, r, t, t0):
+    """Reloj animado: las agujas giran rápido y se clavan en las 8:00."""
+    cv2.circle(f, (cx, cy), r + int(5 * (0.5 + 0.5 * np.sin(t * 5))), AMARILLO, 3, cv2.LINE_AA)
+    cv2.circle(f, (cx, cy), r, AMARILLO, -1, cv2.LINE_AA)
+    cv2.circle(f, (cx, cy), r - 8, (250, 245, 215), -1, cv2.LINE_AA)
+    for k in range(12):
+        a = np.radians(k * 30)
+        r0 = r - 8 - (11 if k % 3 == 0 else 6)
+        cv2.line(f, (int(cx + r0 * np.sin(a)), int(cy - r0 * np.cos(a))),
+                 (int(cx + (r - 10) * np.sin(a)), int(cy - (r - 10) * np.cos(a))),
+                 VERDE_OSCURO, 3 if k % 3 == 0 else 2, cv2.LINE_AA)
+    giro = (1 - ease_out_cubic(prog(t, t0 + 0.35, 1.9))) * 360 * 4
+    ang_min = np.radians(giro)
+    ang_hor = np.radians(240 + giro / 12)
+    for ang, largo, grosor in ((ang_hor, 0.5, 6), (ang_min, 0.76, 4)):
+        cv2.line(f, (cx, cy), (int(cx + r * largo * np.sin(ang)), int(cy - r * largo * np.cos(ang))),
+                 VERDE_OSCURO, grosor, cv2.LINE_AA)
+    if t > t0 + 2.2:                                     # segundero
+        ang = np.radians((t - t0 - 2.2) * 120)
+        cv2.line(f, (cx, cy), (int(cx + r * 0.8 * np.sin(ang)), int(cy - r * 0.8 * np.cos(ang))),
+                 (200, 40, 30), 2, cv2.LINE_AA)
+    cv2.circle(f, (cx, cy), 6, VERDE_OSCURO, -1, cv2.LINE_AA)
+
+
 def escena_cierre():
-    logo = logo_redondo(300)
-    spr_t, xs, _ = fila_palabras("¡TE *ESPERAMOS!*", 100, W - 100)
+    logo = logo_redondo(210)
+    spr_t, xs, _ = fila_palabras("¡TE *ESPERAMOS!*", 92, W - 100)
     c = CONFIG
-    filas = [("telefono", c["telefonos"][0], c["telefonos"][1], True),
-             ("ubicacion", c["direccion"][0], c["direccion"][1], False),
-             ("reloj", c["horarios"][0], c["horarios"][1], False),
-             ("camion", c["servicios"][0], c["servicios"][1], False)]
-    tarjetas = []
-    for ic, l1, l2, destacado in filas:
-        base = caja(940, 170, 38, (3, 34, 14), 0.86)
-        base = sobre(base, icono(ic, 112), 32, 29)
-        t1 = texto_ajustado(l1, 58 if destacado else 46, 700, AMARILLO if destacado else BLANCO)
-        t2 = texto_ajustado(l2, 58 if destacado else 42, 700, AMARILLO if destacado else (205, 235, 205))
-        base = sobre(base, t1, 170 - PAD, 8 + (0 if destacado else 6))
-        base = sobre(base, t2, 170 - PAD, 84 + (0 if destacado else 2))
-        tarjetas.append(base)
-    boton = caja(780, 132, 66, AMARILLO)
-    tb = texto("¡CONSULTÁ AHORA!", 58, VERDE_OSCURO, sombra=False)
-    boton = sobre(boton, tb, (780 - tb.shape[1]) // 2, (132 - tb.shape[0]) // 2)
+    tarjeta = lambda h: caja(940, h, 38, (3, 34, 14), 0.86)
+
+    # teléfono: dos números grandes
+    n1 = texto_ajustado(c["telefonos"][0], 64, 700, AMARILLO, True)
+    n2 = texto_ajustado(c["telefonos"][1], 64, 700, AMARILLO, True)
+    card_tel = sobre(sobre(tarjeta(180), n1, 190 - PAD, 2), n2, 190 - PAD, 84)
+    ic_tel = icono("telefono", 124)
+    # horarios
+    h1 = texto_ajustado(c["horarios"][0], 46, 690, BLANCO)
+    h2 = texto_ajustado(c["horarios"][1], 46, 690, (205, 235, 205))
+    card_hora = sobre(sobre(tarjeta(180), h1, 190 - PAD, 14), h2, 190 - PAD, 86)
+    # ubicación
+    u1 = texto_ajustado(c["direccion"][0], 46, 690, BLANCO)
+    u2 = texto_ajustado(c["direccion"][1], 42, 690, (205, 235, 205))
+    card_ubic = sobre(sobre(sobre(tarjeta(140), icono("ubicacion", 96), 32, 22), u1, 170 - PAD, 2), u2, 170 - PAD, 66)
+    # envíos
+    e1 = texto_ajustado(c["servicios"][0], 50, 700, BLANCO)
+    card_env = sobre(sobre(tarjeta(140), icono("camion", 96), 32, 22), e1, 170 - PAD, 8)
+    # venta por mayor y menor
+    banner = caja(940, 112, 56, AMARILLO)
+    tb = texto_ajustado("VENTA POR MAYOR Y MENOR", 52, 860, VERDE_OSCURO)
+    banner = sobre(banner, tb, (940 - tb.shape[1]) // 2, (112 - tb.shape[0]) // 2)
+    # medios de pago
+    titulo_pago = texto_ajustado("Aceptamos todos los medios de pago", 42, 940, BLANCO, True)
+    chips = []
+    for nom, etq in zip(("efectivo", "transferencia", "debito", "credito"), c["pagos"]):
+        ch = sobre(caja(450, 112, 30, (3, 34, 14), 0.9), icono(nom, 80), 22, 16)
+        t = texto_ajustado(etq, 42, 300, BLANCO)
+        chips.append(sobre(ch, t, 118 - PAD, (112 - t.shape[0]) // 2))
+
+    y_tel, y_hora, y_ubic, y_env, y_may = 410, 606, 802, 958, 1114
+    y_pago, y_chip = 1236, 1352
+
+    def entra(t, t0, dur=0.65):
+        q = prog(t, t0, dur)
+        return q, ease_out_cubic(q)
 
     def fn(t):
         f = fondo_animado(t, semilla=5)
         p = prog(t, 0.2, 0.8)
-        blit(f, logo, W / 2, 245, alpha=clamp01(p * 3), escala=ease_out_back(p), centro=True)
-        dibujar_palabras(f, spr_t, xs, 430, t, 0.7, paso=0.1)
-        for i, tar in enumerate(tarjetas):
-            q = prog(t, 1.3 + 0.38 * i, 0.65)
-            e = ease_out_cubic(q)
-            blit(f, tar, 70 + (1 - e) * (W - 70), 590 + i * 196, alpha=clamp01(q * 2.5))
-        qb = prog(t, 3.3, 0.6)
-        pulso = 1 + 0.045 * np.sin(max(t - 3.9, 0) * 6.5) * clamp01((t - 3.9) * 2)
-        blit(f, boton, W / 2, 1520, alpha=clamp01(qb * 2), escala=ease_out_back(qb) * pulso, centro=True)
+        blit(f, logo, W / 2, 195, alpha=clamp01(p * 3), escala=ease_out_back(p), centro=True)
+        dibujar_palabras(f, spr_t, xs, 295, t, 0.7, paso=0.1)
+
+        # --- teléfono: la tarjeta entra, los números se "tipean" y el ícono vibra con ondas
+        q, e = entra(t, T_TEL)
+        x = 70 + (1 - e) * W
+        blit(f, card_tel, x, y_tel, alpha=clamp01(q * 2.5))
+        if q > 0:
+            cx, cy = x + 32 + 62, y_tel + 90
+            fase = (t - T_TIMBRE0) % PERIODO_TIMBRE if t >= T_TIMBRE0 else 99
+            env = max(0.0, 1 - fase / 0.62)
+            if env > 0:
+                for k in range(3):
+                    r = 74 + 30 * k + fase * 90
+                    ov = f.copy()
+                    cv2.circle(ov, (int(cx), int(cy)), int(r), AMARILLO, 4, cv2.LINE_AA)
+                    a = env * (1 - k * 0.28) * 0.55
+                    f[:] = cv2.addWeighted(ov, a, f, 1 - a, 0)
+            ang = 20 * np.sin(fase * 52) * env if env > 0 else 0
+            blit(f, rotar_sprite(ic_tel, ang), cx, cy, alpha=clamp01(q * 2.5),
+                 escala=1 + 0.08 * env, centro=True)
+        # brillo de "tipeo" sobre los números
+        qn = prog(t, T_TEL + 0.55, 0.9)
+        if 0 < qn < 1:
+            pos = int(x + 190 + qn * 560)
+            ov = f.copy()
+            cv2.rectangle(ov, (pos - 10, y_tel + 18), (pos + 10, y_tel + 160), (255, 255, 255), -1)
+            f[:] = cv2.addWeighted(ov, 0.35, f, 0.65, 0)
+
+        # --- horarios con reloj animado
+        q, e = entra(t, T_HORA)
+        x = 70 + (1 - e) * W
+        blit(f, card_hora, x, y_hora, alpha=clamp01(q * 2.5))
+        if q > 0.05:
+            dibujar_reloj(f, int(x + 32 + 62), y_hora + 90, 58, t, T_HORA)
+
+        # --- ubicación y envíos
+        for card, t0, y in ((card_ubic, T_UBIC, y_ubic), (card_env, T_ENVIO, y_env)):
+            q, e = entra(t, t0)
+            blit(f, card, 70 - (1 - e) * W, y, alpha=clamp01(q * 2.5))
+
+        # --- banner mayor y menor con destello
+        q = prog(t, T_MAYOR, 0.7)
+        bx = 70 + (1 - ease_out_back(q, 1.4)) * (-W)
+        blit(f, banner, bx, y_may, alpha=clamp01(q * 3))
+        if q >= 1:
+            pos = ((t - T_MAYOR - 0.7) % 2.2) * 1700 - 400
+            x0, y0 = 70, y_may
+            reg = f[y0:y0 + 112, x0:x0 + 940].astype(np.float32)
+            reg += (np.exp(-(((DIAGONAL[y0:y0 + 112, x0:x0 + 940] - pos) / 45) ** 2))
+                    * banner[:, :, 3])[..., None] * 140
+            f[y0:y0 + 112, x0:x0 + 940] = np.clip(reg, 0, 255).astype(np.uint8)
+
+        # --- medios de pago
+        qt = prog(t, T_PAGOS, 0.6)
+        blit(f, titulo_pago, (W - titulo_pago.shape[1]) / 2, y_pago + (1 - ease_out_cubic(qt)) * 25,
+             alpha=ease_out_cubic(qt))
+        for i, (ch, t0) in enumerate(zip(chips, T_CHIPS)):
+            q = prog(t, t0, 0.55)
+            idle = 1 + 0.015 * np.sin(t * 3 + i) if q >= 1 else 1
+            cx = 70 + (i % 2) * 490 + 225
+            cy = y_chip + (i // 2) * 128 + 56
+            blit(f, ch, cx, cy, alpha=clamp01(q * 3), escala=max(ease_out_back(q, 2.4), 0.01) * idle,
+                 centro=True)
         return f
     return fn
 
@@ -295,7 +404,9 @@ def main():
             total,
             t_transiciones=[inicios[i] - 0.07 for i in range(1, len(segs))],
             t_drop=inicios[1] + TR,
-            t_golpes=[0.25, inicios[-1] + 0.2])
+            t_golpes=[0.25, inicios[-1] + 0.2],
+            t_dings=[inicios[-1] + o + 0.15 for o in (T_HORA, T_UBIC, T_ENVIO, T_MAYOR, T_PAGOS, *T_CHIPS)],
+            t_timbres=[inicios[-1] + T_TIMBRE0 + k * PERIODO_TIMBRE for k in range(4)])
     pista = AudioFileClip(musica).subclipped(0, total)
     video = VideoClip(make_frame, duration=total).with_audio(pista)
     video.write_videofile(CONFIG["salida"], fps=FPS, codec="libx264", audio_codec="aac",
