@@ -152,7 +152,7 @@ def _env(x, ms):
     return np.sqrt(np.convolve(x ** 2, np.ones(k) / k, mode="same"))
 
 
-def mezclar(total, inicios, voces, ruta="videos_salida/_mezcla.wav"):
+def mezclar(total, inicios, voces, ruta="videos_salida/_mezcla.wav", musica_fn=None, sfx_fn=None, sfx_gain=0.10):
     n = int(total * SR)
     voz = np.zeros(n, np.float32)
     for t0, x in voces:
@@ -162,7 +162,7 @@ def mezclar(total, inicios, voces, ruta="videos_salida/_mezcla.wav"):
         voz[i:i + x.size] += x[: max(0, n - i)]
     voz = sosfilt(butter(2, 70, btype="highpass", fs=SR, output="sos"), voz)
 
-    musica = audio_suave.musica(total)
+    musica = (musica_fn or audio_suave.musica)(total)
     musica = musica[:n] * (10 ** (-27 / 20) / (np.sqrt((musica ** 2).mean()) + 1e-9))
     # la música baja ~11 dB cuando hay voz (ataque rápido, vuelve despacio)
     activa = (_env(voz, 40) > 0.012).astype(np.float32)
@@ -173,9 +173,9 @@ def mezclar(total, inicios, voces, ruta="videos_salida/_mezcla.wav"):
 
     sfx = np.zeros((n, 2))
     for t in inicios[1:]:
-        s = audio_campo.sutil_viento()
+        s = (sfx_fn or audio_campo.sutil_viento)()
         i = int((t + 0.05) * SR)
-        sfx[i:i + s.size] += (s * 0.10)[: max(0, n - i), None]
+        sfx[i:i + s.size] += (s * sfx_gain)[: max(0, n - i), None]
     mix = musica * ganancia[:, None] + sfx * ganancia[:, None] + np.repeat(voz[:, None], 2, axis=1)
     fi, fo = int(0.8 * SR), int(2.5 * SR)
     mix[:fi] *= np.linspace(0, 1, fi)[:, None]

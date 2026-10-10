@@ -8,8 +8,11 @@ BEAT = 60 / BPM
 rng = np.random.default_rng(23)
 
 
+TRANSP = 0
+
+
 def nota(m):
-    return 440 * 2 ** ((m - 69) / 12)
+    return 440 * 2 ** ((m + TRANSP - 69) / 12)
 
 
 def _t(d):
