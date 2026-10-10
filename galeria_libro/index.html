@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libro de recuerdos</title>
+<style>
+  :root{
+    --H: min(70vh, 44vw * 1.3333);
+    --W: calc(var(--H) * 0.75);
+    --gold:#c9a45c; --gold2:#f0d896; --gold3:#8c6a2b;
+    --paper:#f6efe0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(ellipse at 50% 40%, #1b1b1b 0%, #000 70%);
+    color:#eee; font-family:Georgia,"Times New Roman",serif; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  /* ---------- barra de opciones ---------- */
+  .bar{display:flex; flex-wrap:wrap; gap:14px 28px; justify-content:center; align-items:center;
+       padding:14px 16px 6px; font:600 14px/1 system-ui,sans-serif; color:#cfcfcf}
+  .bar label{opacity:.8; margin-right:8px; font-weight:500}
+  .seg{display:inline-flex; border:1px solid #444; border-radius:999px; overflow:hidden}
+  .seg button{background:transparent; color:#ddd; border:0; padding:9px 16px; cursor:pointer; font:inherit}
+  .seg button+button{border-left:1px solid #444}
+  .seg button.on{background:var(--gold); color:#1a1305}
+  .step{display:inline-flex; align-items:center; gap:10px}
+  .step button{width:30px; height:30px; border-radius:50%; border:1px solid #555; background:#111; color:#eee; font-size:18px; cursor:pointer}
+  .btn{background:#111; color:#eee; border:1px solid #555; border-radius:999px; padding:9px 16px; cursor:pointer; font:inherit}
+  .btn:hover{border-color:var(--gold)}
+
+  /* ---------- escenario ---------- */
+  .stage{flex:1; width:100%; display:flex; align-items:center; justify-content:center; gap:clamp(8px,2vw,34px); padding:0 10px}
+  .nav{width:clamp(44px,5vw,64px); height:clamp(44px,5vw,64px); border-radius:50%; border:2px solid var(--gold);
+       background:rgba(0,0,0,.6); color:var(--gold2); cursor:pointer; display:grid; place-items:center;
+       transition:transform .2s, background .2s, opacity .3s; flex:none}
+  .nav:hover:not(:disabled){background:var(--gold); color:#000; transform:scale(1.1)}
+  .nav:active:not(:disabled){transform:scale(.95)}
+  .nav:disabled{opacity:.25; cursor:default}
+  .nav svg{width:50%; height:50%}
+
+  .book{position:relative; width:calc(var(--W) * 2); height:var(--H); perspective:calc(var(--W) * 4.5);
+        filter:drop-shadow(0 30px 40px rgba(0,0,0,.9)); flex:none}
+  .base{position:absolute; inset:-1.6% -1.8%; border-radius:6px 10px 10px 6px;
+        background:linear-gradient(135deg,#5a2a1c,#2e130c 60%,#43200f); box-shadow:inset 0 0 0 2px #7a4a2a, inset 0 0 30px #000;}
+  .base::after{content:""; position:absolute; left:50%; top:0; bottom:0; width:2px; background:#000; opacity:.7}
+  .fixed,.sheet{position:absolute; top:0; width:var(--W); height:var(--H)}
+  .fixed.l{left:0} .fixed.r{left:var(--W)}
+  .sheet{left:var(--W); transform-origin:left center; transform-style:preserve-3d;
+         transition:transform 1.25s cubic-bezier(.645,.045,.355,1)}
+  .sheet.flipped{transform:rotateY(-180deg)}
+  .face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden}
+  .face.back{transform:rotateY(180deg)}
+
+  .page{width:100%; height:100%; background:var(--paper); container-type:size; position:relative;
+        display:grid; padding:7cqw 7cqw 9cqw; gap:5cqw; color:#6b5a3a}
+  .page.r{border-radius:0 5px 5px 0} .page.l{border-radius:5px 0 0 5px}
+  /* sombra del lomo y borde de papel */
+  .page::before{content:""; position:absolute; inset:0; pointer-events:none;
+        background:linear-gradient(to right, rgba(0,0,0,.28), rgba(0,0,0,0) 14%)}
+  .page.l::before{background:linear-gradient(to left, rgba(0,0,0,.28), rgba(0,0,0,0) 14%)}
+  .page::after{content:""; position:absolute; inset:0; pointer-events:none; opacity:0; background:linear-gradient(to right,#000,transparent 70%)}
+  .turning .face .page::after{animation:shade 1.25s ease-in-out}
+  @keyframes shade{0%,100%{opacity:0} 50%{opacity:.45}}
+  .num{position:absolute; bottom:3cqw; left:0; right:0; text-align:center; font-size:3.4cqw; letter-spacing:.2em; opacity:.7}
+  .l1{grid-template-rows:1fr} .l2{grid-template-rows:1fr 1fr} .l3{grid-template-rows:1.25fr 1fr; grid-template-columns:1fr 1fr}
+  .l3 .frame:first-child{grid-column:1 / -1}
+
+  /* marcos: marco dorado + paspartú + fondo negro con icono */
+  .frame{padding:1.6cqw; border-radius:3px; min-height:0;
+         background:linear-gradient(135deg,var(--gold2),var(--gold) 45%,var(--gold3));
+         box-shadow:0 3px 8px rgba(0,0,0,.35)}
+  .mat{width:100%; height:100%; padding:3.2cqw; background:#fffaf0; box-shadow:inset 0 0 6px rgba(0,0,0,.25)}
+  .ph{width:100%; height:100%; background:#000 center/cover no-repeat; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:2cqw; color:#9a9a9a; font:500 3.2cqw system-ui,sans-serif}
+  .ph svg{width:min(34%,16cqw); height:auto; max-height:60%}
+  .ph.has{color:transparent}
+  .ph.has svg,.ph.has span{display:none}
+
+  .cover{background:linear-gradient(135deg,#3a1a10,#1d0a05); align-content:center; justify-items:center; text-align:center; color:var(--gold2)}
+  .cover h1{font-size:8.5cqw; font-weight:normal; line-height:1.15; margin:0; letter-spacing:.04em}
+  .cover small{display:block; font-size:3.6cqw; letter-spacing:.35em; margin-top:5cqw; opacity:.8}
+  .cover .orn{width:30cqw; height:1px; background:var(--gold); margin:5cqw auto}
+  .blank{align-content:center; justify-items:center; text-align:center}
+  .blank .orn{width:20cqw; height:1px; background:var(--gold); opacity:.6}
+  .blank p{font-style:italic; font-size:5cqw; margin:4cqw 0}
+
+  .cap{position:fixed; left:50%; bottom:3.5vh; transform:translateX(-50%); background:rgba(0,0,0,.78); border:1px solid var(--gold);
+       color:var(--gold2); padding:12px 26px; border-radius:999px; font:600 clamp(14px,2vw,24px) system-ui,sans-serif;
+       opacity:0; transition:opacity .4s; pointer-events:none; white-space:nowrap}
+  .cap.show{opacity:1}
+  .dots{height:18px; display:flex; gap:7px; margin:-4px 0 10px}
+  .dots i{width:7px; height:7px; border-radius:50%; background:#444; transition:background .3s}
+  .dots i.on{background:var(--gold)}
+  input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<div class="bar" id="bar">
+  <span><label>Fotos por hoja</label>
+    <span class="seg" id="segLayout">
+      <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="mix">Mixto</button>
+    </span></span>
+  <span class="step"><label>Cantidad de fotos</label>
+    <button id="minus" aria-label="Menos">−</button><b id="count">12</b><button id="plus" aria-label="Más">+</button></span>
+  <button class="btn" id="load">Cargar mis fotos</button>
+  <input type="file" id="file" accept="image/*" multiple>
+</div>
+
+<div class="stage">
+  <button class="nav" id="prev" aria-label="Hoja anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg></button>
+  <div class="book" id="book"></div>
+  <button class="nav" id="next" aria-label="Hoja siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 8 8-8 8"/></svg></button>
+</div>
+<div class="dots" id="dots"></div>
+<div class="cap" id="cap"></div>
+
+<script>
+const ICON = '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="10" width="52" height="44" rx="6"/><circle cx="22" cy="26" r="5"/><path d="m8 48 16-15 11 10 9-8 14 13"/></svg>';
+const TURN_MS = 1250;
+const state = {layout:'2', count:12, photos:[], spread:0, sheets:[], busy:false};
+const $ = id => document.getElementById(id);
+
+function frame(n, url){
+  const bg = url ? `style="background-image:url('${url}')"` : '';
+  return `<div class="frame"><div class="mat"><div class="ph ${url?'has':''}" ${bg}>${ICON}<span>Foto ${n}</span></div></div></div>`;
+}
+
+function plan(){               // reparte las fotos en hojas según la opción elegida
+  const total = state.photos.length || state.count;
+  const pages = []; let i = 0, k = 0;
+  const seq = [1,2,3];
+  while(i < total){
+    const per = state.layout === 'mix' ? seq[k++ % 3] : +state.layout;
+    const n = Math.min(per, total - i);
+    pages.push({per:n, from:i}); i += n;
+  }
+  if(pages.length % 2) pages.push(null);       // completar hoja doble
+  return pages;
+}
+
+function pageHTML(p, side, num){
+  if(!p) return `<div class="page ${side} blank"><div><div class="orn"></div><p>Recuerdos</p><div class="orn"></div></div></div>`;
+  let f = ''; for(let j=0;j<p.per;j++){ const n=p.from+j+1; f += frame(n, state.photos[n-1]); }
+  return `<div class="page ${side} l${p.per}">${f}<div class="num">${num}</div></div>`;
+}
+
+function build(){
+  const pages = plan(); const S = pages.length/2;
+  let h = '<div class="base"></div>';
+  h += `<div class="fixed l"><div class="page l cover"><div><h1>Recuerdos<br>de Cumpleaños</h1><div class="orn"></div><small>ÁLBUM DE FOTOS</small></div></div></div>`;
+  h += `<div class="fixed r"><div class="page r cover"><div><div class="orn"></div><small>FIN</small></div></div></div>`;
+  for(let k=0;k<S;k++){
+    h += `<div class="sheet" data-k="${k}"><div class="face front">${pageHTML(pages[2*k],'r',2*k+1)}</div>`+
+         `<div class="face back">${pageHTML(pages[2*k+1],'l',2*k+2)}</div></div>`;
+  }
+  $('book').innerHTML = h;
+  state.sheets = [...document.querySelectorAll('.sheet')];
+  state.spread = 0; state.busy = false;
+  $('dots').innerHTML = Array.from({length:S+1},()=>'<i></i>').join('');
+  applyZ(); updateUI();
+}
+
+function applyZ(){
+  const S = state.sheets.length;
+  state.sheets.forEach((s,k)=>{
+    const flipped = k < state.spread;
+    s.classList.toggle('flipped', flipped);
+    s.style.zIndex = flipped ? 10+k : 10+(S-k);
+  });
+}
+function updateUI(){
+  const S = state.sheets.length;
+  $('prev').disabled = state.spread === 0;
+  $('next').disabled = state.spread === S;
+  [...$('dots').children].forEach((d,i)=>d.classList.toggle('on', i===state.spread));
+  $('count').textContent = state.photos.length || state.count;
+  document.querySelectorAll('#segLayout button').forEach(b=>b.classList.toggle('on', b.dataset.v===state.layout));
+}
+
+function turn(dir){
+  const S = state.sheets.length;
+  if(state.busy) return;
+  const k = dir > 0 ? state.spread : state.spread-1;
+  if(k < 0 || k >= S) return;
+  state.busy = true;
+  const sh = state.sheets[k];
+  sh.style.zIndex = 1000; sh.classList.add('turning');
+  state.spread += dir;
+  sh.classList.toggle('flipped', dir > 0);
+  updateUI();
+  setTimeout(()=>{ sh.classList.remove('turning'); applyZ(); state.busy = false; }, TURN_MS);
+}
+
+$('next').onclick = ()=>turn(1);
+$('prev').onclick = ()=>turn(-1);
+addEventListener('keydown', e=>{ if(e.key==='ArrowRight') turn(1); if(e.key==='ArrowLeft') turn(-1); });
+document.querySelectorAll('#segLayout button').forEach(b=>b.onclick=()=>{ state.layout=b.dataset.v; build(); });
+$('plus').onclick  = ()=>{ if(!state.photos.length){ state.count=Math.min(60,state.count+1); build(); } };
+$('minus').onclick = ()=>{ if(!state.photos.length){ state.count=Math.max(1,state.count-1); build(); } };
+$('load').onclick = ()=>$('file').click();
+$('file').onchange = e=>{
+  const files=[...e.target.files]; if(!files.length) return;
+  state.photos = files.map(f=>URL.createObjectURL(f)); build();
+};
+
+/* subtítulo opcional para presentaciones / grabación */
+window.setCaption = t => { $('cap').textContent = t||''; $('cap').classList.toggle('show', !!t); };
+window.setLayout = v => { state.layout = String(v); build(); };
+window.setCount = n => { state.count = n; state.photos = []; build(); };
+window.turn = turn;
+
+build();
+</script>
+</body>
+</html>
