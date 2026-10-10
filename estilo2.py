@@ -245,17 +245,18 @@ def bloque_texto(f, titulo, pastilla, kicker, t, t0):
 
 
 # ------------------------------------------------------------ escena de producto
-def escena_producto(ruta, idx, titulo_m, sub, dur, g0, variante, cam):
+def escena_producto(ruta, idx, titulo_m, sub, dur, g0, variante, cam, kicker_txt="TENEMOS", cont=None):
     z0, z1, a, b = cam
     titulo = Titulo(titulo_m, 100, W - 110)
-    kicker = texto_espaciado("TENEMOS", 32, TIERRA, SANS, 9)
+    kicker = texto_espaciado(kicker_txt, 32, TIERRA, SANS, 9)
     pastilla = None
     if sub:
         s = T(sub, 44, CREMA, SANS_SEMI)
         pastilla = sobre(caja(s.shape[1] + 30, s.shape[0] - 10, 46, VERDE_OSC, 0.96), s, 15, -5)
-    ins = insignia(f"{idx + 1:02d}")
     n_tot = len(PRODUCTOS)
-    mini = T(f"{idx + 1} / {n_tot}", 26, TIERRA, SANS_SEMI)
+    num, tot = cont if cont else (idx + 1, n_tot)
+    ins = insignia(f"{num:02d}")
+    mini = T(f"{num} / {tot}", 26, TIERRA, SANS_SEMI)
 
     if variante == "tarjeta":
         pw, ph = 940, 1000
@@ -410,9 +411,9 @@ def decorado_a():
     return fn
 
 
-def decorado_b():
+def decorado_b(pres_txt="Te presento"):
     logo = logo_redondo(210)
-    pres = T("Te presento", 70, TIERRA, SERIF_IT)
+    pres = T(pres_txt, 70, TIERRA, SERIF_IT)
     nombre = "FORRALITAS"
     tam = 126
     xs = []
