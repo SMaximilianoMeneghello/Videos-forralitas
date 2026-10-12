@@ -26,7 +26,6 @@ N, P = ec.N, ec.P
 F1 = "¡Atención! Hoy lunes doce de octubre, Forralitas atiende todo el día."
 F2 = "Te esperamos hasta las diecinueve horas."
 F3 = "Aprovechá para comprar productos de primera calidad, y al mejor precio."
-F4 = "Ruta trescientos cinco, kilómetro siete coma cinco. Las Talitas."
 
 LOGO = logo_redondo(430)
 LOGO_SOMBRA = e2.sombra_de(LOGO[:, :, 3], 60, 0.35, 20)
@@ -164,18 +163,46 @@ def clip_local(texto):
     return x[max(idx[0] - int(0.02 * SR), 0): idx[-1] + int(0.04 * SR)]
 
 
+def clip_voz(texto, rate=None):
+    """Voz de siempre (Edge es-AR-TomasNeural); si el entorno la bloquea, usa Piper y avisa."""
+    global VOZ_ORIGINAL
+    try:
+        return voz_tts.clip(texto, rate=rate)
+    except Exception:
+        VOZ_ORIGINAL = False
+        return clip_local(texto)
+
+
+VOZ_ORIGINAL = True
+
+
 def construir():
-    cl = clip_local
+    cl = clip_voz
     d = lambda x: len(x) / SR
-    a1, a2, a3, a4 = cl(F1), cl(F2), cl(F3), cl(F4)
-    o2 = 0.7 + d(a1) + 0.2
-    d_hoy = o2 - 0.1 + TR + 0.3          # el "hasta las 19" ya entra en la 2ª escena
+    a1, a2, a3 = cl(F1), cl(F2), cl(F3)
     escenas = [
-        (0.7 + d(a1) + TR + 0.3, escena_hoy, [(0.7, a1)], "a"),
-        (0.6 + d(a2) + TR + 1.6, escena_hasta, [(0.6, a2)], "b"),
-        (0.6 + d(a3) + TR + 0.6, escena_precio, [(0.6, a3)], "c"),
-        (0.7 + d(a4) + 2.8, escena_final, [(0.7, a4)], "d"),
+        (0.7 + d(a1) + TR + 0.3, lambda g0, d_: escena_hoy(g0, d_), [(0.7, a1)], "a"),
+        (0.6 + d(a2) + TR + 1.6, lambda g0, d_: escena_hasta(g0, d_), [(0.6, a2)], "b"),
+        (0.6 + d(a3) + TR + 0.6, lambda g0, d_: escena_precio(g0, d_), [(0.6, a3)], "c"),
     ]
+    # cierre completo (igual que el resto de los videos): teléfonos, horarios, envíos, mayor/menor y medios de pago
+    cc = [(k, cl(t, rate=ev.RATE_RAPIDO.get(k))) for k, t in ec.CIERRE]
+    t_loc, cur = {}, 0.75
+    for k, x in cc:
+        t_loc[k] = cur
+        cur += d(x) + ev.GAP
+    d_c = t_loc["firma"] + d(cc[-1][1]) + 1.6
+    cv = ec.cv
+    cv.T_TEL, cv.T_HORA = t_loc["tel"] - 0.12, t_loc["hora"] - 0.12
+    cv.T_UBIC = t_loc["hora"] + d(dict(cc)["hora"]) - 0.1
+    cv.T_ENVIO, cv.T_MAYOR, cv.T_PAGOS = t_loc["envio"] - 0.12, t_loc["mayor"] - 0.12, t_loc["pagos"] - 0.12
+    cv.T_TIMBRE0, cv.PERIODO_TIMBRE = t_loc["tel"] + 0.2, 1.9
+    pg, txt = dict(cc)["pagos"], dict(ec.CIERRE)["pagos"]
+    cv.T_CHIPS = tuple(t_loc["pagos"] + ev.frac(txt, w) * d(pg) - 0.15
+                       for w in ("efectivo", "transferencia", "débito", "crédito"))
+    e2.TM["firma"] = t_loc["firma"] - 0.1
+    escenas.append((d_c, lambda g0, d_: e2.escena_cierre(g0), [(t_loc[k], x) for k, x in cc], "d"))
+
     inicios, t = [], 0.0
     for dur, *_ in escenas:
         inicios.append(t)
@@ -215,6 +242,8 @@ def main():
     video = VideoClip(mf, duration=total).with_audio(pista.subclipped(0, min(total, pista.duration)))
     video.write_videofile(SALIDA, fps=FPS, codec="libx264", audio_codec="aac", audio_bitrate="192k", preset="medium",
                           ffmpeg_params=["-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart"])
+    if not VOZ_ORIGINAL:
+        print("AVISO: la voz de Edge está bloqueada en este entorno; se usó la voz de respaldo (Piper).")
     print("Listo:", SALIDA, f"({total:.1f} s)")
 
 
