@@ -393,7 +393,8 @@ def main():
     if "--audio" in sys.argv:
         return
 
-    clip = VideoClip(make_frame, duration=total).with_audio(AudioFileClip(audio_wav).subclipped(0, total))
+    pista = AudioFileClip(audio_wav)
+    clip = VideoClip(make_frame, duration=total).with_audio(pista.subclipped(0, min(total, pista.duration)))
     clip.write_videofile(SALIDA, fps=FPS, codec="libx264", audio_codec="aac", audio_bitrate="192k",
                          preset="medium", ffmpeg_params=["-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart"])
     print("Listo:", SALIDA, f"({total:.1f} s)")
