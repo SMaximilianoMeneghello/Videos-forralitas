@@ -176,15 +176,9 @@ def clip_voz(texto, rate=None):
 VOZ_ORIGINAL = True
 
 
-def construir():
-    cl = clip_voz
+def cierre(cl):
+    """Cierre estándar de todos los videos: teléfonos, horarios, ubicación, envíos, mayor/menor y medios de pago."""
     d = lambda x: len(x) / SR
-    a1, a2, a3 = cl(F1), cl(F2), cl(F3)
-    escenas = [
-        (0.7 + d(a1) + TR + 0.3, lambda g0, d_: escena_hoy(g0, d_), [(0.7, a1)], "a"),
-        (0.6 + d(a2) + TR + 1.6, lambda g0, d_: escena_hasta(g0, d_), [(0.6, a2)], "b"),
-        (0.6 + d(a3) + TR + 0.6, lambda g0, d_: escena_precio(g0, d_), [(0.6, a3)], "c"),
-    ]
     # cierre completo (igual que el resto de los videos): teléfonos, horarios, envíos, mayor/menor y medios de pago
     cc = [(k, cl(t, rate=ev.RATE_RAPIDO.get(k))) for k, t in ec.CIERRE]
     t_loc, cur = {}, 0.75
@@ -201,7 +195,20 @@ def construir():
     cv.T_CHIPS = tuple(t_loc["pagos"] + ev.frac(txt, w) * d(pg) - 0.15
                        for w in ("efectivo", "transferencia", "débito", "crédito"))
     e2.TM["firma"] = t_loc["firma"] - 0.1
-    escenas.append((d_c, lambda g0, d_: e2.escena_cierre(g0), [(t_loc[k], x) for k, x in cc], "d"))
+    return (d_c, lambda g0, d_: e2.escena_cierre(g0), [(t_loc[k], x) for k, x in cc], "d")
+
+
+
+def construir():
+    cl = clip_voz
+    d = lambda x: len(x) / SR
+    a1, a2, a3 = cl(F1), cl(F2), cl(F3)
+    escenas = [
+        (0.7 + d(a1) + TR + 0.3, lambda g0, d_: escena_hoy(g0, d_), [(0.7, a1)], "a"),
+        (0.6 + d(a2) + TR + 1.6, lambda g0, d_: escena_hasta(g0, d_), [(0.6, a2)], "b"),
+        (0.6 + d(a3) + TR + 0.6, lambda g0, d_: escena_precio(g0, d_), [(0.6, a3)], "c"),
+    ]
+    escenas.append(cierre(cl))
 
     inicios, t = [], 0.0
     for dur, *_ in escenas:
