@@ -168,11 +168,16 @@ def escena_ubicacion():
 
 
 # ------------------------------------------------------------ escena cierre
-def escena_cierre():
+def escena_cierre(tel=None):
     tit = texto("¡CONSULTANOS YA!", 78, DORADO)
     ic_tel = icono("telefono", 150, fondo=DORADO, tinta=NEGRO2)
-    # recuadro de teléfono vacío a propósito: lo completa quien publique el video
-    tarjeta = caja(940, 220, 46, PANEL, 0.82)
+    if tel:
+        num = texto_ajustado(tel, 90, 760, BLANCO, True)
+        tarjeta = sobre(caja(940, 220, 46, PANEL, 0.82), num,
+                        int((940 - num.shape[1]) / 2 + 60), int((220 - num.shape[0]) / 2))
+    else:
+        # recuadro de teléfono vacío a propósito: lo completa quien publique el video
+        tarjeta = caja(940, 220, 46, PANEL, 0.82)
     ic_ubic = icono("ubicacion", 90, fondo=DORADO, tinta=NEGRO2)
     dir1 = texto_ajustado(DIRECCION, 54, 760, BLANCO)
     tarjeta2 = sobre(sobre(caja(940, 150, 40, PANEL, 0.78), ic_ubic, 30, 30), dir1, 150, int((150 - dir1.shape[0]) / 2))
@@ -286,10 +291,10 @@ def mezclar(total, voces, ruta="videos_salida/_mezcla_casa.wav"):
 
 
 # ------------------------------------------------------------ render
-def hacer_frame_fn(video, clips, inicios, durs, trs, total):
+def hacer_frame_fn(video, clips, inicios, durs, trs, total, tel=None):
     fn_intro = escena_intro()
     fn_ubic = escena_ubicacion()
-    fn_cierre = escena_cierre()
+    fn_cierre = escena_cierre(tel)
     badge, dirpast = dibujar_badge()
 
     i_intro = 0
@@ -349,9 +354,9 @@ def hacer_frame_fn(video, clips, inicios, durs, trs, total):
 def main():
     Path("videos_salida").mkdir(exist_ok=True)
     video, clips, inicios, durs, trs, total, voces = construir()
-    make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total)
 
     if "--frames" in sys.argv:
+        make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total)
         segundos = [float(x) for x in sys.argv[sys.argv.index("--frames") + 1:]]
         from PIL import Image
         for s in segundos:
@@ -364,10 +369,22 @@ def main():
     if "--audio" in sys.argv:
         return
 
-    clip = VideoClip(make_frame, duration=total).with_audio(AudioFileClip(audio_wav).subclipped(0, total))
-    clip.write_videofile(SALIDA, fps=FPS, codec="libx264", audio_codec="aac", audio_bitrate="192k",
-                         preset="medium", ffmpeg_params=["-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart"])
-    print("Listo:", SALIDA, f"({total:.1f} s)")
+    # --tel-list num1,num2,... genera una copia del video por cada número,
+    # reutilizando el mismo audio (la locución no menciona el teléfono).
+    if "--tel-list" in sys.argv:
+        tels = sys.argv[sys.argv.index("--tel-list") + 1].split(",")
+    else:
+        tels = [None]
+
+    pista = AudioFileClip(audio_wav)
+    audio_clip = pista.subclipped(0, min(total, pista.duration))
+    for tel in tels:
+        make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total, tel=tel)
+        salida = SALIDA if tel is None else f"videos_salida/casa_rivadavia_{tel.replace(' ', '')}.mp4"
+        clip = VideoClip(make_frame, duration=total).with_audio(audio_clip)
+        clip.write_videofile(salida, fps=FPS, codec="libx264", audio_codec="aac", audio_bitrate="192k",
+                             preset="medium", ffmpeg_params=["-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart"])
+        print("Listo:", salida, f"({total:.1f} s)")
 
 
 if __name__ == "__main__":
