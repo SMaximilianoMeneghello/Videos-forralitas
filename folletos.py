@@ -32,6 +32,16 @@ def fit_cover(im, w, h):
     return im.crop((x0, y0, x0 + w, y0 + h))
 
 
+def fit_contain(im, w, h, bg):
+    im = im.convert("RGB")
+    s = min(w / im.width, h / im.height)
+    nw, nh = max(1, round(im.width * s)), max(1, round(im.height * s))
+    im = im.resize((nw, nh), Image.LANCZOS)
+    fondo = Image.new("RGB", (w, h), bg)
+    fondo.paste(im, ((w - nw) // 2, (h - nh) // 2))
+    return fondo
+
+
 def redondear(im, radio):
     m = Image.new("L", im.size, 0)
     ImageDraw.Draw(m).rounded_rectangle((0, 0, im.width - 1, im.height - 1), radio, fill=255)
@@ -122,11 +132,12 @@ def armar_folleto(ruta_salida, paleta, titulo, subtitulo, hero_path, miniaturas,
     d.rectangle((W / 2 - 160, y, W / 2 + 160, y + 6), fill=dorado)
     y += 34
 
-    # foto principal
-    hero = fit_cover(Image.open(hero_path), W - 80, 560)
+    # foto principal: "contain" para que se vea completa, sin recortar
+    hero_h = 760
+    hero = fit_contain(Image.open(hero_path), W - 80, hero_h, panel)
     hero = redondear(hero, 28)
     pegar(im, hero, 40, y)
-    y += 560 + 26
+    y += hero_h + 26
 
     # grilla de miniaturas (3 columnas)
     cols = 3
@@ -200,8 +211,9 @@ def main():
         "PH EN VENTA",
         "Rivadavia 2647",
         f"{F}/casa_003.5.jpg",
-        [f"{F}/casa_014.0.jpg", f"{F}/casa_037.5.jpg", f"{F}/casa_046.0.jpg",
-         f"{F}/casa_083.0.jpg", f"{F}/casa_097.0.jpg", f"{F}/casa_003.5.jpg"],
+        [f"{F}/casa_014.0.jpg", f"{F}/casa_037.5.jpg", f"{F}/casa_044.0.jpg",
+         f"{F}/casa_067.0.jpg", f"{F}/casa_072.0.jpg", f"{F}/casa_083.0.jpg",
+         f"{F}/casa_097.0.jpg"],
         ["2 dormitorios grandes", "Living comedor", "Cocina", "Living estar adicional",
          "Baño completo", "Lavadero propio", "Terraza"],
         "UBICACIÓN",
@@ -215,10 +227,10 @@ def main():
         PALETA_CABANA,
         "CABAÑA EN VENTA",
         "Club de Campo Taficillo · Tafí Viejo",
-        f"{F}/cabana_027.5.jpg",
+        f"{F}/cabana_048.0.jpg",
         ["assets_cabana/01_living.webp", "assets_cabana/02_dormitorio.webp",
          "assets_cabana/03_piscina_dia.webp", "assets_cabana/04_piscina_atardecer.webp",
-         "assets_cabana/05_piscina_noche.webp", f"{F}/cabana_048.0.jpg"],
+         "assets_cabana/05_piscina_noche.webp", f"{F}/cabana_027.5.jpg"],
         ["Living comedor y cocina integrados, con hogar a leña", "2 dormitorios", "Baño",
          "Galería al costado", "Lavadero", "2 cisternas de 1000 L con bomba",
          "Piscina 7 x 3 x 1,50 m con hidromasaje y cascada"],
