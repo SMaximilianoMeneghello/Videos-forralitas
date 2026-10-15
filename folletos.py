@@ -230,7 +230,7 @@ def main():
         PALETA_CABANA,
         "CABAÑA EN VENTA",
         "Club de Campo Taficillo · Tafí Viejo",
-        f"{F}/cabana_048.0.jpg",
+        "assets_cabana/06_fachada.jpg",
         ["assets_cabana/01_living.webp", "assets_cabana/02_dormitorio.webp",
          "assets_cabana/03_piscina_dia.webp", "assets_cabana/04_piscina_atardecer.webp",
          "assets_cabana/05_piscina_noche.webp", f"{F}/cabana_027.5.jpg"],
@@ -241,6 +241,7 @@ def main():
         ["Terreno de 20 x 30 m", "Luz y WiFi", "Se entrega con escritura"],
         "381 585 9396",
         "Consultanos por WhatsApp o llamada",
+        hero_bias=0.5,
     )
 
 
