@@ -63,26 +63,36 @@ def fondo_elegante(t, semilla=3, n=20):
 
 
 # ------------------------------------------------------------ guion: un clip por ambiente
+# "ini" y "maxdur" son ventanas del recorrido verificadas cuadro a cuadro (sin
+# cámara en movimiento brusco ni superposición con el ambiente siguiente).
 CLIPS = [
-    dict(ini=1.0, cap="Entrada", voz="Vendo PH en Rivadavia, dos mil seiscientos cuarenta y siete."),
-    dict(ini=11.5, cap="Living *comedor*", voz="Living comedor amplio."),
-    dict(ini=35.0, cap="*Cocina* equipada", voz="Cocina con muebles bajo mesada."),
-    dict(ini=44.0, cap="2 *dormitorios* grandes", voz="Dos dormitorios grandes, con placard."),
-    dict(ini=66.5, cap="Segundo *dormitorio*", voz="Ideal para toda la familia."),
-    dict(ini=71.0, cap="*Lavadero* independiente", voz="Lavadero independiente."),
-    dict(ini=95.0, cap="*Baño* completo", voz="Y baño completo."),
+    dict(ini=0.6, maxdur=7.5, cap="Entrada",
+         voz="Vendo este PH en Rivadavia, dos mil seiscientos cuarenta y siete."),
+    dict(ini=11.0, maxdur=7.0, cap="Living *comedor*",
+         voz="Un living comedor amplio y luminoso, ideal para compartir en familia."),
+    dict(ini=33.0, maxdur=7.5, cap="*Cocina* equipada",
+         voz="La cocina tiene muebles bajo mesada, con mucho espacio de guardado."),
+    dict(ini=44.0, maxdur=7.0, cap="2 *dormitorios* grandes",
+         voz="Cuenta con dos dormitorios grandes, con placard."),
+    dict(ini=62.0, maxdur=8.0, cap="Segundo *dormitorio*",
+         voz="El segundo dormitorio, ideal para toda la familia."),
+    dict(ini=71.0, maxdur=5.0, cap="*Lavadero* independiente",
+         voz="Tiene lavadero independiente."),
+    dict(ini=94.0, maxdur=8.0, cap="*Baño* completo",
+         voz="Y un baño completo, totalmente revestido."),
 ]
-DUR_MIN, DUR_MAX = 3.4, 5.6
+DUR_MIN = 6.0
 
 L_UBIC = ("A solo cincuenta metros de avenida Francisco de Aguirre, con cuatro líneas de colectivos. "
           "La escuela te queda a cien metros, con todo tipo de comercios cerca.")
 C_UBIC = ["A 50 m de Av. *Francisco de Aguirre*", "4 líneas de *colectivos* · Escuela a *100 m*", "Todo tipo de *comercios* cerca"]
 L_CIERRE = "Consultá ya. Tres ocho uno, cinco dos seis, nueve cero cero cuatro."
 
-D_INTRO = 3.3
-D_UBIC = 5.6
-D_CIERRE = 7.2
-TR = 0.55
+D_INTRO = 4.5
+D_UBIC = 8.5
+D_CIERRE = 9.5
+TR_VIDEO = 0.55       # disolución entre escenas que incluyen metraje
+TR_CORTE = 0.0        # corte seco entre tarjetas gráficas (sin superponer texto)
 
 
 # ------------------------------------------------------------ texto ajustado con resaltado
@@ -209,7 +219,7 @@ def construir():
 
     for c in CLIPS:
         c["audio"] = cl(c["voz"])
-        c["dur"] = min(DUR_MAX, max(DUR_MIN, dur(c["audio"]) + 1.1))
+        c["dur"] = min(c["maxdur"], max(DUR_MIN, dur(c["audio"]) + 1.6))
         c["placa"] = placa(c["cap"])
     ubic_voz = cl(L_UBIC, rate="+6%")
     cierre_voz = cl(L_CIERRE, rate="+8%")
@@ -218,19 +228,24 @@ def construir():
     video = video.cropped(y_center=video.h / 2, height=H)
 
     durs = [D_INTRO] + [c["dur"] for c in CLIPS] + [D_UBIC, D_CIERRE]
-    inicios, t = [], 0.0
-    for d in durs:
+    n = len(durs)
+    # transición entre cada par de escenas consecutivas: disolución si alguna
+    # de las dos incluye metraje de la casa, corte seco entre tarjetas gráficas
+    # (ubicación -> cierre) para que los títulos nunca se superpongan.
+    trs = [TR_CORTE if (i == n - 2) else TR_VIDEO for i in range(n - 1)]
+    inicios, t = [0.0], 0.0
+    for d, tr in zip(durs[:-1], trs):
+        t += d - tr
         inicios.append(t)
-        t += d - TR
     total = inicios[-1] + durs[-1]
 
     voces = []
     for c, t0 in zip(CLIPS, inicios[1:]):
-        voces.append((t0 + 0.35, c["audio"]))
-    voces.append((inicios[-2] + 0.5, ubic_voz))
+        voces.append((t0 + 0.4, c["audio"]))
+    voces.append((inicios[-2] + 0.6, ubic_voz))
     voces.append((inicios[-1] + 0.6, cierre_voz))
 
-    return video, CLIPS, inicios, durs, total, voces
+    return video, CLIPS, inicios, durs, trs, total, voces
 
 
 # ------------------------------------------------------------ mezcla de audio
@@ -270,7 +285,7 @@ def mezclar(total, voces, ruta="videos_salida/_mezcla_casa.wav"):
 
 
 # ------------------------------------------------------------ render
-def hacer_frame_fn(video, clips, inicios, durs, total):
+def hacer_frame_fn(video, clips, inicios, durs, trs, total):
     fn_intro = escena_intro()
     fn_ubic = escena_ubicacion()
     fn_cierre = escena_cierre()
@@ -318,7 +333,8 @@ def hacer_frame_fn(video, clips, inicios, durs, total):
         a, b = activos[0], activos[-1]
         fa = raw(a, min(t - inicios[a], durs[a] - 1e-3))
         fb = raw(b, max(t - inicios[b], 0))
-        p = clamp01((t - inicios[b]) / TR)
+        tr = trs[a] if a < len(trs) else TR_VIDEO
+        p = clamp01((t - inicios[b]) / tr) if tr > 0 else 1.0
         return cv2.addWeighted(fa, 1 - p, fb, p, 0)
 
     return make_frame
@@ -326,8 +342,8 @@ def hacer_frame_fn(video, clips, inicios, durs, total):
 
 def main():
     Path("videos_salida").mkdir(exist_ok=True)
-    video, clips, inicios, durs, total, voces = construir()
-    make_frame = hacer_frame_fn(video, clips, inicios, durs, total)
+    video, clips, inicios, durs, trs, total, voces = construir()
+    make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total)
 
     if "--frames" in sys.argv:
         segundos = [float(x) for x in sys.argv[sys.argv.index("--frames") + 1:]]
