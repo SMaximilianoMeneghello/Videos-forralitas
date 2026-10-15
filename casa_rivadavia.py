@@ -30,7 +30,6 @@ FPS = 30
 SR = voz_tts.SR
 ENTRADA = "assets_casa/entrada.mp4"
 SALIDA = "videos_salida/casa_rivadavia.mp4"
-TEL = "381 526 9004"
 DIRECCION = "Rivadavia 2647"
 VOZ = "es-AR-ElenaNeural"
 
@@ -73,7 +72,7 @@ CLIPS = [
     dict(ini=33.0, maxdur=7.5, cap="*Cocina* equipada",
          voz="La cocina tiene muebles bajo mesada, con mucho espacio de guardado."),
     dict(ini=44.0, maxdur=7.0, cap="2 *dormitorios* grandes",
-         voz="Cuenta con dos dormitorios grandes, con placard."),
+         voz="Cuenta con dos dormitorios grandes."),
     dict(ini=62.0, maxdur=8.0, cap="*Galería* al costado",
          voz="Una galería al costado, con mucha luz."),
     dict(ini=71.0, maxdur=5.0, cap="*Lavadero* propio",
@@ -88,7 +87,7 @@ DUR_MIN = 6.0
 L_UBIC = ("A solo cincuenta metros de avenida Francisco de Aguirre, con cuatro líneas de colectivos. "
           "La escuela te queda a cien metros, con todo tipo de comercios cerca.")
 C_UBIC = ["A 50 m de Av. *Francisco de Aguirre*", "4 líneas de *colectivos* · Escuela a *100 m*", "Todo tipo de *comercios* cerca"]
-L_CIERRE = "Consultá ya. Tres ocho uno, cinco dos seis, nueve cero cero cuatro."
+L_CIERRE = "Consultá ya por este PH."
 
 D_INTRO = 4.5
 D_UBIC = 8.5
@@ -172,8 +171,8 @@ def escena_ubicacion():
 def escena_cierre():
     tit = texto("¡CONSULTANOS YA!", 78, DORADO)
     ic_tel = icono("telefono", 150, fondo=DORADO, tinta=NEGRO2)
-    num = texto_ajustado(TEL, 90, 760, BLANCO, True)
-    tarjeta = sobre(caja(940, 220, 46, PANEL, 0.82), num, int((940 - num.shape[1]) / 2 + 60), int((220 - num.shape[0]) / 2))
+    # recuadro de teléfono vacío a propósito: lo completa quien publique el video
+    tarjeta = caja(940, 220, 46, PANEL, 0.82)
     ic_ubic = icono("ubicacion", 90, fondo=DORADO, tinta=NEGRO2)
     dir1 = texto_ajustado(DIRECCION, 54, 760, BLANCO)
     tarjeta2 = sobre(sobre(caja(940, 150, 40, PANEL, 0.78), ic_ubic, 30, 30), dir1, 150, int((150 - dir1.shape[0]) / 2))
