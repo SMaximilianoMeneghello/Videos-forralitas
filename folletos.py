@@ -120,7 +120,7 @@ def grano_sutil(im, color_acc, alpha=10):
 
 # ------------------------------------------------------------ folleto genérico
 def armar_folleto(ruta_salida, paleta, titulo, subtitulo, hero_path, miniaturas, features,
-                   extra_titulo, extra_lineas, telefono, pie, hero_bias=0.22):
+                   extra_titulo, extra_lineas, telefono, pie, hero_bias=0.22, secundaria=None):
     fondo1, fondo2, dorado, panel, texto_c, gris = paleta
     alto = 3400  # lienzo generoso; se recorta al contenido real al final
     im = degrade_vertical(W, alto, fondo1, fondo2)
@@ -141,15 +141,25 @@ def armar_folleto(ruta_salida, paleta, titulo, subtitulo, hero_path, miniaturas,
     pegar(im, hero, 40, y)
     y += hero_h + 26
 
+    # foto secundaria opcional: a todo el ancho, más grande que una miniatura
+    if secundaria:
+        sec_path, sec_bias = secundaria if isinstance(secundaria, tuple) else (secundaria, 0.3)
+        sec_h = 480
+        sec = fit_cover(Image.open(sec_path), W - 80, sec_h, bias_y=sec_bias)
+        sec = redondear(sec, 26)
+        pegar(im, sec, 40, y)
+        y += sec_h + 26
+
     # grilla de miniaturas (3 columnas)
     cols = 3
     gap = 14
     cell_w = (W - 80 - gap * (cols - 1)) / cols
     cell_h = 220
     for i, mp in enumerate(miniaturas):
+        mp, bias = mp if isinstance(mp, tuple) else (mp, 0.5)
         cx = 40 + (i % cols) * (cell_w + gap)
         cy = y + (i // cols) * (cell_h + gap)
-        th = fit_cover(Image.open(mp), int(cell_w), cell_h)
+        th = fit_cover(Image.open(mp), int(cell_w), cell_h, bias_y=bias)
         th = redondear(th, 20)
         pegar(im, th, cx, cy)
     filas = -(-len(miniaturas) // cols)
@@ -213,9 +223,9 @@ def main():
         "PH EN VENTA",
         "Rivadavia 2647",
         f"{F}/casa_003.5.jpg",
-        [f"{F}/casa_014.0.jpg", f"{F}/casa_037.5.jpg", f"{F}/casa_044.0.jpg",
-         f"{F}/casa_067.0.jpg", f"{F}/casa_072.0.jpg", f"{F}/casa_083.0.jpg",
-         f"{F}/casa_097.0.jpg"],
+        [f"{F}/casa_037.5.jpg", (f"{F}/casa_044.0.jpg", 0.4),
+         f"{F}/casa_067.0.jpg", f"{F}/casa_072.0.jpg", (f"{F}/casa_083.0.jpg", 0.32),
+         (f"{F}/casa_097.0.jpg", 0.4)],
         ["2 dormitorios grandes", "Living comedor", "Cocina", "Living estar adicional",
          "Baño completo", "Lavadero propio", "Terraza"],
         "UBICACIÓN",
@@ -224,6 +234,7 @@ def main():
         "381 526 9004",
         "Consultanos por WhatsApp o llamada",
         hero_bias=0.47,
+        secundaria=(f"{F}/casa_014.0.jpg", 0.62),
     )
     armar_folleto(
         OUT / "folleto_cabana.jpg",
