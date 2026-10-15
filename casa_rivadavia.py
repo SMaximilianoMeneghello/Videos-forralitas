@@ -73,8 +73,8 @@ CLIPS = [
          voz="La cocina tiene muebles bajo mesada, con mucho espacio de guardado."),
     dict(ini=44.0, maxdur=7.0, cap="2 *dormitorios* grandes",
          voz="Cuenta con dos dormitorios grandes."),
-    dict(ini=62.0, maxdur=8.0, cap="*Galería* al costado",
-         voz="Una galería al costado, con mucha luz."),
+    dict(ini=62.0, maxdur=8.0, cap="*Living* estar",
+         voz="También tiene un living estar, con mucha luz."),
     dict(ini=71.0, maxdur=5.0, cap="*Lavadero* propio",
          voz="Con lavadero propio."),
     dict(ini=79.2, maxdur=4.5, cap="Segundo *dormitorio*", brillo=2.1,
@@ -88,6 +88,14 @@ L_UBIC = ("A solo cincuenta metros de avenida Francisco de Aguirre, con cuatro l
           "La escuela te queda a cien metros, con todo tipo de comercios cerca.")
 C_UBIC = ["A 50 m de Av. *Francisco de Aguirre*", "4 líneas de *colectivos* · Escuela a *100 m*", "Todo tipo de *comercios* cerca"]
 L_CIERRE = "Consultá ya por este PH."
+DIGITOS = {"0": "cero", "1": "uno", "2": "dos", "3": "tres", "4": "cuatro",
+           "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve"}
+
+
+def num_hablado(tel):
+    """'381 526 9004' -> 'tres ocho uno, cinco dos seis, nueve cero cero cuatro'."""
+    grupos = [" ".join(DIGITOS[d] for d in g) for g in tel.split()]
+    return ", ".join(grupos)
 
 D_INTRO = 4.5
 D_UBIC = 8.5
@@ -228,7 +236,6 @@ def construir():
         c["dur"] = min(c["maxdur"], max(DUR_MIN, dur(c["audio"]) + 1.6))
         c["placa"] = placa(c["cap"])
     ubic_voz = cl(L_UBIC, rate="+6%")
-    cierre_voz = cl(L_CIERRE, rate="+8%")
 
     video = VideoFileClip(ENTRADA).resized(width=W)
     video = video.cropped(y_center=video.h / 2, height=H)
@@ -249,9 +256,9 @@ def construir():
     for c, t0 in zip(CLIPS, inicios[1:]):
         voces.append((t0 + 0.4, c["audio"]))
     voces.append((inicios[-2] + 0.6, ubic_voz))
-    voces.append((inicios[-1] + 0.6, cierre_voz))
+    t_cierre = inicios[-1] + 0.6
 
-    return video, CLIPS, inicios, durs, trs, total, voces
+    return video, CLIPS, inicios, durs, trs, total, voces, t_cierre
 
 
 # ------------------------------------------------------------ mezcla de audio
@@ -353,7 +360,7 @@ def hacer_frame_fn(video, clips, inicios, durs, trs, total, tel=None):
 
 def main():
     Path("videos_salida").mkdir(exist_ok=True)
-    video, clips, inicios, durs, trs, total, voces = construir()
+    video, clips, inicios, durs, trs, total, voces_base, t_cierre = construir()
 
     if "--frames" in sys.argv:
         make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total)
@@ -364,23 +371,29 @@ def main():
         print("duración total:", round(total, 2), "s | inicios:", [round(x, 1) for x in inicios])
         return
 
-    audio_wav = mezclar(total, voces)
-    print("audio listo:", audio_wav, f"({total:.1f} s)")
-    if "--audio" in sys.argv:
-        return
-
-    # --tel-list num1,num2,... genera una copia del video por cada número,
-    # reutilizando el mismo audio (la locución no menciona el teléfono).
+    # --tel-list num1,num2,... genera una copia del video por cada número; la
+    # locución del cierre nombra el número, así que el audio se mezcla por
+    # separado para cada uno (el resto de las voces se reutiliza).
     if "--tel-list" in sys.argv:
         tels = sys.argv[sys.argv.index("--tel-list") + 1].split(",")
     else:
         tels = [None]
 
-    pista = AudioFileClip(audio_wav)
-    audio_clip = pista.subclipped(0, min(total, pista.duration))
+    cl = lambda t, **kw: voz_tts.clip(t, voz=VOZ, **kw)
     for tel in tels:
+        texto_cierre = f"{L_CIERRE} Llamanos al {num_hablado(tel)}." if tel else L_CIERRE
+        cierre_voz = cl(texto_cierre, rate="+8%")
+        tag = tel.replace(" ", "") if tel else "sinnumero"
+        voces = voces_base + [(t_cierre, cierre_voz)]
+        audio_wav = mezclar(total, voces, ruta=f"videos_salida/_mezcla_casa_{tag}.wav")
+        print("audio listo:", audio_wav, f"({total:.1f} s)")
+        if "--audio" in sys.argv:
+            continue
+
         make_frame = hacer_frame_fn(video, clips, inicios, durs, trs, total, tel=tel)
-        salida = SALIDA if tel is None else f"videos_salida/casa_rivadavia_{tel.replace(' ', '')}.mp4"
+        salida = SALIDA if tel is None else f"videos_salida/casa_rivadavia_{tag}.mp4"
+        pista = AudioFileClip(audio_wav)
+        audio_clip = pista.subclipped(0, min(total, pista.duration))
         clip = VideoClip(make_frame, duration=total).with_audio(audio_clip)
         clip.write_videofile(salida, fps=FPS, codec="libx264", audio_codec="aac", audio_bitrate="192k",
                              preset="medium", ffmpeg_params=["-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart"])
