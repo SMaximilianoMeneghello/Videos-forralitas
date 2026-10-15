@@ -76,6 +76,8 @@ CLIPS = [
          voz="Cuenta con dos dormitorios grandes, con placard."),
     dict(ini=62.0, maxdur=8.0, cap="Segundo *dormitorio*",
          voz="El segundo dormitorio, ideal para toda la familia."),
+    dict(ini=79.2, maxdur=4.5, cap="Otra *habitación*", brillo=2.1,
+         voz="Además suma otra habitación de buen tamaño."),
     dict(ini=71.0, maxdur=5.0, cap="*Lavadero* independiente",
          voz="Tiene lavadero independiente."),
     dict(ini=94.0, maxdur=8.0, cap="*Baño* completo",
@@ -300,6 +302,11 @@ def hacer_frame_fn(video, clips, inicios, durs, trs, total):
         c = clips[idx]
         tv = c["ini"] + clamp01(tl / c["dur"]) * c["dur"]
         f = np.ascontiguousarray(video.get_frame(tv))
+        brillo = c.get("brillo", 1.0)
+        if brillo != 1.0:
+            fl = f.astype(np.float32) / 255.0
+            fl = np.clip(fl * brillo + (brillo - 1) * 0.06, 0, 1) ** (1 / max(brillo * 0.7, 1.0))
+            f = (fl * 255).astype(np.uint8)
         yy = np.arange(H, dtype=np.float32)[:, None, None]
         top = np.clip(1 - (yy / 260), 0, 1) * 0.55
         bot = np.clip(1 - ((H - 1 - yy) / 420), 0, 1) * 0.6
