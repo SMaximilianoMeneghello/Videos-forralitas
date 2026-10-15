@@ -225,7 +225,7 @@ def main():
         f"{F}/casa_003.5.jpg",
         [f"{F}/casa_037.5.jpg", (f"{F}/casa_044.0.jpg", 0.4),
          f"{F}/casa_067.0.jpg", f"{F}/casa_072.0.jpg", (f"{F}/casa_083.0.jpg", 0.32),
-         (f"{F}/casa_097.0.jpg", 0.4)],
+         "assets_casa/bano_panorama.jpg"],
         ["2 dormitorios grandes", "Living comedor", "Cocina", "Living estar adicional",
          "Baño completo", "Lavadero propio", "Terraza"],
         "UBICACIÓN",
@@ -234,7 +234,6 @@ def main():
         "381 526 9004",
         "Consultanos por WhatsApp o llamada",
         hero_bias=0.47,
-        secundaria=(f"{F}/casa_014.0.jpg", 0.62),
     )
     armar_folleto(
         OUT / "folleto_cabana.jpg",
