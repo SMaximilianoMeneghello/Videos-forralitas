@@ -1,8 +1,8 @@
 """Video publicitario vertical (1080x1920) para la venta del PH de Rivadavia 2647.
 
-Usa el metraje real del recorrido (assets_casa/entrada.mp4) con locución (voz
-neuronal), música suave de fondo y textos animados con los datos de la
-propiedad.
+Corto y directo: clips breves del recorrido real (uno por ambiente), locución
+neuronal, textos animados y música suave. Identidad propia (grafito + dorado),
+sin relación visual con los videos de Forralitas.
 
 Uso:
     source .venv/bin/activate
@@ -22,9 +22,9 @@ from scipy.signal import butter, sosfilt
 
 import audio_suave
 import voz_tts
-from efectos import (AMARILLO, BLANCO, VERDE_OSCURO, W, H, blit, caja, clamp01,
-                     ease_out_back, ease_out_cubic, fondo_animado, icono, prog,
-                     sobre, texto, ancho_texto)
+from efectos import (BLANCO, BRILLO, W, H, ancho_texto, blit, caja, clamp01,
+                     ease_out_back, ease_out_cubic, icono, prog, rotar_sprite,
+                     sobre, texto)
 
 FPS = 30
 SR = voz_tts.SR
@@ -34,31 +34,55 @@ TEL = "381 526 9004"
 DIRECCION = "Rivadavia 2647"
 VOZ = "es-AR-ElenaNeural"
 
-# ------------------------------------------------------------ guion (lo que se dice)
-L_INTRO = "Vendo PH en Rivadavia, dos mil seiscientos cuarenta y siete."
-L_BODY = [
-    "Dos dormitorios grandes, cocina comedor y living.",
-    "Baño y lavadero, con terraza propia.",
-    "A solo cincuenta metros de avenida Francisco de Aguirre.",
-    "Con cuatro líneas de colectivos a la puerta.",
-    "La escuela te queda a cien metros.",
-    "Y tenés todo tipo de comercios cerca.",
+# ------------------------------------------------------------ identidad propia (grafito + dorado)
+NEGRO1 = (36, 32, 27)
+NEGRO2 = (12, 11, 10)
+DORADO = (203, 166, 86)
+PANEL = (14, 13, 13)
+GRIS_TXT = (214, 210, 202)
+
+_grad_t = np.linspace(0, 1, H, dtype=np.float32)[:, None, None]
+FONDO_BASE = np.repeat(np.array(NEGRO1, np.float32) * (1 - _grad_t) + np.array(NEGRO2, np.float32) * _grad_t, W, axis=1)
+
+
+def fondo_elegante(t, semilla=3, n=20):
+    pulso = 0.5 + 0.5 * np.sin(t * 1.4)
+    f = FONDO_BASE + BRILLO * np.array(DORADO, np.float32) * 0.16 * pulso
+    f = np.clip(f, 0, 255).astype(np.uint8)
+    rng = np.random.default_rng(semilla)
+    xs, ys = rng.uniform(0, W, n), rng.uniform(0, H, n)
+    rs, vel = rng.uniform(3, 12, n), rng.uniform(12, 45, n)
+    fase = rng.uniform(0, 6.28, n)
+    ov = f.copy()
+    col = tuple(int(c * 0.8) for c in DORADO)
+    for x, y, r, v, ph in zip(xs, ys, rs, vel, fase):
+        cx = x + 14 * np.sin(t * 0.6 + ph)
+        cy = (y - v * t) % (H + 60) - 30
+        cv2.circle(ov, (int(cx), int(cy)), int(r), col, -1, cv2.LINE_AA)
+    return cv2.addWeighted(ov, 0.09, f, 0.91, 0)
+
+
+# ------------------------------------------------------------ guion: un clip por ambiente
+CLIPS = [
+    dict(ini=1.0, cap="Entrada", voz="Vendo PH en Rivadavia, dos mil seiscientos cuarenta y siete."),
+    dict(ini=11.5, cap="Living *comedor*", voz="Living comedor amplio."),
+    dict(ini=35.0, cap="*Cocina* equipada", voz="Cocina con muebles bajo mesada."),
+    dict(ini=44.0, cap="2 *dormitorios* grandes", voz="Dos dormitorios grandes, con placard."),
+    dict(ini=66.5, cap="Segundo *dormitorio*", voz="Ideal para toda la familia."),
+    dict(ini=71.0, cap="*Lavadero* independiente", voz="Lavadero independiente."),
+    dict(ini=95.0, cap="*Baño* completo", voz="Y baño completo."),
 ]
+DUR_MIN, DUR_MAX = 3.4, 5.6
+
+L_UBIC = ("A solo cincuenta metros de avenida Francisco de Aguirre, con cuatro líneas de colectivos. "
+          "La escuela te queda a cien metros, con todo tipo de comercios cerca.")
+C_UBIC = ["A 50 m de Av. *Francisco de Aguirre*", "4 líneas de *colectivos* · Escuela a *100 m*", "Todo tipo de *comercios* cerca"]
 L_CIERRE = "Consultá ya. Tres ocho uno, cinco dos seis, nueve cero cero cuatro."
 
-# textos en pantalla (paralelos a L_BODY). Las palabras con * salen en amarillo.
-C_BODY = [
-    "2 *dormitorios* grandes · Cocina comedor · Living",
-    "Baño y *lavadero* · Terraza propia",
-    "A 50 m de Av. *Francisco de Aguirre*",
-    "4 líneas de *colectivos* a la puerta",
-    "Escuela a *100 metros*",
-    "Todo tipo de *comercios* cerca",
-]
-
-D_INTRO = 4.6
-D_CIERRE = 7.5
-GAP = 0.5
+D_INTRO = 3.3
+D_UBIC = 5.6
+D_CIERRE = 7.2
+TR = 0.55
 
 
 # ------------------------------------------------------------ texto ajustado con resaltado
@@ -68,10 +92,10 @@ def linea_resaltada(marcado, tam, max_w, color=BLANCO):
         gap = tam * 0.28
         anchos = [ancho_texto(p, tam) for p, _ in pal]
         total = sum(anchos) + gap * (len(pal) - 1)
-        if total <= max_w or tam <= 28:
+        if total <= max_w or tam <= 26:
             break
         tam -= 3
-    sprites = [texto(p, tam, AMARILLO if d else color) for p, d in pal]
+    sprites = [texto(p, tam, DORADO if d else color) for p, d in pal]
     x, xs = (W - total) / 2, []
     for a in anchos:
         xs.append(x)
@@ -85,41 +109,66 @@ def texto_ajustado(txt, tam, max_w, color=BLANCO, sombra=False):
     return texto(txt, tam, color, sombra)
 
 
+def placa(marcado, tam=52, max_w=W - 140):
+    spr, xs = linea_resaltada(marcado, tam, max_w)
+    ancho = max(x + s.shape[1] for s, x in zip(spr, xs)) - min(xs)
+    fondo = caja(int(ancho + 70), 110, 32, PANEL, 0.74)
+    off = min(xs)
+    for s, x in zip(spr, xs):
+        fondo = sobre(fondo, s, int(x - off + 35), int((110 - s.shape[0]) / 2))
+    return fondo
+
+
 # ------------------------------------------------------------ escena intro
-def escena_intro(voz_dur):
-    tit1 = texto("PH EN VENTA", 104, AMARILLO)
+def escena_intro():
+    tit1 = texto("PH EN VENTA", 104, DORADO)
     tit2 = texto(DIRECCION, 80, BLANCO)
-    sub = texto("A metros de Av. Francisco de Aguirre", 42, (210, 235, 210))
 
     def fn(t):
-        f = fondo_animado(t, semilla=11)
-        p1 = ease_out_cubic(prog(t, 0.25, 0.8))
-        blit(f, tit1, W / 2, 760 + (1 - p1) * 60, alpha=p1, escala=max(ease_out_back(prog(t, 0.25, 0.8)), 0.01),
+        f = fondo_elegante(t, semilla=11)
+        p1 = ease_out_cubic(prog(t, 0.2, 0.75))
+        blit(f, tit1, W / 2, 780 + (1 - p1) * 60, alpha=p1, escala=max(ease_out_back(prog(t, 0.2, 0.75)), 0.01),
              centro=True)
-        p2 = ease_out_cubic(prog(t, 0.75, 0.7))
-        blit(f, tit2, W / 2, 900 + (1 - p2) * 40, alpha=p2, centro=True)
-        linea = int(420 * ease_out_cubic(prog(t, 1.25, 0.5)))
+        p2 = ease_out_cubic(prog(t, 0.65, 0.65))
+        blit(f, tit2, W / 2, 915 + (1 - p2) * 40, alpha=p2, centro=True)
+        linea = int(420 * ease_out_cubic(prog(t, 1.1, 0.5)))
         if linea > 0:
-            cv2.rectangle(f, (W // 2 - linea // 2, 1010), (W // 2 + linea // 2, 1022), AMARILLO, -1, cv2.LINE_AA)
-        p3 = ease_out_cubic(prog(t, 1.5, 0.6))
-        blit(f, sub, W / 2, 1060, alpha=p3, centro=True)
+            cv2.rectangle(f, (W // 2 - linea // 2, 1020), (W // 2 + linea // 2, 1030), DORADO, -1, cv2.LINE_AA)
+        return f
+    return fn
+
+
+# ------------------------------------------------------------ escena ubicación
+def escena_ubicacion():
+    tit = texto("UBICACIÓN PRIVILEGIADA", 56, DORADO)
+    lineas = [placa(c, 46) for c in C_UBIC]
+    ys = [560, 760, 960]
+
+    def fn(t):
+        f = fondo_elegante(t, semilla=23)
+        p = ease_out_cubic(prog(t, 0.15, 0.6))
+        blit(f, tit, W / 2, 300 + (1 - p) * 30, alpha=p, centro=True)
+        for i, (spr, y) in enumerate(zip(lineas, ys)):
+            q = prog(t, 0.55 + i * 0.6, 0.55)
+            e = ease_out_cubic(q)
+            blit(f, spr, (W - spr.shape[1]) / 2, y + (1 - e) * 35, alpha=clamp01(q * 2.2))
         return f
     return fn
 
 
 # ------------------------------------------------------------ escena cierre
 def escena_cierre():
-    tit = texto("¡CONSULTANOS YA!", 78, AMARILLO)
-    ic_tel = icono("telefono", 150)
+    tit = texto("¡CONSULTANOS YA!", 78, DORADO)
+    ic_tel = icono("telefono", 150, fondo=DORADO, tinta=NEGRO2)
     num = texto_ajustado(TEL, 90, 760, BLANCO, True)
-    tarjeta = sobre(caja(940, 220, 46, (3, 34, 14), 0.88), num, int((940 - num.shape[1]) / 2 + 60), int((220 - num.shape[0]) / 2))
-    ic_ubic = icono("ubicacion", 90)
+    tarjeta = sobre(caja(940, 220, 46, PANEL, 0.82), num, int((940 - num.shape[1]) / 2 + 60), int((220 - num.shape[0]) / 2))
+    ic_ubic = icono("ubicacion", 90, fondo=DORADO, tinta=NEGRO2)
     dir1 = texto_ajustado(DIRECCION, 54, 760, BLANCO)
-    tarjeta2 = sobre(sobre(caja(940, 150, 40, (3, 34, 14), 0.86), ic_ubic, 30, 30), dir1, 150, int((150 - dir1.shape[0]) / 2))
-    pie = texto_ajustado("PH 2 dormitorios · Cocina comedor · Living · Terraza", 36, W - 80, (205, 235, 205))
+    tarjeta2 = sobre(sobre(caja(940, 150, 40, PANEL, 0.78), ic_ubic, 30, 30), dir1, 150, int((150 - dir1.shape[0]) / 2))
+    pie = texto_ajustado("PH 2 dormitorios · Cocina comedor · Living · Terraza", 36, W - 80, GRIS_TXT)
 
     def fn(t):
-        f = fondo_animado(t, semilla=19)
+        f = fondo_elegante(t, semilla=19)
         p = ease_out_cubic(prog(t, 0.2, 0.7))
         blit(f, tit, W / 2, 330 + (1 - p) * 40, alpha=p, centro=True)
 
@@ -131,7 +180,6 @@ def escena_cierre():
             fase = (t - 0.9) % 1.7
             env = max(0.0, 1 - fase / 0.55)
             ang = 18 * np.sin(fase * 50) * env if env > 0 else 0
-            from efectos import rotar_sprite
             blit(f, rotar_sprite(ic_tel, ang), x + 70, 540 + 110, alpha=clamp01(q * 2.5),
                  escala=1 + 0.06 * env, centro=True)
 
@@ -145,59 +193,44 @@ def escena_cierre():
     return fn
 
 
-# ------------------------------------------------------------ captions sobre el recorrido
+# ------------------------------------------------------------ badge persistente sobre el recorrido
 def dibujar_badge():
-    tag = texto("EN VENTA", 34, VERDE_OSCURO, sombra=False)
-    pastilla = sobre(caja(tag.shape[1] + 50, tag.shape[0] + 6, 30, AMARILLO, 0.95), tag, 25, 0)
+    tag = texto("EN VENTA", 34, NEGRO2, sombra=False)
+    pastilla = sobre(caja(tag.shape[1] + 50, tag.shape[0] + 6, 30, DORADO, 0.95), tag, 25, 0)
     dirsp = texto(DIRECCION, 34, BLANCO, sombra=True)
-    dirpast = sobre(caja(dirsp.shape[1] + 46, dirsp.shape[0] + 4, 26, (3, 34, 14), 0.78), dirsp, 20, -1)
+    dirpast = sobre(caja(dirsp.shape[1] + 46, dirsp.shape[0] + 4, 26, PANEL, 0.72), dirsp, 20, -1)
     return pastilla, dirpast
 
 
-def construir_captions(inicios_body, b_dur):
-    sprites = []
-    for marcado, t0, dur in zip(C_BODY, inicios_body, b_dur):
-        spr, xs = linea_resaltada(marcado, 52, W - 140)
-        ancho = max(x + s.shape[1] for s, x in zip(spr, xs)) - min(xs)
-        tot_w = ancho + 70
-        fondo = caja(int(tot_w), 110, 32, (3, 34, 14), 0.72)
-        off = min(xs)
-        placa = fondo
-        for s, x in zip(spr, xs):
-            placa = sobre(placa, s, int(x - off + 35), int((110 - s.shape[0]) / 2))
-        sprites.append((placa, t0, dur))
-    return sprites
-
-
-# ------------------------------------------------------------ construir linea de tiempo + voces
+# ------------------------------------------------------------ construir línea de tiempo + voces
 def construir():
     cl = lambda t, **kw: voz_tts.clip(t, voz=VOZ, **kw)
     dur = lambda x: len(x) / SR
 
-    intro_voz = cl(L_INTRO)
-    cierre_voz = cl(L_CIERRE)
-    body_voces = [cl(t) for t in L_BODY]
+    for c in CLIPS:
+        c["audio"] = cl(c["voz"])
+        c["dur"] = min(DUR_MAX, max(DUR_MIN, dur(c["audio"]) + 1.1))
+        c["placa"] = placa(c["cap"])
+    ubic_voz = cl(L_UBIC, rate="+6%")
+    cierre_voz = cl(L_CIERRE, rate="+8%")
 
     video = VideoFileClip(ENTRADA).resized(width=W)
     video = video.cropped(y_center=video.h / 2, height=H)
-    dur_video = video.duration
 
-    # repartir las 6 frases a lo largo del recorrido, dejando aire al principio y al final
-    margen = 3.0
-    usable = max(dur_video - 2 * margen, 10.0)
-    n = len(body_voces)
-    inicios_body = [margen + usable * (i + 0.5) / n - dur(body_voces[i]) / 2 for i in range(n)]
-    inicios_body = [max(0.0, min(t, dur_video - dur(v) - 0.3)) for t, v in zip(inicios_body, body_voces)]
+    durs = [D_INTRO] + [c["dur"] for c in CLIPS] + [D_UBIC, D_CIERRE]
+    inicios, t = [], 0.0
+    for d in durs:
+        inicios.append(t)
+        t += d - TR
+    total = inicios[-1] + durs[-1]
 
-    total = D_INTRO + dur_video + D_CIERRE
+    voces = []
+    for c, t0 in zip(CLIPS, inicios[1:]):
+        voces.append((t0 + 0.35, c["audio"]))
+    voces.append((inicios[-2] + 0.5, ubic_voz))
+    voces.append((inicios[-1] + 0.6, cierre_voz))
 
-    voces = [(0.5, intro_voz)]
-    for t0, v in zip(inicios_body, body_voces):
-        voces.append((D_INTRO + t0, v))
-    voces.append((D_INTRO + dur_video + 0.9, cierre_voz))
-
-    captions = construir_captions(inicios_body, [dur(v) for v in body_voces])
-    return video, dur_video, total, voces, captions
+    return video, CLIPS, inicios, durs, total, voces
 
 
 # ------------------------------------------------------------ mezcla de audio
@@ -224,7 +257,7 @@ def mezclar(total, voces, ruta="videos_salida/_mezcla_casa.wav"):
     ganancia = 1 - 0.7 * np.clip(suave, 0, 1)
 
     mix = musica * ganancia[:, None] + np.repeat(voz[:, None], 2, axis=1)
-    fi, fo = int(0.6 * SR), int(2.0 * SR)
+    fi, fo = int(0.5 * SR), int(1.8 * SR)
     mix[:fi] *= np.linspace(0, 1, fi)[:, None]
     mix[-fo:] *= np.linspace(1, 0, fo)[:, None]
     mix = np.tanh(mix * 1.05)
@@ -237,69 +270,71 @@ def mezclar(total, voces, ruta="videos_salida/_mezcla_casa.wav"):
 
 
 # ------------------------------------------------------------ render
-def hacer_frame_fn(video, dur_video, total, captions):
-    fn_intro = escena_intro(None)
+def hacer_frame_fn(video, clips, inicios, durs, total):
+    fn_intro = escena_intro()
+    fn_ubic = escena_ubicacion()
     fn_cierre = escena_cierre()
     badge, dirpast = dibujar_badge()
-    TR = 0.6
+
+    i_intro = 0
+    i_clips = list(range(1, 1 + len(clips)))
+    i_ubic = i_clips[-1] + 1
+    i_cierre = i_ubic + 1
+
+    def frame_clip(idx, tl):
+        c = clips[idx]
+        tv = c["ini"] + clamp01(tl / c["dur"]) * c["dur"]
+        f = np.ascontiguousarray(video.get_frame(tv))
+        yy = np.arange(H, dtype=np.float32)[:, None, None]
+        top = np.clip(1 - (yy / 260), 0, 1) * 0.55
+        bot = np.clip(1 - ((H - 1 - yy) / 420), 0, 1) * 0.6
+        f = (f.astype(np.float32) * (1 - np.maximum(top, bot))).astype(np.uint8)
+        ph = ease_out_cubic(prog(tl, 0.2, 0.5))
+        blit(f, badge, 44, 70, alpha=ph)
+        blit(f, dirpast, 44, 70 + badge.shape[0] + 14, alpha=ph)
+        q = prog(tl, 0.35, 0.4)
+        qf = prog(tl, c["dur"] - 0.35, 0.35)
+        alpha = clamp01(q) * (1 - clamp01(qf))
+        if alpha > 0.01:
+            e = ease_out_cubic(q)
+            blit(f, c["placa"], (W - c["placa"].shape[1]) / 2, 1640 + (1 - e) * 35, alpha=alpha)
+        return f
+
+    def raw(i, tl):
+        if i == i_intro:
+            return fn_intro(tl)
+        if i in i_clips:
+            return frame_clip(i - 1, tl)
+        if i == i_ubic:
+            return fn_ubic(tl)
+        return fn_cierre(tl)
 
     def make_frame(t):
         t = min(t, total - 1e-3)
-        if t < D_INTRO:
-            f = fn_intro(t)
-            if t > D_INTRO - TR:
-                p = (t - (D_INTRO - TR)) / TR
-                fv = np.ascontiguousarray(video.get_frame(0))
-                f = cv2.addWeighted(f, 1 - p, fv, p, 0)
-            return f
-        if t < D_INTRO + dur_video:
-            tv = t - D_INTRO
-            f = np.ascontiguousarray(video.get_frame(tv))
-            if tv < TR:
-                p = tv / TR
-                fi = fn_intro(D_INTRO)
-                f = cv2.addWeighted(fi, 1 - p, f, p, 0)
-            if tv > dur_video - TR:
-                p = (tv - (dur_video - TR)) / TR
-                fc = fn_cierre(0)
-                f = cv2.addWeighted(f, 1 - p, fc, p, 0)
-            # viñeta suave arriba/abajo para legibilidad del texto
-            yy = np.arange(H, dtype=np.float32)[:, None, None]
-            top = np.clip(1 - (yy / 260), 0, 1) * 0.55
-            bot = np.clip(1 - ((H - 1 - yy) / 420), 0, 1) * 0.6
-            f = (f.astype(np.float32) * (1 - np.maximum(top, bot))).astype(np.uint8)
-            ph = ease_out_cubic(prog(tv, 0.3, 0.6))
-            blit(f, badge, 44, 70, alpha=ph)
-            blit(f, dirpast, 44, 70 + badge.shape[0] + 14, alpha=ph)
-            for placa, t0, d in captions:
-                q = prog(tv, t0 - 0.25, 0.4)
-                qf = prog(tv, t0 + d + 0.35, 0.4)
-                alpha = clamp01(q) * (1 - clamp01(qf)) if tv >= t0 - 0.25 else 0
-                if alpha > 0.01:
-                    e = ease_out_cubic(q)
-                    blit(f, placa, (W - placa.shape[1]) / 2, 1640 + (1 - e) * 35, alpha=alpha)
-            return f
-        tc = t - D_INTRO - dur_video
-        f = fn_cierre(tc)
-        if tc < TR:
-            p = tc / TR
-            fv = np.ascontiguousarray(video.get_frame(dur_video - 1e-2))
-            f = cv2.addWeighted(fv, 1 - p, f, p, 0)
-        return f
+        activos = [i for i, (s, d) in enumerate(zip(inicios, durs)) if s <= t < s + d]
+        if len(activos) == 1:
+            i = activos[0]
+            return raw(i, t - inicios[i])
+        a, b = activos[0], activos[-1]
+        fa = raw(a, min(t - inicios[a], durs[a] - 1e-3))
+        fb = raw(b, max(t - inicios[b], 0))
+        p = clamp01((t - inicios[b]) / TR)
+        return cv2.addWeighted(fa, 1 - p, fb, p, 0)
+
     return make_frame
 
 
 def main():
     Path("videos_salida").mkdir(exist_ok=True)
-    video, dur_video, total, voces, captions = construir()
-    make_frame = hacer_frame_fn(video, dur_video, total, captions)
+    video, clips, inicios, durs, total, voces = construir()
+    make_frame = hacer_frame_fn(video, clips, inicios, durs, total)
 
     if "--frames" in sys.argv:
         segundos = [float(x) for x in sys.argv[sys.argv.index("--frames") + 1:]]
         from PIL import Image
         for s in segundos:
             Image.fromarray(make_frame(s)).save(f"videos_salida/prev_casa_{s:05.1f}.png")
-        print("duración total:", round(total, 2), "s")
+        print("duración total:", round(total, 2), "s | inicios:", [round(x, 1) for x in inicios])
         return
 
     audio_wav = mezclar(total, voces)
