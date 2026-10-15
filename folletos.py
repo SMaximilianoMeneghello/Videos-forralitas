@@ -23,12 +23,13 @@ def fuente(tam, bold=True):
     return ImageFont.truetype(FUENTE_B if bold else FUENTE_R, tam)
 
 
-def fit_cover(im, w, h):
+def fit_cover(im, w, h, bias_y=0.5):
+    """bias_y: 0 = ancla arriba (recorta abajo), 1 = ancla abajo, 0.5 = centrado."""
     im = im.convert("RGB")
     s = max(w / im.width, h / im.height)
     im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
     x0 = (im.width - w) // 2
-    y0 = (im.height - h) // 2
+    y0 = int((im.height - h) * bias_y)
     return im.crop((x0, y0, x0 + w, y0 + h))
 
 
@@ -119,7 +120,7 @@ def grano_sutil(im, color_acc, alpha=10):
 
 # ------------------------------------------------------------ folleto genérico
 def armar_folleto(ruta_salida, paleta, titulo, subtitulo, hero_path, miniaturas, features,
-                   extra_titulo, extra_lineas, telefono, pie):
+                   extra_titulo, extra_lineas, telefono, pie, hero_bias=0.22):
     fondo1, fondo2, dorado, panel, texto_c, gris = paleta
     alto = 3400  # lienzo generoso; se recorta al contenido real al final
     im = degrade_vertical(W, alto, fondo1, fondo2)
@@ -132,9 +133,10 @@ def armar_folleto(ruta_salida, paleta, titulo, subtitulo, hero_path, miniaturas,
     d.rectangle((W / 2 - 160, y, W / 2 + 160, y + 6), fill=dorado)
     y += 34
 
-    # foto principal: "contain" para que se vea completa, sin recortar
-    hero_h = 760
-    hero = fit_contain(Image.open(hero_path), W - 80, hero_h, panel)
+    # foto principal: llena todo el recuadro, con el recorte sesgado hacia
+    # arriba para no perder el techo/la puerta.
+    hero_h = 720
+    hero = fit_cover(Image.open(hero_path), W - 80, hero_h, bias_y=hero_bias)
     hero = redondear(hero, 28)
     pegar(im, hero, 40, y)
     y += hero_h + 26
@@ -221,6 +223,7 @@ def main():
          "Escuela a 100 m", "Todo tipo de comercios cerca"],
         "381 526 9004",
         "Consultanos por WhatsApp o llamada",
+        hero_bias=0.47,
     )
     armar_folleto(
         OUT / "folleto_cabana.jpg",
