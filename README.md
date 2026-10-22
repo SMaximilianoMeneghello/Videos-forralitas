@@ -18,3 +18,15 @@ El video queda en `videos_salida/publicidad.mp4`.
 Para sumar música poné un `.mp3` en la carpeta y completá `"musica": "musica.mp3"`.
 
 Requiere `ffmpeg` instalado en el sistema.
+
+## Alma de Mujer Lencería
+
+Video publicitario vertical de ~20 s sin audio (logo animado, fotos con Ken Burns, transiciones, destellos y light leaks):
+
+```bash
+python alma_prep.py CARPETA_CON_CAPTURAS   # solo si cambian las capturas: recorta fotos y logo a assets/alma/
+python alma_de_mujer.py                    # genera videos_salida/alma_de_mujer.mp4
+python alma_de_mujer.py --frames 2 9.5     # vistas previas PNG
+```
+
+Textos y fotos de cada escena: `PRODUCTOS`, `PRECIO` y `MONTAJE` en `alma_de_mujer.py`.
