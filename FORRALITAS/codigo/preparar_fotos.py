@@ -32,6 +32,7 @@ FOTOS = {
     "perros_gatos": "fotos/02_perros_gatos.jpg",
     "perro_gato_sacos": "fotos_presentacion/13_perro_gato.jpg",
     "sal": "fotos/05_sal_lamer.jpg",
+    "sal_gris": "fotos/06_sal_bloque.jpg",
     "virutas": "fotos_presentacion/14_virutas.jpg",
     "galpon_1": "assets/nuevas/n05.png",
     "galpon_2": "assets/nuevas/n06.png",
