@@ -5,3 +5,8 @@ fotos/prueba*.jpg
 *TEMP_MPY_*
 voz/cache_*
 voz/piper_*
+FORRALITAS/fotos_originales/
+FORRALITAS/fotos_preparadas/
+FORRALITAS/audios/cache/
+FORRALITAS/miniaturas/_prev_*
+__pycache__/
