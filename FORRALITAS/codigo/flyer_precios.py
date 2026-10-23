@@ -60,7 +60,7 @@ ITEMS = [
     ("MAÍZ", "ENTERO", "40 kg", "$12.500", "maiz_entero", (0.5, 0.5), 1.5),
     ("MAÍZ", "ENTERO", "50 kg", "$15.500", "maiz_entero", (0.35, 0.3), 1.9),
     ("FARDO DE", "ALFA VERDE", "", "$6.000", "alfalfa_pila", (0.5, 0.45), 1.15),
-    ("AVENA", "", "30 kg", "$15.500", ("flyer", (790, 430, 1012, 534)), None, 1),
+    ("AVENA", "", "30 kg", "$15.500", ("flyer", (792, 436, 1012, 530)), None, 1),
     ("MEZCLA PARA", "CABALLO", "35 kg", "$14.500", "mezcla_caballo", (0.5, 0.5), 1.4),
     ("MAÍZ", "QUEBRADO", "40 kg", "$14.500", "maiz_quebrado", (0.5, 0.45), 1.5),
     ("AFRECHO", "DE MAÍZ", "40 kg", "$11.500", "afrecho_maiz", (0.5, 0.5), 1.3),
@@ -80,7 +80,7 @@ def foto_item(clave, foco, zoom, w, h, flyer):
     if isinstance(clave, tuple):
         x0, y0, x1, y1 = clave[1]
         arr = cv2.cvtColor(np.asarray(flyer.crop((x0, y0, x1, y1)).convert("RGB")), cv2.COLOR_RGB2BGR)
-        esc = min(px(w) / arr.shape[1], px(h) / arr.shape[0])
+        esc = (max if clave[1][0] == 792 else min)(px(w) / arr.shape[1], px(h) / arr.shape[0])
         arr = cv2.resize(arr, (int(arr.shape[1] * esc), int(arr.shape[0] * esc)), interpolation=cv2.INTER_CUBIC)
         blur = cv2.GaussianBlur(arr, (0, 0), 2.0)
         arr = cv2.addWeighted(arr, 1.6, blur, -0.6, 0)
