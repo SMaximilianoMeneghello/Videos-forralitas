@@ -1,0 +1,34 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tomi cumple 5 — invitación infantil (demo)</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.card{background:linear-gradient(180deg,#2b1d7a 0%,#5b3fd1 45%,#ff8fb1 100%);font-family:Fredoka;color:#fff}
+.estrella{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;animation:tw 1.6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.planeta{position:absolute;border-radius:50%}
+.p1{left:-60px;top:120px;width:200px;height:200px;background:radial-gradient(circle at 35% 30%,#ffd76a,#ff9a3c 60%,#e2611b);box-shadow:0 0 60px rgba(255,170,60,.5);animation:flotar 5s ease-in-out infinite}
+.p2{right:-30px;top:560px;width:120px;height:120px;background:radial-gradient(circle at 35% 30%,#7ef0ff,#25b9e8 60%,#147ab8);animation:flotar 4s 1s ease-in-out infinite}
+.p2::after{content:"";position:absolute;left:-30px;top:48px;width:180px;height:26px;border-radius:50%;border:5px solid rgba(255,255,255,.75);transform:rotate(-18deg)}
+.cohete{position:absolute;left:50%;top:640px;width:120px;margin-left:-60px;animation:despegue 2.4s .2s cubic-bezier(.3,.1,.2,1) forwards,flotar 2.4s 2.6s ease-in-out infinite}
+@keyframes despegue{from{transform:translateY(500px) rotate(8deg)}to{transform:translateY(0) rotate(0)}}
+.llama{animation:llama .12s linear infinite alternate;transform-origin:60px 150px}
+@keyframes llama{from{transform:scaleY(1)}to{transform:scaleY(1.35)}}
+.t1{top:120px;font:600 34px Fredoka;letter-spacing:.06em;animation-delay:1.2s}
+.nom{top:160px;font:700 110px/1 Fredoka;color:#ffe15c;text-shadow:0 8px 0 #e2611b,0 18px 30px rgba(0,0,0,.35);animation:pop .9s 1.5s both}
+.cinco{top:275px;font:700 230px/1 Fredoka;color:#fff;text-shadow:0 10px 0 #ff5fa2,0 26px 40px rgba(0,0,0,.3);animation:pop .9s 1.9s both}
+.sub{top:520px;font:500 26px Fredoka;animation-delay:2.4s}
+.datos{top:800px;font:500 22px/1.4 Fredoka;animation-delay:2.8s}
+.datos b{display:block;font-size:30px;color:#ffe15c}
+</style></head><body>
+<div class="card" id="c">
+ <div class="planeta p1"></div><div class="planeta p2"></div>
+ <p class="ctr in t1">¡VENÍ A FESTEJAR!</p>
+ <p class="ctr nom">TOMI</p>
+ <p class="ctr cinco">5</p>
+ <p class="ctr in sub">¡Una fiesta fuera de este mundo! 🚀</p>
+ <svg class="cohete" viewBox="0 0 120 170"><g class="llama"><path d="M44 128 Q60 175 76 128Z" fill="#ffb02e"/><path d="M52 128 Q60 160 68 128Z" fill="#fff36b"/></g><path d="M60 6 C90 30 92 90 84 130 H36 C28 90 30 30 60 6Z" fill="#f4f6ff"/><path d="M36 130 L18 150 L28 100Z M84 130 L102 150 L92 100Z" fill="#ff5fa2"/><circle cx="60" cy="62" r="15" fill="#25b9e8" stroke="#2b1d7a" stroke-width="5"/><path d="M60 6 C72 15 80 26 84 38 H36 C40 26 48 15 60 6Z" fill="#ff5fa2"/></svg>
+ <div class="ctr in datos"><b>Sábado 8 de mayo · 16 h</b>Salón Planeta Diversión (ejemplo)</div>
+ <p class="demo">DEMO · DATOS FICTICIOS</p>
+</div>
+<script src="escala.js"></script>
+<script>let s=5;const r=()=>(s=s*16807%2147483647)/2147483647;const c=document.getElementById('c');for(let i=0;i<45;i++){const e=document.createElement('i');e.className='estrella';e.style.cssText=`left:${r()*540}px;top:${r()*620}px;animation-delay:${-r()*2}s;transform:scale(${.4+r()})`;c.prepend(e)}</script>
+</body></html>

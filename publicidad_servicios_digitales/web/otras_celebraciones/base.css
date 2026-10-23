@@ -1,0 +1,19 @@
+@font-face{font-family:Fredoka;src:url(../_fuentes/Fredoka.ttf);font-weight:300 700}
+@font-face{font-family:Allura;src:url(../_fuentes/Allura.ttf)}
+@font-face{font-family:Cormorant;src:url(../_fuentes/CormorantGaramond.ttf);font-weight:300 700}
+@font-face{font-family:Fraunces;src:url(../_fuentes/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Montserrat;src:url(../_fuentes/Montserrat.ttf);font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#111}
+body{display:grid;place-items:center}
+.card{position:relative;width:540px;height:960px;overflow:hidden;transform-origin:center;text-align:center}
+.abs{position:absolute}
+.ctr{position:absolute;left:0;width:100%;text-align:center}
+.demo{position:absolute;bottom:14px;width:100%;text-align:center;font:500 10px Montserrat;letter-spacing:.18em;opacity:.55}
+.in{opacity:0;animation:entra 1s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes entra{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.2) rotate(-12deg)}70%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:none}}
+@keyframes flotar{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes trazo{to{stroke-dashoffset:0}}
+@keyframes girar{to{transform:rotate(360deg)}}
+@keyframes fade{to{opacity:1}}

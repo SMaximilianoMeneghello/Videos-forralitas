@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mis 18 · Mateo — Invitación digital animada (demo)</title>
+<style>
+@font-face{font-family:Cinzel;src:url(../_fuentes/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Montserrat;src:url(../_fuentes/Montserrat.ttf);font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;overflow:hidden}
+body{display:grid;place-items:center}
+/* lienzo 9:16 escalado al tamaño de la pantalla */
+#card{position:relative;width:540px;height:960px;overflow:hidden;background:radial-gradient(70% 45% at 50% 42%,#2a1d08 0%,#0d0903 45%,#030303 100%);transform-origin:center;font-family:Montserrat,sans-serif;color:#f3dfa8}
+.haz{position:absolute;top:-30%;width:120px;height:160%;background:linear-gradient(90deg,transparent,rgba(255,214,130,.05),transparent);transform:rotate(25deg);filter:blur(10px);animation:haz 7s linear infinite}
+.haz.h2{animation-delay:-3.5s;width:70px}
+.rejilla{position:absolute;inset:0;background:linear-gradient(rgba(232,197,118,.05) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,rgba(232,197,118,.05) 1px,transparent 1px) 0 0/40px 40px;mask-image:radial-gradient(60% 50% at 50% 45%,#000,transparent);-webkit-mask-image:radial-gradient(60% 50% at 50% 45%,#000,transparent);opacity:0;animation:aparecer 2s .2s forwards}
+svg.marco{position:absolute;inset:0;width:100%;height:100%}
+.marco path,.marco rect,.marco circle{fill:none;stroke:url(#oro);stroke-width:1.6;stroke-dasharray:2400;stroke-dashoffset:2400;animation:trazo 2.6s cubic-bezier(.65,0,.35,1) forwards}
+.marco .d2{animation-delay:.5s}.marco .d3{animation-delay:.9s;stroke-width:1}
+.anillo{position:absolute;left:50%;top:39%;width:360px;height:360px;margin:-180px 0 0 -180px;opacity:0;animation:aparecer 1.5s 1.8s forwards}
+.anillo svg{width:100%;height:100%;animation:girar 30s linear infinite}
+.anillo polygon,.anillo circle{fill:none;stroke:rgba(232,197,118,.45);stroke-width:1}
+.top{position:absolute;top:150px;width:100%;text-align:center;font:600 15px Montserrat;letter-spacing:.6em;padding-left:.6em;color:#d8bd7c;opacity:0;animation:subir 1.2s 2s forwards}
+.num{position:absolute;top:180px;width:100%;text-align:center;font:700 290px/1 Cinzel;letter-spacing:-.02em;background:linear-gradient(100deg,#7a5418 0%,#f6dc92 25%,#b98a2e 45%,#fff6d0 52%,#b98a2e 60%,#f6dc92 78%,#7a5418 100%);background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(246,210,120,.35));clip-path:inset(100% 0 0 0);animation:revelar 1.4s 2.4s cubic-bezier(.2,.8,.2,1) forwards,brillo 3.5s 3.6s ease-in-out infinite}
+.nombre{position:absolute;top:500px;width:100%;text-align:center;font:600 64px Cinzel;letter-spacing:.32em;padding-left:.32em;color:#fff3cf}
+.nombre span{display:inline-block;opacity:0;transform:translateY(30px);filter:blur(8px);animation:letra .9s cubic-bezier(.2,.8,.2,1) forwards}
+.linea{position:absolute;top:600px;left:50%;width:300px;margin-left:-150px;height:1px;background:linear-gradient(90deg,transparent,#e8c576,transparent);transform:scaleX(0);animation:expandir 1s 4.5s cubic-bezier(.2,.8,.2,1) forwards}
+.rombo{position:absolute;top:594px;left:50%;width:12px;height:12px;margin-left:-6px;transform:rotate(45deg) scale(0);background:#e8c576;animation:rombo .6s 4.9s forwards}
+.datos{position:absolute;top:630px;width:100%;text-align:center}
+.datos p{opacity:0;animation:subir 1s forwards}
+.fecha{font:600 17px Montserrat;letter-spacing:.42em;padding-left:.42em;color:#f3dfa8;animation-delay:5.0s!important}
+.hora{font:400 46px Cinzel;color:#fff3cf;margin-top:6px;animation-delay:5.3s!important}
+.lugar{font:600 15px Montserrat;letter-spacing:.35em;padding-left:.35em;margin-top:18px;animation-delay:5.6s!important}
+.dir{font:400 13px Montserrat;letter-spacing:.12em;color:#bfa36a;margin-top:6px;animation-delay:5.75s!important}
+.dress{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);padding:11px 26px;border:1px solid rgba(232,197,118,.6);font:600 12px Montserrat;letter-spacing:.35em;color:#e8c576;white-space:nowrap;opacity:0;animation:aparecer 1s 6.3s forwards}
+.demo{position:absolute;bottom:12px;width:100%;text-align:center;font:500 10px Montserrat;letter-spacing:.2em;color:rgba(232,197,118,.45)}
+.destello{position:absolute;left:-60%;top:0;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,240,200,.18),transparent);transform:skewX(-20deg);animation:pasada 1.6s 6.9s ease-in-out forwards}
+#chispas{position:absolute;inset:0;pointer-events:none}
+@keyframes trazo{to{stroke-dashoffset:0}}
+@keyframes aparecer{to{opacity:1}}
+@keyframes girar{to{transform:rotate(360deg)}}
+@keyframes subir{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes revelar{0%{clip-path:inset(100% 0 0 0);filter:blur(12px) drop-shadow(0 0 30px rgba(246,210,120,.35))}100%{clip-path:inset(0 0 0 0);filter:blur(0) drop-shadow(0 0 30px rgba(246,210,120,.35))}}
+@keyframes brillo{0%{background-position:100% 0}60%,100%{background-position:0% 0}}
+@keyframes letra{to{opacity:1;transform:none;filter:none}}
+@keyframes expandir{to{transform:scaleX(1)}}
+@keyframes rombo{to{transform:rotate(45deg) scale(1)}}
+@keyframes haz{from{left:-30%}to{left:130%}}
+@keyframes pasada{to{left:140%}}
+</style>
+</head>
+<body>
+<div id="card" role="img" aria-label="Invitación: Mis 18, Mateo. Sábado 24 de abril de 2027, 23 horas. Club Ébano. Datos ficticios de demostración.">
+  <div class="haz"></div><div class="haz h2"></div>
+  <div class="rejilla"></div>
+  <svg class="marco" viewBox="0 0 540 960" aria-hidden="true">
+    <defs><linearGradient id="oro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a6120"/><stop offset=".45" stop-color="#f6dc92"/><stop offset="1" stop-color="#a87a2a"/></linearGradient></defs>
+    <path d="M40 90 V40 H90 M450 40 H500 V90 M500 870 V920 H450 M90 920 H40 V870"/>
+    <rect class="d2" x="58" y="58" width="424" height="844"/>
+    <path class="d3" d="M58 120 L120 58 M420 58 L482 120 M482 840 L420 902 M120 902 L58 840"/>
+    <path class="d3" d="M270 58 L300 88 L270 118 L240 88 Z M270 842 L300 872 L270 902 L240 872 Z"/>
+  </svg>
+  <div class="anillo"><svg viewBox="0 0 360 360"><polygon points="180,10 327,95 327,265 180,350 33,265 33,95"/><polygon points="180,40 301,110 301,250 180,320 59,250 59,110" style="stroke-dasharray:4 8"/><circle cx="180" cy="180" r="172" style="stroke-dasharray:1 6"/></svg></div>
+  <canvas id="chispas" width="1080" height="1920"></canvas>
+  <p class="top">TE INVITO A MIS</p>
+  <div class="num">18</div>
+  <div class="nombre" id="nombre">MATEO</div>
+  <div class="linea"></div><div class="rombo"></div>
+  <div class="datos">
+    <p class="fecha">SÁBADO 24 · ABRIL · 2027</p>
+    <p class="hora">23:00 H</p>
+    <p class="lugar">CLUB ÉBANO</p>
+    <p class="dir">Av. de Ejemplo 500 · San Miguel de Tucumán</p>
+  </div>
+  <div class="dress">DRESS CODE · BLACK &amp; GOLD</div>
+  <p class="demo">INVITACIÓN DE DEMOSTRACIÓN · DATOS FICTICIOS</p>
+  <div class="destello"></div>
+</div>
+<script>
+// escala el lienzo 9:16 a la pantalla
+const card = document.getElementById('card');
+function ajustar(){ const s = Math.min(innerWidth / 540, innerHeight / 960); card.style.transform = `scale(${s})`; }
+ajustar(); addEventListener('resize', ajustar);
+// letras del nombre con entrada escalonada
+const n = document.getElementById('nombre');
+n.innerHTML = [...n.textContent].map((c, i) => `<span style="animation-delay:${3.5 + i * .12}s">${c}</span>`).join('');
+// chispas doradas ascendentes
+const cv = document.getElementById('chispas'), cx = cv.getContext('2d');
+let s = 3; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+const P = Array.from({ length: 90 }, () => ({ x: r() * 1080, y: r() * 1920, v: 20 + r() * 70, z: .5 + r() * 2.2, f: r() * 6.3 }));
+let t0 = null;
+function cuadro(ts) {
+  if (t0 === null) t0 = ts; const t = (ts - t0) / 1000;
+  cx.clearRect(0, 0, 1080, 1920);
+  const k = Math.min(1, Math.max(0, (t - 1.5) / 2));
+  for (const p of P) {
+    const y = ((p.y - t * p.v) % 1920 + 1920) % 1920, x = p.x + Math.sin(t * .8 + p.f) * 20;
+    const a = k * (.3 + .7 * Math.max(0, Math.sin(t * 2.4 + p.f)));
+    const g = cx.createRadialGradient(x, y, 0, x, y, p.z * 4);
+    g.addColorStop(0, `rgba(255,230,160,${a})`); g.addColorStop(1, 'rgba(255,200,100,0)');
+    cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, p.z * 4, 0, 6.29); cx.fill();
+  }
+  requestAnimationFrame(cuadro);
+}
+requestAnimationFrame(cuadro);
+</script>
+</body>
+</html>

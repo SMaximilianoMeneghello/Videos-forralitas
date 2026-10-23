@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORBE · Accesorios & tecnología — tienda de demostración</title>
+<meta name="description" content="Sitio de demostración de una tienda online. Marca, productos y precios ficticios.">
+<style>
+@font-face{font-family:Sora;src:url(../_fuentes/Sora.ttf);font-weight:100 800}
+@font-face{font-family:DM;src:url(../_fuentes/DMSans.ttf);font-weight:100 900}
+:root{--tinta:#0f1115;--gris:#6b7280;--fondo:#f5f4f0;--card:#fff;--acento:#ff5a1f;--linea:#e6e3dc}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:DM,system-ui,sans-serif;background:var(--fondo);color:var(--tinta);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+/* barra */
+.aviso{background:var(--tinta);color:#fff;text-align:center;font-size:13px;padding:9px;letter-spacing:.04em}
+header{position:sticky;top:0;z-index:20;background:rgba(245,244,240,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--linea)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{font:800 26px Sora;letter-spacing:.12em;display:flex;align-items:center;gap:10px}
+.logo i{width:22px;height:22px;border-radius:50%;background:conic-gradient(var(--acento),#ffb08a,var(--acento));display:block;animation:gira 6s linear infinite}
+.menu{display:flex;gap:34px;font-weight:500;font-size:15px}.menu a{position:relative}.menu a::after{content:"";position:absolute;left:0;bottom:-6px;width:100%;height:2px;background:var(--acento);transform:scaleX(0);transition:transform .3s}.menu a:hover::after{transform:none}
+.carrito{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--linea)}
+.carrito svg{width:20px;fill:none;stroke:var(--tinta);stroke-width:1.8}
+.carrito b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--acento);color:#fff;font-size:11px;display:grid;place-items:center;transform:scale(0);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.carrito b.on{transform:scale(1)}.carrito.salto{animation:salto .5s}
+.ham{display:none}
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;padding:56px 0 40px}
+.etq{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border-radius:30px;background:#fff;border:1px solid var(--linea);font-size:13px;font-weight:600}
+.etq::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acento);box-shadow:0 0 0 4px rgba(255,90,31,.2)}
+h1{font:700 clamp(44px,6vw,82px)/1.02 Sora;letter-spacing:-.03em;margin:22px 0}
+h1 em{font-style:normal;color:var(--acento)}
+.hero p{font-size:18px;color:var(--gris);max-width:460px;line-height:1.6}
+.ctas{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 26px;border-radius:40px;font-weight:700;font-size:15px;transition:transform .25s,box-shadow .25s,background .25s}
+.btn.neg{background:var(--tinta);color:#fff}.btn.neg:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,17,21,.25)}
+.btn.lin{border:1.5px solid var(--tinta)}.btn.lin:hover{background:var(--tinta);color:#fff}
+.hero-img{position:relative;aspect-ratio:1/1;border-radius:36px;overflow:hidden;box-shadow:0 40px 80px rgba(15,17,21,.18)}
+.hero-img img{width:100%;height:100%;object-fit:cover;transform:scale(1.15);animation:acercar 2.2s cubic-bezier(.2,.8,.2,1) forwards}
+.burbuja{position:absolute;left:-24px;bottom:40px;padding:16px 18px;border-radius:20px;background:#fff;box-shadow:0 20px 40px rgba(15,17,21,.15);display:flex;gap:12px;align-items:center;animation:flota 4s ease-in-out infinite}
+.burbuja img{width:52px;height:52px;border-radius:14px;object-fit:cover}.burbuja b{display:block;font:700 15px Sora}.burbuja span{font-size:13px;color:var(--gris)}
+.cifras{display:flex;gap:40px;margin-top:40px}.cifras b{display:block;font:700 28px Sora}.cifras span{font-size:13px;color:var(--gris)}
+/* catálogo */
+section{padding:70px 0}
+.titulo{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:30px;flex-wrap:wrap}
+h2{font:700 clamp(32px,4vw,48px)/1.1 Sora;letter-spacing:-.02em}
+.filtros{display:flex;gap:10px;flex-wrap:wrap}
+.filtros button{padding:10px 18px;border-radius:30px;border:1px solid var(--linea);background:#fff;font-weight:600;font-size:14px;transition:all .25s}
+.filtros button.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+.grilla{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.prod{background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--linea);transition:transform .35s,box-shadow .35s,opacity .4s}
+.prod:hover{transform:translateY(-6px);box-shadow:0 26px 50px rgba(15,17,21,.12)}
+.prod.oculto{display:none}
+.prod .foto{position:relative;aspect-ratio:4/3.4;overflow:hidden;background:#eee}
+.prod .foto img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.prod:hover .foto img{transform:scale(1.07)}
+.prod .tag{position:absolute;left:14px;top:14px;padding:5px 11px;border-radius:20px;background:#fff;font-size:12px;font-weight:700}
+.prod .tag.nuevo{background:var(--acento);color:#fff}
+.prod .info{padding:18px 18px 20px}
+.prod h3{font:600 17px Sora}.prod .cat{font-size:13px;color:var(--gris);margin-top:3px}
+.prod .fila{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:8px}
+.precio{font:700 20px Sora}
+.acc{display:flex;gap:8px}
+.mini{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--linea);transition:all .25s}
+.mini:hover{background:var(--tinta);color:#fff}.mini svg{width:18px;fill:none;stroke:currentColor;stroke-width:2}
+.mini.agregar{background:var(--tinta);color:#fff;border-color:var(--tinta)}.mini.agregar.ok{background:#16a34a;border-color:#16a34a}
+/* beneficios */
+.benef{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.benef div{background:#fff;border:1px solid var(--linea);border-radius:26px;padding:28px}
+.benef .ic{width:50px;height:50px;border-radius:16px;background:#fff1ea;display:grid;place-items:center;margin-bottom:16px}
+.benef svg{width:24px;fill:none;stroke:var(--acento);stroke-width:2}
+.benef h3{font:600 19px Sora}.benef p{color:var(--gris);margin-top:6px;line-height:1.5;font-size:15px}
+.banda{background:var(--tinta);color:#fff;border-radius:36px;padding:56px;display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center;overflow:hidden;position:relative}
+.banda h2{font-size:clamp(30px,3.6vw,46px)}.banda p{color:#a3a3a3;margin-top:12px;line-height:1.6}
+.banda img{width:100%;border-radius:24px;transform:rotate(-4deg)}
+.banda .btn{background:var(--acento);color:#fff;margin-top:24px}
+footer{padding:50px 0 60px;color:var(--gris);font-size:14px;text-align:center}
+footer .logo{justify-content:center;color:var(--tinta);margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,120px);background:var(--tinta);color:#fff;padding:14px 22px;border-radius:30px;font-weight:600;font-size:14px;z-index:50;transition:transform .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 14px 34px rgba(0,0,0,.25)}
+.toast.on{transform:translate(-50%,0)}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform 1s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+@keyframes gira{to{transform:rotate(360deg)}}
+@keyframes acercar{to{transform:scale(1)}}
+@keyframes flota{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes salto{30%{transform:scale(1.2)}60%{transform:scale(.95)}}
+@media (max-width:980px){.grilla{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr}.banda{grid-template-columns:1fr;padding:36px}.benef{grid-template-columns:1fr}}
+@media (max-width:640px){.wrap{padding:0 18px}.menu{display:none}.ham{display:grid}.hero{padding-top:28px}.cifras{gap:24px}.grilla{gap:12px}.prod .info{padding:12px}.prod h3{font-size:14px}.precio{font-size:16px}.mini{width:36px;height:36px}.prod .acc .consultar{display:none}.burbuja{left:12px;bottom:12px}section{padding:46px 0}}
+</style>
+</head>
+<body>
+<div class="aviso">Sitio de demostración · marca, productos y precios ficticios</div>
+<header><div class="wrap nav">
+  <a class="logo" href="#"><i></i>ORBE</a>
+  <nav class="menu"><a href="#catalogo">Catálogo</a><a href="#beneficios">Beneficios</a><a href="#novedades">Novedades</a><a href="#contacto">Contacto</a></nav>
+  <div style="display:flex;gap:10px">
+    <button class="carrito" id="carrito" aria-label="Carrito"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7L6 7zM9 7a3 3 0 0 1 6 0"/></svg><b id="cuenta">0</b></button>
+    <button class="carrito ham" aria-label="Menú"><svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg></button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <span class="etq rv in">Nueva colección 2026</span>
+      <h1 class="rv in d1">Diseño que te <em>acompaña</em> todos los días.</h1>
+      <p class="rv in d2">Accesorios y tecnología seleccionados para tu estilo. Elegí, consultá y recibí tu pedido sin vueltas.</p>
+      <div class="ctas rv in d3"><a class="btn neg" href="#catalogo">Ver catálogo →</a><a class="btn lin" href="#contacto">Hacer una consulta</a></div>
+      <div class="cifras rv in d3"><div><b>+120</b><span>productos</span></div><div><b>24 h</b><span>respuesta</span></div><div><b>3</b><span>sucursales</span></div></div>
+    </div>
+    <div class="hero-img rv in d2">
+      <img src="img/flatlay.jpg" alt="Accesorios: reloj, celular y anteojos">
+      <div class="burbuja"><img src="img/auriculares1.jpg" alt=""><div><b>Auriculares Pro</b><span>Más elegido de la semana</span></div></div>
+    </div>
+  </div>
+
+  <section id="catalogo">
+    <div class="titulo"><h2 class="rv">Catálogo</h2>
+      <div class="filtros rv" id="filtros"><button class="on" data-f="todos">Todos</button><button data-f="audio">Audio</button><button data-f="relojes">Relojes</button><button data-f="accesorios">Accesorios</button></div>
+    </div>
+    <div class="grilla" id="grilla"></div>
+  </section>
+
+  <section id="beneficios">
+    <div class="benef">
+      <div class="rv"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.1M17 19a2 2 0 1 0 0-.1"/></svg></span><h3>Envíos a todo el país</h3><p>Seguimiento de tu pedido desde que sale hasta que llega.</p></div>
+      <div class="rv d1"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg></span><h3>Pagos flexibles</h3><p>Transferencia, tarjetas y billeteras virtuales.</p></div>
+      <div class="rv d2"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.500 8-8 9-4.500-1-8-4-8-9V7z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg></span><h3>Compra protegida</h3><p>Cambios simples y atención personalizada.</p></div>
+    </div>
+  </section>
+
+  <section id="novedades">
+    <div class="banda rv">
+      <div><h2>Armá tu combo y consultá sin compromiso.</h2><p>Te asesoramos por WhatsApp para elegir el producto ideal.</p><a class="btn" href="#" id="consultaGeneral">Consultar ahora</a></div>
+      <img src="img/lentes1.jpg" alt="Anteojos de sol">
+    </div>
+  </section>
+</main>
+<footer id="contacto"><div class="logo"><i></i>ORBE</div>Tienda de demostración creada como ejemplo de diseño web · Datos ficticios</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const PRODUCTOS = [
+  { n: 'Auriculares Pro', c: 'audio', p: 89900, img: 'auriculares1.jpg', tag: 'Nuevo' },
+  { n: 'Reloj Clásico Acero', c: 'relojes', p: 124500, img: 'reloj1.jpg', tag: 'Top' },
+  { n: 'Lentes Polarizados', c: 'accesorios', p: 45900, img: 'lentes2.jpg' },
+  { n: 'Mochila Urbana', c: 'accesorios', p: 67800, img: 'mochila.jpg' },
+  { n: 'Auriculares Studio', c: 'audio', p: 112000, img: 'auriculares2.jpg' },
+  { n: 'Reloj Vintage', c: 'relojes', p: 98700, img: 'reloj2.jpg', tag: 'Nuevo' },
+  { n: 'Zapatillas Blanc', c: 'accesorios', p: 79900, img: 'zapatillas.jpg' },
+  { n: 'Lentes Azul Mar', c: 'accesorios', p: 52300, img: 'lentes1.jpg' }
+];
+const $ = s => document.querySelector(s);
+const pesos = n => '$ ' + n.toLocaleString('es-AR');
+const ICON_MAS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+const ICON_CHAT = '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>';
+$('#grilla').innerHTML = PRODUCTOS.map((p, i) => `<article class="prod rv d${i % 4}" data-c="${p.c}">
+  <div class="foto"><img src="img/${p.img}" alt="${p.n}">${p.tag ? `<span class="tag ${p.tag === 'Nuevo' ? 'nuevo' : ''}">${p.tag}</span>` : ''}</div>
+  <div class="info"><h3>${p.n}</h3><p class="cat">${p.c[0].toUpperCase() + p.c.slice(1)}</p>
+  <div class="fila"><span class="precio">${pesos(p.p)}</span><div class="acc"><button class="mini consultar" data-i="${i}" aria-label="Consultar">${ICON_CHAT}</button><button class="mini agregar" data-i="${i}" aria-label="Agregar al carrito">${ICON_MAS}</button></div></div></div></article>`).join('');
+
+// filtros
+document.querySelectorAll('#filtros button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#filtros button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.prod').forEach(p => p.classList.toggle('oculto', b.dataset.f !== 'todos' && p.dataset.c !== b.dataset.f));
+}));
+// carrito
+let n = 0; const toast = $('#toast');
+function avisar(t) { toast.textContent = t; toast.classList.add('on'); clearTimeout(avisar.k); avisar.k = setTimeout(() => toast.classList.remove('on'), 2200); }
+document.querySelectorAll('.agregar').forEach(b => b.addEventListener('click', () => {
+  n++; $('#cuenta').textContent = n; $('#cuenta').classList.add('on');
+  const c = $('#carrito'); c.classList.remove('salto'); void c.offsetWidth; c.classList.add('salto');
+  b.classList.add('ok'); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>';
+  avisar('✓ ' + PRODUCTOS[b.dataset.i].n + ' agregado al carrito');
+}));
+// consultas: abren WhatsApp con el mensaje armado (en la demo no hay número cargado)
+const WHATSAPP = '';
+const consultar = txt => window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+document.querySelectorAll('.consultar').forEach(b => b.addEventListener('click', () => consultar('Hola, quiero consultar por: ' + PRODUCTOS[b.dataset.i].n)));
+$('#consultaGeneral').addEventListener('click', e => { e.preventDefault(); consultar('Hola, quiero hacer una consulta.'); });
+// revelado al desplazar
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
+document.querySelectorAll('.rv:not(.in)').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

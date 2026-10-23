@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mis XV · Valentina — Invitación web (demo)</title>
+<meta name="description" content="Invitación web interactiva de demostración. Datos ficticios.">
+<meta name="theme-color" content="#070d26">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<canvas id="brillos" aria-hidden="true"></canvas>
+
+<!-- ============ PORTADA / SOBRE ============ -->
+<section id="portada" aria-label="Portada">
+  <div class="mitad izq"></div><div class="mitad der"></div>
+  <div class="portada-contenido">
+    <p class="pre">Tenés una invitación especial</p>
+    <div class="sobre" id="sobre">
+      <div class="sobre-fondo"></div>
+      <div class="sobre-carta"><span>Mis XV</span><b>Valentina</b></div>
+      <div class="sobre-frente"></div>
+      <div class="sobre-solapa"></div>
+      <button class="sello" id="btnAbrir" aria-label="Abrir invitación">V</button>
+    </div>
+    <button class="btn-abrir" id="btnAbrir2">Abrir invitación</button>
+    <p class="nota-musica">♪ con música</p>
+  </div>
+</section>
+
+<!-- ============ INVITACIÓN ============ -->
+<main id="inv">
+  <header class="hero">
+    <img class="hero-bg" src="img/flores2.jpg" alt="">
+    <svg class="esquina e1" viewBox="0 0 200 200" aria-hidden="true"><use href="#ramo"/></svg>
+    <svg class="esquina e2" viewBox="0 0 200 200" aria-hidden="true"><use href="#ramo"/></svg>
+    <div class="hero-txt">
+      <svg class="corona" viewBox="0 0 120 70" aria-hidden="true"><path d="M8 60 L14 18 L36 40 L60 6 L84 40 L106 18 L112 60 Z" fill="none" stroke="url(#gPerla)" stroke-width="3" stroke-linejoin="round"/><circle cx="60" cy="6" r="5" fill="#e9eefc"/><circle cx="14" cy="18" r="4" fill="#c9d3ee"/><circle cx="106" cy="18" r="4" fill="#c9d3ee"/><path d="M8 64 H112" stroke="url(#gPerla)" stroke-width="4"/></svg>
+      <p class="mis">Mis XV años</p>
+      <h1 class="nombre">Valentina</h1>
+      <div class="adorno"><i></i><span>✦</span><i></i></div>
+      <p class="fecha-hero"><span>Sábado</span><b>13</b><span>Marzo · 2027</span></p>
+    </div>
+    <a class="bajar" href="#cuenta" aria-label="Ver más">⌄</a>
+  </header>
+
+  <section class="bloque rv" id="frase">
+    <p class="cita">“Hay momentos que se esperan toda la vida…<br>y quiero compartir el mío con vos.”</p>
+  </section>
+
+  <section class="bloque" id="cuenta">
+    <h2 class="rv">Falta poco</h2>
+    <div class="reloj rv" role="timer" aria-live="polite">
+      <div><b id="cDias">00</b><span>días</span></div>
+      <div><b id="cHoras">00</b><span>horas</span></div>
+      <div><b id="cMin">00</b><span>min</span></div>
+      <div><b id="cSeg">00</b><span>seg</span></div>
+    </div>
+    <p class="sub rv">13 de marzo de 2027 · 21:30 h</p>
+  </section>
+
+  <section class="bloque" id="lugar">
+    <h2 class="rv">La fiesta</h2>
+    <div class="tarjeta rv">
+      <div class="icono">
+        <svg viewBox="0 0 24 24"><path d="M12 22s7-7.6 7-13a7 7 0 1 0-14 0c0 5.400 7 13 7 13z"/><circle cx="12" cy="9" r="2.6"/></svg>
+      </div>
+      <h3>Salón Aurora</h3>
+      <p>Av. de Ejemplo 1234 · San Miguel de Tucumán</p>
+      <p class="hora">21:30 h</p>
+      <div class="mapa" aria-hidden="true">
+        <svg viewBox="0 0 320 150"><defs><pattern id="cuad" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="rgba(201,211,238,.12)"/></pattern></defs><rect width="320" height="150" fill="url(#cuad)"/><path d="M0 98 C80 90 120 120 190 96 S290 70 320 80" stroke="rgba(110,143,232,.55)" stroke-width="7" fill="none"/><path d="M150 0 V150" stroke="rgba(201,211,238,.25)" stroke-width="5"/><path d="M0 40 H320" stroke="rgba(201,211,238,.18)" stroke-width="4"/><g class="pin"><path d="M160 76s16-17 16-29a16 16 0 1 0-32 0c0 12 16 29 16 29z" fill="#e9eefc"/><circle cx="160" cy="47" r="6" fill="#16285f"/></g><circle class="onda" cx="160" cy="76" r="8" fill="none" stroke="#e9eefc"/></svg>
+      </div>
+      <a class="btn" id="btnMapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Plaza+Independencia+San+Miguel+de+Tucum%C3%A1n">Cómo llegar</a>
+      <p class="mini">Ubicación de ejemplo (demostración)</p>
+    </div>
+  </section>
+
+  <section class="bloque" id="dress">
+    <h2 class="rv">Dress code</h2>
+    <div class="tarjeta rv">
+      <div class="icono"><svg viewBox="0 0 24 24"><path d="M9 3l3 3 3-3M9 3 6 8l3 2-2 11h10l-2-11 3-2-3-5"/></svg></div>
+      <h3>Elegante</h3>
+      <p>El azul queda reservado para la quinceañera ✦</p>
+    </div>
+  </section>
+
+  <section class="bloque" id="galeria">
+    <h2 class="rv">Momentos</h2>
+    <div class="grilla">
+      <button class="foto rv" data-src="img/bengala2.jpg"><img src="img/bengala2.jpg" alt="Bengala encendida"></button>
+      <button class="foto rv alta" data-src="img/flores1.jpg"><img src="img/flores1.jpg" alt="Flores azules"></button>
+      <button class="foto rv" data-src="img/bengala1.jpg"><img src="img/bengala1.jpg" alt="Chispas doradas"></button>
+      <button class="foto rv" data-src="img/flores3.jpg"><img src="img/flores3.jpg" alt="Flor con gotas"></button>
+      <button class="foto rv ancha" data-src="img/bengalas3.jpg"><img src="img/bengalas3.jpg" alt="Celebración con bengalas"></button>
+    </div>
+  </section>
+
+  <section class="bloque" id="confirmar">
+    <h2 class="rv">¿Venís?</h2>
+    <p class="sub rv">Confirmá tu asistencia antes del 1 de marzo</p>
+    <button class="btn grande rv" id="btnRsvp">Confirmar asistencia</button>
+  </section>
+
+  <footer class="pie">
+    <p class="gracias">¡Te espero!</p>
+    <p class="nombre-pie">Valentina</p>
+    <p class="demo">Invitación web de demostración · datos ficticios</p>
+  </footer>
+</main>
+
+<!-- música -->
+<button id="btnMusica" class="musica" aria-label="Pausar música" aria-pressed="true"><span></span><span></span><span></span><span></span></button>
+<audio id="audio" src="audio/musica.mp3" loop preload="auto"></audio>
+
+<!-- lightbox -->
+<div id="visor" role="dialog" aria-modal="true" aria-label="Foto"><img alt=""><button aria-label="Cerrar">✕</button></div>
+
+<!-- modal RSVP -->
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="tModal">
+  <form id="formRsvp" class="modal-caja">
+    <button type="button" class="cerrar" aria-label="Cerrar">✕</button>
+    <h3 id="tModal">Confirmar asistencia</h3>
+    <label>Tu nombre<input id="fNombre" name="nombre" required placeholder="Nombre y apellido" autocomplete="name"></label>
+    <label>¿Cuántos van?
+      <div class="contador"><button type="button" data-d="-1">−</button><output id="fCant">1</output><button type="button" data-d="1">+</button></div>
+    </label>
+    <label>Mensaje (opcional)<textarea id="fMsg" rows="2" placeholder="Un saludo para Valentina"></textarea></label>
+    <button class="btn whatsapp" type="submit"><svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.200 19.600L3 29l6.600-1.700A13 13 0 1 0 16 3zm7.500 18.300c-.3.900-1.800 1.700-2.500 1.800-.6.100-1.400.100-2.300-.1-.5-.2-1.200-.4-2.100-.8-3.700-1.600-6.100-5.300-6.300-5.600-.2-.2-1.500-2-1.500-3.800s.9-2.700 1.300-3.100c.3-.4.700-.5 1-.5h.7c.2 0 .5-.1.8.6l1.100 2.600c.1.200.2.400 0 .7l-.4.600-.5.600c-.2.200-.4.400-.2.800.2.400 1 1.700 2.200 2.700 1.500 1.300 2.700 1.700 3.100 1.900.4.200.6.100.8-.1l1.200-1.400c.3-.4.500-.3.900-.2l2.500 1.200c.4.200.6.300.7.400.1.200.1 1-.2 1.900z"/></svg>Enviar por WhatsApp</button>
+    <p class="mini">Demo: en una invitación real se abre el chat con el número del organizador.</p>
+  </form>
+</div>
+<div id="toast" role="status"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gPerla" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c9d3ee"/><stop offset="1" stop-color="#8ea6e6"/></linearGradient>
+    <g id="ramo" fill="none" stroke="#c9d3ee" stroke-width="1.4" stroke-linecap="round">
+      <path d="M10 190 C40 140 70 100 140 70"/><path d="M40 150 C30 120 45 100 60 96 C62 120 52 136 40 150Z" fill="rgba(201,211,238,.12)"/>
+      <path d="M70 116 C78 90 100 80 112 84 C104 106 88 116 70 116Z" fill="rgba(201,211,238,.12)"/>
+      <path d="M100 90 C96 66 110 50 124 48 C126 70 114 84 100 90Z" fill="rgba(201,211,238,.12)"/>
+      <circle cx="146" cy="66" r="12"/><circle cx="146" cy="66" r="5" fill="#e9eefc"/>
+      <circle cx="160" cy="44" r="7"/><circle cx="128" cy="40" r="5"/><circle cx="170" cy="74" r="4" fill="#c9d3ee"/>
+    </g>
+  </defs>
+</svg>
+<script src="app.js"></script>
+</body>
+</html>

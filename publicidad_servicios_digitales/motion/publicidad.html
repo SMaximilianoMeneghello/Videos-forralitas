@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Publicidad · servicios digitales (composición)</title>
+<style>
+@font-face{font-family:Unbounded;src:url(../web/_fuentes/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Syne;src:url(../web/_fuentes/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Mono;src:url(../web/_fuentes/JetBrainsMono.ttf);font-weight:100 800}
+@font-face{font-family:Allura;src:url(../web/_fuentes/Allura.ttf)}
+@font-face{font-family:Cormorant;src:url(../web/_fuentes/CormorantGaramond.ttf);font-weight:300 700}
+@font-face{font-family:Montserrat;src:url(../web/_fuentes/Montserrat.ttf);font-weight:100 900}
+:root{--negro:#04050a;--azul:#2f6bff;--azul2:#4fa3ff;--violeta:#7b3cff;--violeta2:#b07bff;--blanco:#f4f6ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--negro);font-family:"Inter Display",Inter,sans-serif;color:var(--blanco);-webkit-font-smoothing:antialiased}
+canvas{position:absolute;left:0;top:0}
+#escena{position:absolute;inset:0;perspective:1600px;perspective-origin:50% 45%;overflow:hidden}
+.capa{position:absolute;inset:0;transform-style:preserve-3d;display:none}
+.abs{position:absolute}
+.p3d{transform-style:preserve-3d}
+.cen{position:absolute;left:0;width:1080px;text-align:center}
+.titular{font-family:Unbounded;font-weight:800;letter-spacing:-.02em;line-height:1}
+.grad{background:linear-gradient(100deg,#4fa3ff 0%,#2f6bff 30%,#7b3cff 60%,#b07bff 80%,#4fa3ff 100%);background-size:220% 100%;background-position:var(--gp,0%) 0;-webkit-background-clip:text;background-clip:text;color:transparent}
+.linea{display:block;overflow:hidden;padding:.06em .1em}
+.ch{display:inline-block;white-space:pre;will-change:transform}
+.chip{display:inline-flex;align-items:center;gap:16px;padding:16px 26px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1.5px solid rgba(160,190,255,.35);box-shadow:0 10px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(10px);font:700 30px "Inter Display",Inter;letter-spacing:.04em;white-space:nowrap}
+.chip .ico{flex:none;width:1.55em;height:1.55em;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--azul),var(--violeta));box-shadow:0 0 24px rgba(79,163,255,.6)}
+.chip svg{width:.8em;height:.8em;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tag{display:inline-block;padding:10px 18px;border-radius:12px;background:rgba(10,14,30,.7);border:1px solid rgba(160,190,255,.3);font:600 20px Mono;letter-spacing:.08em;color:#bcd0ff;white-space:nowrap}
+/* teléfono */
+.tel{position:absolute;border-radius:var(--r,64px);background:linear-gradient(145deg,#3a3d4a,#0b0c10 30%,#1d1f27 70%,#4a4e5c);padding:var(--b,14px);box-shadow:0 0 0 2px #5b6070 inset,0 0 0 5px #0b0c10 inset,0 50px 120px rgba(0,0,0,.7),0 0 80px rgba(79,120,255,.18)}
+.tel .pant{position:relative;width:100%;height:100%;border-radius:calc(var(--r,64px) - var(--b,14px));overflow:hidden;background:#000}
+.tel .pant img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tel .isla{position:absolute;left:50%;top:2.2%;width:28%;height:3.3%;transform:translateX(-50%);border-radius:40px;background:#000;z-index:3}
+.tel .brillo{position:absolute;inset:0;z-index:4;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.10) 45%,transparent 60%);pointer-events:none}
+/* navegador */
+.nav{position:absolute;border-radius:22px;overflow:hidden;background:#11131a;box-shadow:0 0 0 1.5px rgba(255,255,255,.12),0 50px 120px rgba(0,0,0,.7),0 0 90px rgba(79,120,255,.16)}
+.nav .barra{height:46px;display:flex;align-items:center;gap:10px;padding:0 18px;background:linear-gradient(#1b1e28,#14161e);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav .barra i{width:13px;height:13px;border-radius:50%;display:block}
+.nav .url{flex:1;margin:0 14px;height:28px;border-radius:14px;background:#0b0d13;display:flex;align-items:center;gap:8px;padding:0 14px;font:500 15px Mono;color:#8b93ad}
+.nav .cont{position:relative;width:100%;height:calc(100% - 46px);overflow:hidden;background:#fff}
+.nav .cont img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+/* subtítulos */
+#subs{position:absolute;left:60px;right:60px;top:1650px;text-align:center;font:800 54px/1.18 "Inter Display",Inter;letter-spacing:-.01em;z-index:90;text-shadow:0 4px 24px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.9)}
+#subs span{display:inline-block;margin:0 .14em;transition:none}
+#subs span.on{color:#7fb4ff}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:95;pointer-events:none;mix-blend-mode:screen}
+#haz{position:absolute;top:-200px;left:0;width:420px;height:2400px;transform:skewX(-20deg);background:linear-gradient(90deg,transparent,rgba(120,170,255,.0) 15%,rgba(190,215,255,.75) 50%,rgba(150,120,255,0) 85%,transparent);mix-blend-mode:screen;z-index:94;display:none;filter:blur(8px)}
+</style>
+</head>
+<body>
+<canvas id="fondo" width="1080" height="1920"></canvas>
+<div id="escena"></div>
+<canvas id="fx" width="1080" height="1920" style="z-index:80;pointer-events:none"></canvas>
+<div id="subs"></div>
+<div id="haz"></div>
+<div id="flash"></div>
+<script src="datos.js"></script>
+<script src="core.js"></script>
+<script src="escenas.js"></script>
+</body>
+</html>

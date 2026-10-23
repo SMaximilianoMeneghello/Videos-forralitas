@@ -1,0 +1,27 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>50 años · Rosa & Héctor (demo)</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.card{background:#f3e7d7;color:#7a3b26;font-family:Fraunces}
+.arco{position:absolute;left:70px;top:90px;width:400px;height:560px;border-radius:200px 200px 0 0;background:linear-gradient(180deg,#c8673f,#a9472a);clip-path:inset(100% 0 0 0);animation:abrir 1.4s .2s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes abrir{to{clip-path:inset(0 0 0 0)}}
+.arco2{position:absolute;left:52px;top:72px;width:436px;height:596px;border-radius:218px 218px 0 0;border:1.5px solid #c8673f;opacity:0;animation:fade 1s 1s forwards}
+.num{position:absolute;left:0;width:100%;top:150px;font:300 260px/1 Fraunces;font-variation-settings:"SOFT" 100,"WONK" 1;color:#f3e7d7;opacity:0;animation:entra 1.4s 1s cubic-bezier(.2,.8,.2,1) forwards}
+.anos{top:420px;font:600 18px Montserrat;letter-spacing:.5em;padding-left:.5em;color:#f3e7d7;animation-delay:1.5s}
+.nombres{top:500px;font:italic 400 52px/1.15 Fraunces;color:#fff3e3;animation-delay:1.8s}
+.t1{top:700px;font:600 14px Montserrat;letter-spacing:.4em;padding-left:.4em;animation-delay:2.2s}
+.datos{top:740px;font:400 30px/1.35 Fraunces;animation-delay:2.5s}
+.datos small{display:block;font:500 15px Montserrat;letter-spacing:.12em;margin-top:6px;color:#9a5a40}
+.hoja{position:absolute;width:30px;height:12px;border-radius:50%;background:#7c8a5a;opacity:0;animation:fade .5s forwards}
+</style></head><body>
+<div class="card" id="c">
+ <div class="arco2"></div><div class="arco"></div>
+ <p class="num">50</p>
+ <p class="ctr in anos">AÑOS JUNTOS</p>
+ <p class="ctr in nombres">Rosa<br>&amp; Héctor</p>
+ <p class="ctr in t1">CELEBRAMOS EN FAMILIA</p>
+ <div class="ctr in datos">Sábado 5 de junio · 13 h<small>Almuerzo familiar · Casa de campo (ejemplo)</small></div>
+ <p class="demo">DEMO · DATOS FICTICIOS</p>
+</div>
+<script src="escala.js"></script>
+<script>const c=document.getElementById('c');for(let i=0;i<14;i++){const a=Math.PI*(1+i/13),x=270+Math.cos(a)*232,y=290+Math.sin(a)*232;const e=document.createElement('i');e.className='hoja';e.style.cssText=`left:${x-15}px;top:${y-6}px;transform:rotate(${a*57+90+(i%2?30:-30)}deg);animation-delay:${1.2+i*.08}s`;c.appendChild(e)}</script>
+</body></html>

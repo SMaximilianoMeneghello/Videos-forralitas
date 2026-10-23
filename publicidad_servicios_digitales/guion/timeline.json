@@ -1,0 +1,6 @@
+{
+ "duracion": 132.5,
+ "bpm": 120,
+ "secciones": {"intro": 0.0, "titulo": 6.0, "edicion": 14.0, "demo": 17.5, "edicion2": 27.5, "formatos": 36.6, "destacan": 43.0, "invitaciones": 45.0, "carrusel": 56.0, "web_invitacion": 63.0, "web_demo": 69.0, "compartir": 81.0, "paginas_web": 86.5, "tienda": 90.5, "servicios": 96.5, "gastronomia": 102.5, "cierre": 109.0, "escribinos": 119.0, "contacto": 123.0},
+ "voz": {"v01": 1.2, "v02": 7.6, "v03": 14.3, "v04": 28.0, "v05": 36.8, "v06": 45.4, "v07": 51.0, "v08": 56.3, "v09": 63.4, "v10": 70.0, "v11": 76.6, "v12": 86.9, "v13": 91.5, "v14": 96.8, "v15": 103.1, "v16": 110.3, "v17": 119.4, "v18": 123.5}
+}

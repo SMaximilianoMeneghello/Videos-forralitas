@@ -1,0 +1,34 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Primera Comunión · Sofía (demo)</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.card{background:radial-gradient(80% 50% at 50% 34%,#fffdf6 0%,#f5f0e2 60%,#e8e1cc 100%);color:#5d6b4f;font-family:Cormorant}
+.rayos{position:absolute;left:50%;top:300px;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(from 0deg,rgba(212,182,110,.16) 0 4deg,transparent 4deg 15deg);mask-image:radial-gradient(circle,#000 10%,transparent 55%);-webkit-mask-image:radial-gradient(circle,#000 10%,transparent 55%);opacity:0;animation:fade 2s .4s forwards,girar 60s linear infinite}
+svg.ramas{position:absolute;inset:0}
+.ramas path{fill:none;stroke:#8fa37a;stroke-width:2;stroke-dasharray:900;stroke-dashoffset:900;animation:trazo 2.4s cubic-bezier(.6,0,.3,1) forwards}
+.ramas ellipse{fill:#a9bb93;opacity:0;animation:fade .6s forwards}
+svg.caliz{position:absolute;left:50%;top:190px;width:170px;margin-left:-85px;opacity:0;animation:entra 1.4s .9s forwards}
+.t1{top:430px;font:600 17px Montserrat;letter-spacing:.42em;padding-left:.42em;color:#a08a55;animation-delay:1.4s}
+.nom{top:460px;font:400 120px/1.1 Allura;color:#4b5a3e;animation-delay:1.8s}
+.frase{top:610px;font:italic 400 24px/1.4 Cormorant;color:#6f7d61;animation-delay:2.3s}
+.datos{top:720px;font:600 15px/2 Montserrat;letter-spacing:.25em;color:#5d6b4f;animation-delay:2.7s}
+.datos b{font:500 34px Cormorant;letter-spacing:.05em;display:block;color:#4b5a3e}
+.demo{color:#8a8a70}
+</style></head><body>
+<div class="card">
+ <div class="rayos"></div>
+ <svg class="ramas" viewBox="0 0 540 960">
+  <path d="M-10 120 C80 140 150 90 210 30"/><path d="M550 840 C460 820 390 870 330 930"/>
+  <g id="hojas"></g>
+ </svg>
+ <svg class="caliz" viewBox="0 0 170 220"><defs><linearGradient id="dor" x1="0" x2="1"><stop offset="0" stop-color="#b8954a"/><stop offset=".5" stop-color="#f1dca0"/><stop offset="1" stop-color="#b8954a"/></linearGradient></defs><circle cx="85" cy="44" r="30" fill="#fffaf0" stroke="url(#dor)" stroke-width="3"/><path d="M85 28 V60 M70 44 H100" stroke="#c9ad6a" stroke-width="3"/><path d="M38 90 H132 C130 130 110 150 85 152 C60 150 40 130 38 90Z" fill="url(#dor)"/><path d="M85 152 V190 M58 200 H112 L104 190 H66Z" stroke="url(#dor)" stroke-width="6" fill="url(#dor)"/></svg>
+ <p class="ctr in t1">MI PRIMERA COMUNIÓN</p>
+ <p class="ctr in nom">Sofía</p>
+ <p class="ctr in frase">“Dejad que los niños vengan a mí”</p>
+ <div class="ctr in datos"><b>Domingo 16 de mayo · 10 h</b>PARROQUIA DE EJEMPLO<br>CELEBRAMOS JUNTOS DESPUÉS</div>
+ <p class="demo">DEMO · DATOS FICTICIOS</p>
+</div>
+<script src="escala.js"></script>
+<script>const g=document.getElementById('hojas');let h='';const add=(x,y,a,d)=>h+=`<ellipse cx="${x}" cy="${y}" rx="16" ry="6" transform="rotate(${a} ${x} ${y})" style="animation-delay:${d}s"/>`;
+[[40,128,-30],[90,118,30],[130,96,-20],[170,64,40],[195,40,-10]].forEach((p,i)=>add(p[0],p[1],p[2],.6+i*.25));
+[[500,832,-30],[450,842,30],[410,864,-20],[370,896,40],[345,920,-10]].forEach((p,i)=>add(p[0],p[1],p[2],.6+i*.25));g.innerHTML=h;</script>
+</body></html>

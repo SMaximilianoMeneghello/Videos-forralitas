@@ -1,0 +1,1 @@
+(() => { const card = document.querySelector('.card'); const aj = () => { card.style.transform = `scale(${Math.min(innerWidth / 540, innerHeight / 960)})`; }; aj(); addEventListener('resize', aj); })();

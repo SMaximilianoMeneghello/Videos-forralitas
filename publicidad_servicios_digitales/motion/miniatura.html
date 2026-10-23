@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Miniatura y laterales</title>
+<style>
+@font-face{font-family:Unbounded;src:url(../web/_fuentes/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Mono;src:url(../web/_fuentes/JetBrainsMono.ttf);font-weight:100 800}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#04050a;color:#f4f6ff;font-family:"Inter Display",Inter,sans-serif;overflow:hidden}
+.grad{background:linear-gradient(100deg,#4fa3ff,#2f6bff 35%,#7b3cff 70%,#b07bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.t{font-family:Unbounded;font-weight:800;line-height:1;letter-spacing:-.02em}
+.fondo{position:absolute;inset:0;background:radial-gradient(60% 40% at 30% 25%,rgba(47,107,255,.45),transparent 70%),radial-gradient(60% 40% at 75% 75%,rgba(123,60,255,.45),transparent 70%),#04050a}
+.marco{position:absolute;border-radius:28px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.14),0 40px 100px rgba(0,0,0,.75)}
+.marco img{width:100%;height:100%;object-fit:cover;display:block}
+.tel{position:absolute;border-radius:52px;padding:12px;background:linear-gradient(145deg,#3a3d4a,#0b0c10 30%,#1d1f27 70%,#4a4e5c);box-shadow:0 50px 120px rgba(0,0,0,.75)}
+.tel img{width:100%;height:100%;object-fit:cover;border-radius:40px;display:block}
+.chip{display:inline-flex;align-items:center;gap:14px;padding:16px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(160,190,255,.35);font:800 30px "Inter Display";letter-spacing:.04em}
+.wa{display:inline-flex;align-items:center;gap:18px;font:900 64px "Inter Display"}
+.wa svg{width:80px;height:80px}
+.lat{position:absolute;top:0;bottom:0;width:656px;display:flex;flex-direction:column;justify-content:center;padding:0 60px;gap:26px}
+.fila{display:flex;align-items:center;gap:18px;font:800 32px "Inter Display";letter-spacing:.02em}
+.fila i{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#2f6bff,#7b3cff);display:grid;place-items:center;font-style:normal;font-size:28px;flex:none}
+</style></head>
+<body>
+<script>
+const modo = location.hash.slice(1) || 'vertical';
+const WA = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#25d366"/><path d="M50 20a29 29 0 0 0-25 43.7L21 79l16-4.2A29 29 0 1 0 50 20z" fill="none" stroke="#fff" stroke-width="5.5" stroke-linejoin="round"/><path d="M39 35c-1.5 0-3 1.5-3 4 0 6 8 17 18 20 3 1 5 0 6-2l1-3-6-3-3 3c-4-2-7-5-9-9l3-3-3-6z" fill="#fff"/></svg>';
+const B = '../build';
+if (modo === 'vertical') {
+  document.body.style.cssText += 'width:1080px;height:1920px';
+  document.body.innerHTML = `<div class="fondo"></div>
+  <div style="position:absolute;top:150px;width:100%;text-align:center"><div class="t" style="font-size:110px">TUS IDEAS</div><div class="t" style="font-size:84px;margin-top:10px">MERECEN ALGO</div><div class="t grad" style="font-size:80px;margin-top:10px">EXTRAORDINARIO</div></div>
+  <div class="marco" style="left:70px;top:600px;width:420px;height:747px;transform:rotate(-6deg)"><img src="${B}/demo/f0185.jpg"></div>
+  <div class="tel" style="left:620px;top:560px;width:380px;height:810px;transform:rotate(6deg)"><img src="${B}/cap/invitacion15_movil/f00170.jpg"></div>
+  <div class="marco" style="left:200px;top:1100px;width:680px;height:470px;border-radius:20px"><img src="${B}/cap/brasa_desktop/f00090.jpg"></div>
+  <div style="position:absolute;top:1620px;width:100%;text-align:center"><span class="chip">EDICIÓN · INVITACIONES · PÁGINAS WEB</span></div>
+  <div style="position:absolute;top:1740px;width:100%;text-align:center"><span class="wa">${WA}+54 9 381 585 9396</span></div>`;
+} else if (modo === 'horizontal') {
+  document.body.style.cssText += 'width:1920px;height:1080px';
+  document.body.innerHTML = `<div class="fondo"></div>
+  <div style="position:absolute;left:90px;top:170px;width:820px"><div class="t" style="font-size:84px">TUS IDEAS</div><div class="t" style="font-size:64px;margin-top:12px">MERECEN ALGO</div><div class="t grad" style="font-size:60px;margin-top:12px">EXTRAORDINARIO</div>
+  <div style="margin-top:50px"><span class="chip">EDICIÓN · INVITACIONES · PÁGINAS WEB</span></div>
+  <div style="margin-top:46px"><span class="wa" style="font-size:58px">${WA}+54 9 381 585 9396</span></div></div>
+  <div class="marco" style="left:1000px;top:120px;width:380px;height:676px;transform:rotate(-5deg)"><img src="${B}/demo/f0185.jpg"></div>
+  <div class="tel" style="left:1440px;top:150px;width:360px;height:770px;transform:rotate(5deg)"><img src="${B}/cap/invitacion15_movil/f00170.jpg"></div>
+  <div class="marco" style="left:1120px;top:640px;width:600px;height:375px;border-radius:18px"><img src="${B}/cap/tienda_desktop/f00120.jpg"></div>`;
+} else {
+  // laterales transparentes para la versión horizontal
+  document.body.style.cssText += 'width:1920px;height:1080px;background:transparent';
+  document.body.innerHTML = `
+  <div class="lat" style="left:0"><div class="t" style="font-size:44px;line-height:1.1">SERVICIOS<br><span class="grad">DIGITALES</span></div>
+   <div class="fila"><i>▶</i>EDICIÓN DE VIDEOS</div><div class="fila"><i>✦</i>INVITACIONES DIGITALES</div><div class="fila"><i>◎</i>INVITACIONES WEB</div><div class="fila"><i>⌘</i>PÁGINAS WEB</div></div>
+  <div class="lat" style="right:0;align-items:flex-start"><div class="t" style="font-size:40px;line-height:1.15">¡PEDÍ TU<br><span class="grad">PRESUPUESTO!</span></div>
+   <div style="display:flex;align-items:center;gap:16px">${WA.replace('<svg', '<svg style="width:72px;height:72px"')}<div><div style="font:600 22px Mono;color:#aab6d8">WHATSAPP</div><div style="font:900 40px 'Inter Display'">+54 9 381 585 9396</div></div></div>
+   <div style="font:600 24px Mono;color:#7fb4ff">wa.me/5493815859396</div></div>`;
+}
+</script>
+</body></html>
