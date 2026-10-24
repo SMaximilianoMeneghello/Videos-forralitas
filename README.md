@@ -18,3 +18,7 @@ El video queda en `videos_salida/publicidad.mp4`.
 Para sumar música poné un `.mp3` en la carpeta y completá `"musica": "musica.mp3"`.
 
 Requiere `ffmpeg` instalado en el sistema.
+
+## 🧠 Presentación interactiva "Tu cerebro te miente"
+
+En la carpeta [`presentacion-cerebro/`](presentacion-cerebro/) hay una presentación web con control remoto desde el celular y un juego tipo Kahoot al final. En su [README](presentacion-cerebro/README.md) explica cómo publicarla y usarla.

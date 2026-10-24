@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#07070d">
+  <title>Control remoto · Tu cerebro te miente</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+  <div class="topbar">
+    <span class="dot" id="dot"></span>
+    <span class="brand" id="brand">🧠 Control remoto</span>
+    <span class="timer" id="timer">00:00</span>
+    <button class="icon-btn" id="mute-btn" title="Sonido">🔊</button>
+  </div>
+
+  <!-- conectando -->
+  <div class="view center-view" id="v-connect">
+    <div class="spinner"></div>
+    <div class="title" style="font-size:22px">Conectando con la netbook…</div>
+    <div class="muted" id="connect-msg">Asegurate de que la presentación esté abierta.</div>
+  </div>
+
+  <!-- PIN -->
+  <div class="view center-view hidden" id="v-pin">
+    <div class="big-emoji">🔐</div>
+    <div class="title" style="font-size:26px">Escribí el PIN</div>
+    <div class="muted">Son los 4 números que se ven en la pantalla grande.</div>
+    <input class="pin-input" id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" placeholder="····">
+    <div class="err" id="pin-err"></div>
+    <button class="btn primary" id="pin-btn" style="width:230px">Conectar</button>
+  </div>
+
+  <!-- diapositivas -->
+  <div class="view hidden" id="v-slides">
+    <div class="cur">
+      <div class="lbl" id="s-num">Diapositiva</div>
+      <div class="t" id="s-title">—</div>
+      <div class="steps" id="s-steps"></div>
+    </div>
+    <div class="notes" id="s-notes"></div>
+    <div class="upnext">Después: <b id="s-next">—</b></div>
+    <div class="nav" id="nav">
+      <button class="prev" id="prev-btn"><span class="arrow">‹</span><span class="sub">ANTERIOR</span></button>
+      <button class="next" id="next-btn"><span class="arrow">›</span><span id="next-sub">SIGUIENTE</span></button>
+    </div>
+    <div class="tools">
+      <button class="btn" id="list-btn">☰ Diapos</button>
+      <button class="btn" id="game-btn">🎮 Juego</button>
+      <button class="btn" id="lite-btn">🪶 Liviano</button>
+    </div>
+  </div>
+
+  <!-- juego -->
+  <div class="view hidden" id="v-game">
+    <div>
+      <div class="g-phase" id="g-phase">Sala de espera</div>
+      <div class="g-q" id="g-q"></div>
+      <div class="g-ok" id="g-ok"></div>
+    </div>
+    <div class="g-stats">
+      <div class="g-stat"><b id="g-players">0</b><span>jugadores</span></div>
+      <div class="g-stat"><b id="g-answered">–</b><span>respondieron</span></div>
+      <div class="g-stat"><b id="g-qnum">–</b><span>pregunta</span></div>
+    </div>
+    <button class="g-main" id="g-main">Esperando jugadores…</button>
+    <div class="g-tools">
+      <button class="btn" id="share-btn">📲 Compartir enlace</button>
+      <button class="btn" id="reset-btn">🔁 Jugar de nuevo</button>
+    </div>
+    <div class="plist" id="plist"></div>
+    <button class="btn" id="back-btn">↩ Volver a la presentación</button>
+  </div>
+
+  <!-- lista de diapositivas -->
+  <div class="sheet hidden" id="sheet"><div class="sheet-in"><h3>Ir a la diapositiva…</h3><div id="sheet-list"></div></div></div>
+
+  <script src="js/vendor/peerjs.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/net.js"></script>
+  <script src="js/remote.js"></script>
+</body>
+</html>
