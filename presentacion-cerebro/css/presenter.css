@@ -63,7 +63,7 @@ body.lite.glitching #slides { filter: none; }
 .kicker { font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: 0.38em; text-transform: uppercase; color: var(--accent2); display: inline-flex; align-items: center; gap: 16px; margin-bottom: 18px; }
 .kicker::before, .center .kicker::after { content: ""; width: 46px; height: 2px; background: currentColor; opacity: 0.7; }
 .h-xl { font-family: var(--display); font-size: 150px; line-height: 0.92; font-weight: 700; letter-spacing: -0.035em; margin: 0; }
-.h-xl.huge { font-size: 132px; }
+.h-xl.huge { font-size: 112px; }
 .h-l { font-family: var(--display); font-size: 88px; line-height: 1; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 10px; }
 .h-m { font-family: var(--display); font-size: 70px; line-height: 1.02; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 10px; }
 .lead { font-size: 34px; line-height: 1.35; color: var(--muted); margin: 18px 0 0; max-width: 1100px; }

@@ -73,7 +73,7 @@
     walk(el);
   }
 
-  function fmt(n) { return Math.round(n).toLocaleString("es-AR"); }
+  function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
 
   function runCounters(scope, delay, tweens) {
     const list = scope.matches && scope.matches("[data-count]") ? [scope] : [];
@@ -394,12 +394,12 @@
   function setConn(state, extra) {
     const c = $("#conn");
     c.dataset.state = state;
-    const labels = { connecting: "Conectando…", ready: "En línea", reconnecting: "Reconectando…", retrying: "Preparando sala…", error: "Sin conexión" };
+    const labels = { connecting: "Connecting…", ready: "Online", reconnecting: "Reconnecting…", retrying: "Preparing room…", error: "Offline" };
     $("#conn .lbl").textContent = (labels[state] || state) + (remotes.size ? " · 📱" : "");
     const st = $("#start-net");
     if (st) {
-      if (state === "ready") st.innerHTML = remotes.size ? "✅ <b>Control conectado</b>" : "Escaneá el QR con tu celular";
-      else if (state === "error") st.innerHTML = "⚠️ " + ((extra && extra.message) || "No se pudo conectar. Revisá el wifi.") + "<br><small>Podés seguir con el teclado (flechas).</small>";
+      if (state === "ready") st.innerHTML = remotes.size ? "✅ <b>Remote connected</b>" : "Scan the QR code with your phone";
+      else if (state === "error") st.innerHTML = "⚠️ " + ((extra && extra.message) || "Could not connect. Check the wifi.") + "<br><small>You can still use the arrow keys.</small>";
       else st.textContent = labels[state] || state;
     }
     if (extra && extra.room && extra.room !== room) { room = extra.room; store.set("room", room); renderPairing(); }
@@ -413,7 +413,7 @@
     onClose(cid, role) {
       if (remotes.has(cid)) {
         remotes.delete(cid);
-        if (!remotes.size) toast("📱 Control desconectado");
+        if (!remotes.size) toast("📱 Remote disconnected");
         setConn($("#conn").dataset.state || "ready");
       }
       if (role === "player") GAME.playerClosed(cid);
@@ -444,7 +444,7 @@
       closePair();
       SFX.shimmer();
     }
-    if (wasEmpty) toast("📱 <b>Control remoto conectado</b>");
+    if (wasEmpty) toast("📱 <b>Remote connected</b>");
     setConn("ready");
     sendState();
   }
@@ -530,11 +530,11 @@
   }
 
   // Pantalla de inicio
-  $("#name-input").value = store.get("name", CFG.presentador === "Tu nombre" ? "" : CFG.presentador);
+  $("#name-input").value = store.get("name", CFG.presentador === "Your name" ? "" : CFG.presentador);
   const savedSlide = store.get("slide", 0);
   if (savedSlide > 0 && savedSlide < N) {
     $("#resume-box").style.display = "flex";
-    $("#resume-lbl").textContent = `Seguir desde la diapositiva ${savedSlide + 1}`;
+    $("#resume-lbl").textContent = `Continue from slide ${savedSlide + 1}`;
   }
   $("#start-btn").addEventListener("click", () => begin(true));
   $("#name-input").addEventListener("keydown", (e) => { if (e.key === "Enter") begin(true); e.stopPropagation(); });
@@ -547,8 +547,8 @@
     if (["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"].includes(k)) { e.preventDefault(); if (!started) begin(true); else next(); }
     else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(k)) { e.preventDefault(); prev(); }
     else if (k === "f" || k === "F") fullscreen();
-    else if (k === "m" || k === "M") { SFX.init(); SFX.toggleMute(); toast(SFX.muted ? "🔇 Sonido apagado" : "🔊 Sonido encendido"); sendState(); }
-    else if (k === "l" || k === "L") { setLite(!lite); toast(lite ? "🪶 Modo liviano activado" : "✨ Efectos completos"); sendState(); }
+    else if (k === "m" || k === "M") { SFX.init(); SFX.toggleMute(); toast(SFX.muted ? "🔇 Sound off" : "🔊 Sound on"); sendState(); }
+    else if (k === "l" || k === "L") { setLite(!lite); toast(lite ? "🪶 Light mode on" : "✨ Full effects"); sendState(); }
     else if (k === "p" || k === "P") { $("#pair").classList.contains("show") ? closePair() : openPair(); }
     else if (k === "g" || k === "G") { if (started) GAME.active ? GAME.close() : GAME.open(); }
     else if (k === "Escape") closePair();

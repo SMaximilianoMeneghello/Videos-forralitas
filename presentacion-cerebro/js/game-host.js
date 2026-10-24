@@ -74,9 +74,9 @@
     if (m.t === "join") {
       if (!active) { P.net.send(cid, { t: "p", phase: "closed" }); return; }
       let name = String(m.name || "").replace(/\s+/g, " ").trim().slice(0, 15);
-      if (!name) { P.net.send(cid, { t: "joinError", error: "Escribí un nombre" }); return; }
+      if (!name) { P.net.send(cid, { t: "joinError", error: "Type a name" }); return; }
       const taken = Array.from(players.values()).some((p) => p.pid !== m.pid && p.name.toLowerCase() === name.toLowerCase());
-      if (taken) { P.net.send(cid, { t: "joinError", error: "Ese nombre ya está en uso" }); return; }
+      if (taken) { P.net.send(cid, { t: "joinError", error: "That name is already taken" }); return; }
       let p = players.get(m.pid);
       if (!p) {
         p = { pid: m.pid, name, score: 0, streak: 0, cid, connected: true, last: null };
@@ -131,23 +131,23 @@
     const el = screen(`
       <div class="lobby">
         <div class="lobby-left">
-          <div class="kicker g-in">El juego final</div>
-          <h1 class="g-title g-in" data-letters>¿QUIÉN TIENE EL<br><span class="accent">CEREBRO MÁS RÁPIDO?</span></h1>
+          <div class="kicker g-in">The final game</div>
+          <h1 class="g-title g-in" data-letters>WHO HAS THE<br><span class="accent">FASTEST BRAIN?</span></h1>
           <ol class="lobby-steps g-in">
-            <li><b>1</b> Escaneá el QR con el celu</li>
-            <li><b>2</b> Escribí tu nombre</li>
-            <li><b>3</b> Mirá la pantalla y respondé rápido</li>
+            <li><b>1</b> Scan the QR code with your phone</li>
+            <li><b>2</b> Type your name</li>
+            <li><b>3</b> Look at the screen and answer fast</li>
           </ol>
-          <div class="lobby-rules g-in">⏱ ${SECS} segundos por pregunta · ⚡ más rápido = más puntos · 🔥 rachas suman extra</div>
+          <div class="lobby-rules g-in">⏱ ${SECS} seconds per question · ⚡ faster = more points · 🔥 streaks give bonus points</div>
         </div>
         <div class="lobby-right g-in">
           <div class="qr-card"><div class="join-qr"></div></div>
-          <div class="join-code">Código <b class="room-code"></b></div>
+          <div class="join-code">Code <b class="room-code"></b></div>
           <div class="join-url"></div>
         </div>
       </div>
       <div class="lobby-bottom">
-        <div class="lobby-count"><span class="num">0</span> jugadores</div>
+        <div class="lobby-count"><span class="num">0</span> players</div>
         <div class="lobby-names"></div>
       </div>`, "g-lobby");
     refreshJoin();
@@ -202,7 +202,7 @@
   }
 
   function startGame() {
-    if (!players.size) { P.toast("⏳ Todavía no entró ningún jugador"); return; }
+    if (!players.size) { P.toast("⏳ No players yet"); return; }
     players.forEach((p) => { p.score = 0; p.streak = 0; p.last = null; });
     qi = -1;
     nextQuestion();
@@ -218,7 +218,7 @@
     const el = screen(`
       <div class="q-intro">
         <div class="qi-ring"></div>
-        <div class="qi-label">Pregunta</div>
+        <div class="qi-label">Question</div>
         <div class="qi-num"><span>${qi + 1}</span><small>/${Q.length}</small></div>
         <div class="qi-q">${esc(Q[qi].q)}</div>
       </div>`, "g-intro");
@@ -244,7 +244,7 @@
           <div class="t-num">${SECS}</div>
         </div>
         <div class="q-brain">🧠</div>
-        <div class="q-answered"><span class="num">0</span><small>respuestas</small></div>
+        <div class="q-answered"><span class="num">0</span><small>answers</small></div>
       </div>
       <div class="q-grid">
         ${q.a.map((t, i) => `<div class="q-opt" style="--c:${COLORS[i]}"><span class="shape">${SHAPES[i]}</span><span class="txt">${esc(t)}</span></div>`).join("")}
@@ -352,8 +352,8 @@
     const last = qi >= Q.length - 1;
     const el = screen(`
       <div class="board">
-        <div class="kicker">Después de la pregunta ${qi + 1} de ${Q.length}</div>
-        <h1 class="g-title small">🏆 Ranking</h1>
+        <div class="kicker">After question ${qi + 1} of ${Q.length}</div>
+        <h1 class="g-title small">🏆 Leaderboard</h1>
         <div class="b-list">
           ${top.map((p, i) => `
             <div class="b-row ${i === 0 ? "first" : ""}">
@@ -363,12 +363,12 @@
               <div class="b-score" data-to="${p.score}">${p.score - ((p.last && p.last.points) || 0)}</div>
             </div>`).join("")}
         </div>
-        <div class="b-hint">${last ? "Se viene el PODIO…" : "Prepárense para la siguiente…"}</div>
+        <div class="b-hint">${last ? "Here comes the PODIUM…" : "Get ready for the next one…"}</div>
       </div>`, "g-board");
     gsap.fromTo(el.querySelectorAll(".b-row"), { x: -200, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.12, duration: 0.9, ease: "expo.out", delay: 0.2 });
     el.querySelectorAll(".b-score").forEach((s) => {
       const o = { v: parseInt(s.textContent, 10) };
-      gsap.to(o, { v: parseInt(s.dataset.to, 10), duration: 1.6, delay: 0.8, ease: "power2.out", onUpdate: () => (s.textContent = Math.round(o.v).toLocaleString("es-AR")) });
+      gsap.to(o, { v: parseInt(s.dataset.to, 10), duration: 1.6, delay: 0.8, ease: "power2.out", onUpdate: () => (s.textContent = Math.round(o.v).toLocaleString("en-US")) });
     });
     gsap.fromTo(el.querySelector(".g-title"), { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(2)" });
     SFX.whoosh(0.8);
@@ -386,14 +386,14 @@
     const p1 = r[0], p2 = r[1], p3 = r[2];
     const col = (p, place) => p ? `
       <div class="pod p${place}">
-        <div class="pod-who"><div class="pod-medal">${["🥇", "🥈", "🥉"][place - 1]}</div><div class="pod-name">${esc(p.name)}</div><div class="pod-score">${p.score.toLocaleString("es-AR")} pts</div></div>
+        <div class="pod-who"><div class="pod-medal">${["🥇", "🥈", "🥉"][place - 1]}</div><div class="pod-name">${esc(p.name)}</div><div class="pod-score">${p.score.toLocaleString("en-US")} pts</div></div>
         <div class="pod-block"><span>${place}</span></div>
       </div>` : `<div class="pod p${place} empty"><div class="pod-block"><span>${place}</span></div></div>`;
     const el = screen(`
       <div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div>
-      <div class="pod-title">Y los cerebros más rápidos son…</div>
+      <div class="pod-title">And the fastest brains are…</div>
       <div class="podium">${col(p2, 2)}${col(p1, 1)}${col(p3, 3)}</div>
-      <div class="rest">${r.slice(3, 12).map((p, i) => `<div class="rest-row"><b>${i + 4}</b><span>${esc(p.name)}</span><i>${p.score.toLocaleString("es-AR")}</i></div>`).join("")}</div>`, "g-podium");
+      <div class="rest">${r.slice(3, 12).map((p, i) => `<div class="rest-row"><b>${i + 4}</b><span>${esc(p.name)}</span><i>${p.score.toLocaleString("en-US")}</i></div>`).join("")}</div>`, "g-podium");
     gsap.set(el.querySelectorAll(".pod"), { opacity: 0 });
     gsap.fromTo(el.querySelector(".pod-title"), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 1.2, ease: "expo.out" });
     gsap.fromTo(el.querySelectorAll(".spot"), { opacity: 0 }, { opacity: 0.6, duration: 2, stagger: 0.3 });

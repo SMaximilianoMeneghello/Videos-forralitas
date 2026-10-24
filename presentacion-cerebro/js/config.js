@@ -3,7 +3,7 @@
 // ============================================================
 window.CONFIG = {
   // Tu nombre (también se puede escribir en la pantalla de inicio)
-  presentador: "Tu nombre",
+  presentador: "Your name",
   // Materia / curso (aparece chiquito en la portada; dejalo vacío si no querés)
   materia: "",
   // Segundos para responder cada pregunta del juego

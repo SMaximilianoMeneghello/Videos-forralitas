@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tu cerebro te miente</title>
-  <meta name="description" content="Exposición interactiva sobre ilusiones ópticas y trucos de la mente, con juego final tipo Kahoot.">
+  <title>Your brain is lying to you</title>
+  <meta name="description" content="Interactive presentation about optical illusions and mind tricks, with a Kahoot-style final game.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
   <div id="hud">
     <div id="progress"><i></i></div>
     <div id="counter"></div>
-    <div id="conn" data-state="connecting"><span class="dot"></span><span class="lbl">Conectando…</span></div>
+    <div id="conn" data-state="connecting"><span class="dot"></span><span class="lbl">Connecting…</span></div>
   </div>
   <div id="toasts"></div>
 
@@ -40,26 +40,26 @@
   <div id="start">
     <div class="st-grid">
       <div>
-        <div class="kicker st-anim">Exposición interactiva</div>
-        <h1 class="st-brand st-anim">Tu cerebro<br><span class="accent">te miente</span></h1>
-        <p class="st-sub st-anim">Conectá tu celular como control remoto escaneando el QR. Después tocá <b>COMENZAR</b> (se pone en pantalla completa).</p>
+        <div class="kicker st-anim">Interactive presentation</div>
+        <h1 class="st-brand st-anim">Your brain<br><span class="accent">is lying to you</span></h1>
+        <p class="st-sub st-anim">Scan the QR code to use your phone as a remote. Then press <b>START</b> (it goes full screen).</p>
         <div class="st-field st-anim">
-          <label for="name-input">Tu nombre (aparece en la portada)</label>
-          <input id="name-input" type="text" maxlength="40" placeholder="Ej: Maxi Meneghello" autocomplete="off">
+          <label for="name-input">Your name (shown on the cover)</label>
+          <input id="name-input" type="text" maxlength="40" placeholder="e.g. Maxi Meneghello" autocomplete="off">
         </div>
         <label id="resume-box" class="st-anim"><input type="checkbox" id="resume"> <span id="resume-lbl"></span></label>
-        <button id="start-btn" class="st-anim">▶ COMENZAR PRESENTACIÓN</button>
+        <button id="start-btn" class="st-anim">▶ START PRESENTATION</button>
         <div class="st-keys st-anim">
-          <kbd>→</kbd> / <kbd>Espacio</kbd> siguiente &nbsp; <kbd>←</kbd> anterior &nbsp; <kbd>F</kbd> pantalla completa &nbsp; <kbd>M</kbd> sonido<br>
-          <kbd>L</kbd> modo liviano (si la netbook va lenta) &nbsp; <kbd>P</kbd> volver a conectar el celular &nbsp; <kbd>G</kbd> abrir/cerrar juego
+          <kbd>→</kbd> / <kbd>Space</kbd> next &nbsp; <kbd>←</kbd> back &nbsp; <kbd>F</kbd> full screen &nbsp; <kbd>M</kbd> sound<br>
+          <kbd>L</kbd> light mode (if the computer is slow) &nbsp; <kbd>P</kbd> connect the phone again &nbsp; <kbd>G</kbd> open/close the game
         </div>
       </div>
       <div class="card st-remote st-anim">
-        <h3>📱 Control remoto</h3>
+        <h3>📱 Remote control</h3>
         <div class="remote-qr"></div>
-        <div class="pin-row">PIN del control <span class="pin-code">····</span></div>
+        <div class="pin-row">Remote PIN <span class="pin-code">····</span></div>
         <div class="remote-url"></div>
-        <div id="start-net">Conectando…</div>
+        <div id="start-net">Connecting…</div>
       </div>
     </div>
   </div>
@@ -67,7 +67,7 @@
   <!-- Volver a emparejar (tecla P) -->
   <div id="pair">
     <div class="card st-remote">
-      <h3>📱 Conectar control remoto</h3>
+      <h3>📱 Connect the remote</h3>
       <div class="remote-qr"></div>
       <div class="pin-row">PIN <span class="pin-code">····</span></div>
       <div class="remote-url"></div>

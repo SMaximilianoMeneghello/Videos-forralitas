@@ -132,3 +132,6 @@ input { font: inherit; }
 .final-rank.gold { background: linear-gradient(90deg, #ffe58a, #e0a800); -webkit-background-clip: text; background-clip: text; }
 .top3 { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px; margin-top: 10px; }
 .top3 div { padding: 10px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-weight: 700; text-align: left; }
+.notes .en { font-size: 20px; line-height: 1.45; color: #fff; }
+.notes .es { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 14px; line-height: 1.4; color: var(--muted); }
+.notes::before { content: "🎤 What to say / Qué decir"; }

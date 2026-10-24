@@ -1,5 +1,5 @@
 // ============================================================
-//  PREGUNTAS DEL JUEGO
+//  PREGUNTAS DEL JUEGO (en inglés)
 //  - q: la pregunta
 //  - a: las 4 opciones (en orden: rojo ▲, azul ◆, amarillo ●, verde ■)
 //  - ok: número de la opción correcta (0, 1, 2 o 3)
@@ -7,63 +7,63 @@
 // ============================================================
 window.QUESTIONS = [
   {
-    q: "¿Por qué tenemos un “punto ciego” en cada ojo?",
-    a: ["Porque el párpado lo tapa", "Porque ahí sale el nervio óptico y no hay receptores", "Porque es una zona lastimada", "Porque solo pasa de noche"],
+    q: "Why do we have a “blind spot” in each eye?",
+    a: ["Because the eyelid covers it", "Because the optic nerve leaves the eye there and there are no receptors", "Because it’s an injured area", "Because it only happens at night"],
     ok: 1,
   },
   {
-    q: "En la ilusión de las flechas (Müller-Lyer), ¿cómo eran las dos líneas?",
-    a: ["Exactamente iguales", "Una era el doble de larga", "La A era más larga", "La B era más larga"],
+    q: "In the arrows illusion (Müller-Lyer), how long were the two lines?",
+    a: ["Exactly the same", "One was twice as long", "Line A was longer", "Line B was longer"],
     ok: 0,
   },
   {
-    q: "En el tablero con sombra, las casillas A y B…",
-    a: ["A era más clara", "B era más oscura", "Cambiaban de color", "Eran del mismo color"],
+    q: "On the checkerboard with the shadow, squares A and B were…",
+    a: ["A was lighter", "B was darker", "They changed color", "The same color"],
     ok: 3,
   },
   {
-    q: "¿De qué color era en realidad “el vestido” de 2015?",
-    a: ["Blanco y dorado", "Verde y gris", "Azul y negro", "Rosa y blanco"],
+    q: "What color was “the dress” from 2015 in real life?",
+    a: ["White and gold", "Green and gray", "Blue and black", "Pink and white"],
     ok: 2,
   },
   {
-    q: "¿Qué porcentaje de la energía del cuerpo consume el cerebro, más o menos?",
-    a: ["2 %", "5 %", "50 %", "20 %"],
+    q: "About how much of your body’s energy does your brain use?",
+    a: ["2%", "5%", "50%", "20%"],
     ok: 3,
   },
   {
-    q: "¿Cómo llega la imagen a la retina?",
-    a: ["Tal cual la vemos", "Invertida (al revés)", "En blanco y negro", "Partida en dos"],
+    q: "How does the image arrive at the retina?",
+    a: ["Exactly as we see it", "Upside down", "In black and white", "Split in two"],
     ok: 1,
   },
   {
-    q: "En el juego de los colores (efecto Stroop), ¿qué era lo difícil?",
-    a: ["Decir el color de la letra y no la palabra", "Leer palabras largas", "Recordar los colores", "Leer en otro idioma"],
+    q: "In the color words game (the Stroop effect), what was difficult?",
+    a: ["Saying the color of the letters, not the word", "Reading long words", "Remembering the colors", "Reading in another language"],
     ok: 0,
   },
   {
-    q: "¿Cómo se llama ver caras en objetos como enchufes o autos?",
-    a: ["Hipnosis", "Efecto Mandela", "Daltonismo", "Pareidolia"],
+    q: "What do we call seeing faces in objects like outlets or cars?",
+    a: ["Hypnosis", "The Mandela effect", "Color blindness", "Pareidolia"],
     ok: 3,
   },
   {
-    q: "En el desafío del gorila, ¿qué tenían que hacer?",
-    a: ["Cerrar los ojos", "Mirar el celular", "Contar los pases del equipo blanco", "Buscar al gorila"],
+    q: "In the gorilla challenge, what did you have to do?",
+    a: ["Close your eyes", "Look at your phone", "Count the passes of the white team", "Find the gorilla"],
     ok: 2,
   },
   {
-    q: "¿Qué es el “efecto Mandela”?",
-    a: ["Ver colores que no existen", "Que mucha gente recuerde lo mismo de forma equivocada", "Escuchar palabras distintas en un audio", "No ver algo que cambia"],
+    q: "What is the “Mandela effect”?",
+    a: ["Seeing colors that don’t exist", "When lots of people remember the same thing wrong", "Hearing different words in the same audio", "Not seeing something that changes"],
     ok: 1,
   },
   {
-    q: "¿Pikachu tiene la punta de la cola negra?",
-    a: ["Sí, siempre la tuvo", "Solo en las películas", "No, nunca la tuvo", "Solo en los videojuegos"],
+    q: "Does Pikachu have a black tip on its tail?",
+    a: ["Yes, it always did", "Only in the movies", "No, it never did", "Only in the video games"],
     ok: 2,
   },
   {
-    q: "Según la exposición, tu cerebro funciona más como…",
-    a: ["Una máquina de predicciones", "Una cámara de fotos", "Un disco duro", "Una calculadora"],
+    q: "According to the presentation, your brain works more like…",
+    a: ["A prediction machine", "A photo camera", "A hard drive", "A calculator"],
     ok: 0,
   },
 ];

@@ -27,6 +27,8 @@
   let qTimer = null;
   let last = null;
 
+  // 1 -> 1st, 2 -> 2nd, 3 -> 3rd, 4 -> 4th…
+  const ordinal = (n) => { const t = n % 100; return n + (t >= 11 && t <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th"); };
   const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
   function set(key, html) {
@@ -42,7 +44,7 @@
   }
 
   if (!room) {
-    set("noroom", `<div class="big-emoji">🤔</div><div class="title" style="font-size:24px">Falta el código del juego</div><div class="muted">Escaneá el QR de la pantalla grande o pedí el enlace.</div>`);
+    set("noroom", `<div class="big-emoji">🤔</div><div class="title" style="font-size:24px">The game code is missing</div><div class="muted">Scan the QR code on the big screen or ask for the link.</div>`);
     return;
   }
 
@@ -50,14 +52,14 @@
     room, role: "player",
     onStatus(s) {
       $("#dot").className = "dot" + (s === "connected" ? " on" : s === "error" ? " off" : "");
-      if (s === "nohost" && !joined) set("nohost", `<div class="spinner"></div><div class="title" style="font-size:22px">Buscando el juego…</div><div class="muted">Puede que la presentación todavía no esté abierta. Reintentando solo.</div>`);
+      if (s === "nohost" && !joined) set("nohost", `<div class="spinner"></div><div class="title" style="font-size:22px">Looking for the game…</div><div class="muted">The presentation may not be open yet. Trying again automatically.</div>`);
     },
     onOpen() { link.send({ t: "hello", role: "player", pid }); },
     onClose() {
-      if (joined) $("#brand").textContent = "🔄 Reconectando…";
+      if (joined) $("#brand").textContent = "🔄 Reconnecting…";
     },
     onMessage(m) {
-      $("#brand").textContent = "🧠 Tu cerebro te miente";
+      $("#brand").textContent = "🧠 Your brain is lying to you";
       if (m.t === "p") handle(m);
       else if (m.t === "joined") { joined = true; myName = m.name; ls.set("tcm.name", m.name); }
       else if (m.t === "joinError") {
@@ -66,7 +68,7 @@
         buzz(150);
       } else if (m.t === "kicked") {
         joined = false;
-        set("kicked", `<div class="big-emoji">🚫</div><div class="title" style="font-size:24px">Te sacaron del juego</div><div class="muted">Si fue un error, avisale a quien presenta.</div>`);
+        set("kicked", `<div class="big-emoji">🚫</div><div class="title" style="font-size:24px">You were removed from the game</div><div class="muted">If it was a mistake, tell the presenter.</div>`);
         ls.set(PID_KEY, NET.uid());
       }
     },
@@ -75,16 +77,16 @@
   function nameForm() {
     if (!set("name", `
       <div class="big-emoji">🧠</div>
-      <div class="title" style="font-size:30px">¿Quién tiene el cerebro más rápido?</div>
-      <div class="muted">Escribí tu nombre para entrar</div>
+      <div class="title" style="font-size:30px">Who has the fastest brain?</div>
+      <div class="muted">Type your name to join</div>
       <div class="p-form">
-        <input class="p-name" id="name" maxlength="15" placeholder="Tu nombre" autocomplete="off" enterkeyhint="go" value="${esc(myName)}">
+        <input class="p-name" id="name" maxlength="15" placeholder="Your name" autocomplete="off" enterkeyhint="go" value="${esc(myName)}">
         <div class="err" id="join-err"></div>
-        <button class="btn primary" id="join-btn">¡ENTRAR! 🚀</button>
+        <button class="btn primary" id="join-btn">JOIN! 🚀</button>
       </div>`)) return;
     const go = () => {
       const v = $("#name").value.trim();
-      if (!v) { $("#join-err").textContent = "Escribí un nombre"; return; }
+      if (!v) { $("#join-err").textContent = "Type a name"; return; }
       $("#join-btn").disabled = true;
       link.send({ t: "join", pid, name: v });
     };
@@ -96,12 +98,12 @@
     if (m.score !== undefined && m.name) {
       const sc = $("#score");
       sc.classList.remove("hidden");
-      sc.textContent = `${m.score.toLocaleString("es-AR")} pts`;
+      sc.textContent = `${m.score.toLocaleString("en-US")} pts`;
     }
     switch (m.phase) {
       case "closed":
         joined = false;
-        set("closed", `<div class="big-emoji">⏳</div><div class="title" style="font-size:24px">El juego todavía no empezó</div><div class="muted">Cuando termine la exposición se abre la sala. Dejá esta página abierta: entra sola.</div>`);
+        set("closed", `<div class="big-emoji">⏳</div><div class="title" style="font-size:24px">The game hasn’t started yet</div><div class="muted">The game room opens when the presentation ends. Keep this page open: you’ll get in automatically.</div>`);
         // vuelve a preguntar cada tanto
         setTimeout(() => { if (view === "closed") link.send({ t: "hello", role: "player", pid }); }, 4000);
         break;
@@ -110,20 +112,20 @@
         joined = true;
         set("lobby", `
           <div class="big-emoji">✅</div>
-          <div class="p-hello">¡Ya estás adentro!</div>
+          <div class="p-hello">You’re in!</div>
           <div class="p-chip">${esc(m.name)}</div>
-          <div class="muted" style="margin-top:10px">Mirá la pantalla grande.<br>El juego empieza en un ratito…</div>
-          <div class="muted" style="font-size:13px;margin-top:18px">💡 Más rápido respondés, más puntos ganás</div>`);
+          <div class="muted" style="margin-top:10px">Look at the big screen.<br>The game starts soon…</div>
+          <div class="muted" style="font-size:13px;margin-top:18px">💡 The faster you answer, the more points you get</div>`);
         break;
       case "intro":
         if (set("intro" + m.qi, `
-          <div class="p-qnum">Pregunta ${m.qi + 1} de ${m.total}</div>
-          <div class="title" style="font-size:44px">¡Preparate!</div>
+          <div class="p-qnum">Question ${m.qi + 1} of ${m.total}</div>
+          <div class="title" style="font-size:44px">Get ready!</div>
           <div class="spinner"></div>`)) buzz(30);
         break;
       case "question":
         if (m.answered) {
-          set("answered" + m.qi, `<div class="big-emoji">🚀</div><div class="title" style="font-size:28px">¡Respuesta enviada!</div><div class="muted">Esperá a que termine el tiempo…</div>`);
+          set("answered" + m.qi, `<div class="big-emoji">🚀</div><div class="title" style="font-size:28px">Answer sent!</div><div class="muted">Wait for the time to run out…</div>`);
         } else question(m);
         break;
       case "result": result(m); break;
@@ -133,7 +135,7 @@
 
   function question(m) {
     if (!set("q" + m.qi, `
-      <div class="p-qnum">Pregunta ${m.qi + 1} de ${m.total}</div>
+      <div class="p-qnum">Question ${m.qi + 1} of ${m.total}</div>
       <div class="q-bar" id="qbar"><i></i></div>
       <div class="p-qtext">${esc(m.q)}</div>
       <div class="answers">
@@ -160,15 +162,15 @@
   function result(m) {
     const key = "r" + m.qi;
     const cls = !m.answered ? "none" : m.correct ? "ok" : "bad";
-    const title = !m.answered ? "⏰ ¡Se acabó el tiempo!" : m.correct ? "¡CORRECTO! 🎉" : "Incorrecto 😬";
+    const title = !m.answered ? "⏰ Time’s up!" : m.correct ? "CORRECT! 🎉" : "Wrong 😬";
     if (!set(key, `
       <div class="result ${cls}">
         <div class="big-emoji">${!m.answered ? "⌛" : m.correct ? "✅" : "❌"}</div>
         <div class="r-title">${title}</div>
         <div class="r-pts">+${m.points} pts</div>
-        ${m.streak >= 2 ? `<div class="r-streak">🔥 Racha de ${m.streak}</div>` : ""}
-        <div class="r-rank">Estás en el puesto <b>${m.rank}</b> de ${m.players}</div>
-        ${!m.correct ? `<div class="r-correct">La correcta era: <b>${esc(m.correctText)}</b></div>` : ""}
+        ${m.streak >= 2 ? `<div class="r-streak">🔥 ${m.streak} in a row!</div>` : ""}
+        <div class="r-rank">You are in <b>${ordinal(m.rank)}</b> place (of ${m.players})</div>
+        ${!m.correct ? `<div class="r-correct">The correct answer was: <b>${esc(m.correctText)}</b></div>` : ""}
       </div>`)) return;
     app.className = "view";
     buzz(m.correct ? [40, 60, 40] : 250);
@@ -178,16 +180,16 @@
   function final(m) {
     const key = "final" + (m.revealed ? "1" : "0");
     if (!m.revealed) {
-      set(key, `<div class="big-emoji">🥁</div><div class="title" style="font-size:30px">¡Mirá la pantalla!</div><div class="muted">Se viene el podio…</div>`);
+      set(key, `<div class="big-emoji">🥁</div><div class="title" style="font-size:30px">Look at the screen!</div><div class="muted">Here comes the podium…</div>`);
       return;
     }
     const medal = ["🥇", "🥈", "🥉"][m.rank - 1];
     if (!set(key, `
-      <div class="muted">Terminó el juego</div>
+      <div class="muted">Game over</div>
       <div class="big-emoji">${medal || "🧠"}</div>
-      <div class="final-rank ${m.rank === 1 ? "gold" : ""}">${m.rank}°</div>
-      <div class="title" style="font-size:22px">${m.rank === 1 ? "¡GANASTE! Cerebro supremo 👑" : m.rank <= 3 ? "¡Llegaste al podio!" : `de ${m.players} jugadores`}</div>
-      <div class="p-chip">${m.score.toLocaleString("es-AR")} pts</div>
+      <div class="final-rank ${m.rank === 1 ? "gold" : ""}">${ordinal(m.rank)}</div>
+      <div class="title" style="font-size:22px">${m.rank === 1 ? "YOU WON! Supreme brain 👑" : m.rank <= 3 ? "You made the podium!" : `out of ${m.players} players`}</div>
+      <div class="p-chip">${m.score.toLocaleString("en-US")} pts</div>
       <div class="top3">${m.top.map((n, i) => `<div>${["🥇", "🥈", "🥉"][i]} ${esc(n)}</div>`).join("")}</div>`)) return;
     if (m.rank <= 3 && typeof confetti === "function") {
       buzz([60, 40, 60, 40, 200]);

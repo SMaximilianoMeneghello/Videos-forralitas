@@ -1,10 +1,12 @@
-# 🧠 Tu cerebro te miente
+# 🧠 Your brain is lying to you
 
-Presentación interactiva sobre ilusiones ópticas y trucos de la mente, para una exposición de unos 30 minutos. La controlás desde el celular y al final se juega un juego tipo Kahoot.
+Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la mente, para una exposición de unos 30 minutos. La controlás desde el celular y al final se juega un juego tipo Kahoot.
+
+📘 **Guía de estudio** (guion en inglés con traducción, pronunciación, datos y preguntas): [`guia.html`](guia.html). Publicada en: https://smaximilianomeneghello.github.io/Videos-forralitas/presentacion-cerebro/guia.html
 
 - **20 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido.
 - **9 momentos interactivos**: punto ciego, líneas de Müller-Lyer, tablero de Adelson, el vestido, la bandera fantasma, el efecto Stroop, el desafío del gorila, encontrá la diferencia y el efecto Mandela.
-- **Control remoto en tu celular**: botones grandes, notas de qué decir en cada paso, cronómetro y lista de diapositivas.
+- **Control remoto en tu celular**: botones grandes, qué decir en cada paso (en inglés, con la traducción abajo), cronómetro y lista de diapositivas.
 - **Juego final**: tus compañeros entran con un QR o un enlace, ponen su nombre y responden 12 preguntas con 40 segundos cada una. Hay puntos por velocidad, rachas, ranking y podio con confeti.
 
 ---
@@ -25,12 +27,12 @@ Presentación interactiva sobre ilusiones ópticas y trucos de la mente, para un
 ## 2. El día de la exposición
 
 1. En la netbook abrí el enlace en **Google Chrome**.
-2. Escribí tu nombre (aparece en la portada).
+2. Escribí tu nombre en *Your name* (aparece en la portada).
 3. Con tu celular **escaneá el QR** de la derecha y escribí el **PIN de 4 números**.
-4. En la netbook tocá **▶ COMENZAR PRESENTACIÓN**: se pone en pantalla completa.
+4. En la netbook tocá **▶ START PRESENTATION**: se pone en pantalla completa.
 5. Desde ahí manejás todo con el celular:
    - **SIGUIENTE** avanza. En las diapositivas interactivas cada toque revela la próxima parte.
-   - En la tarjeta **🎤 Qué decir** tenés el texto para cada momento.
+   - En la tarjeta **🎤 What to say** tenés el texto en inglés para cada momento, con la traducción abajo.
    - **☰ Diapos** salta a cualquier diapositiva.
 6. Al terminar la última diapositiva se abre el **juego**:
    - Tocá **📲 Compartir enlace** y mandalo al grupo de WhatsApp, o que escaneen el QR de la pantalla.
@@ -71,7 +73,7 @@ Abrí `index.html?local=1` en una pestaña. Copiá el enlace del control que apa
 |---|---|
 | Tu nombre, la materia, los segundos por pregunta | `js/config.js` |
 | Las preguntas del juego | `js/questions.js` (`ok` es el número de la respuesta correcta: 0, 1, 2 o 3) |
-| Textos y notas de cada diapositiva | `js/slides.js` |
+| Textos y notas de cada diapositiva (`en` = inglés, `es` = traducción) | `js/slides.js` |
 
 ## Créditos
 

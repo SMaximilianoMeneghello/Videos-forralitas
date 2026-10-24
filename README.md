@@ -19,6 +19,6 @@ Para sumar música poné un `.mp3` en la carpeta y completá `"musica": "musica.
 
 Requiere `ffmpeg` instalado en el sistema.
 
-## 🧠 Presentación interactiva "Tu cerebro te miente"
+## 🧠 Presentación interactiva "Your brain is lying to you"
 
-En la carpeta [`presentacion-cerebro/`](presentacion-cerebro/) hay una presentación web con control remoto desde el celular y un juego tipo Kahoot al final. En su [README](presentacion-cerebro/README.md) explica cómo publicarla y usarla.
+En la carpeta [`presentacion-cerebro/`](presentacion-cerebro/) hay una presentación web con control remoto desde el celular y un juego tipo Kahoot al final (en inglés). En su [README](presentacion-cerebro/README.md) explica cómo publicarla y usarla, y la [guía de estudio](presentacion-cerebro/guia.html) tiene el guion completo.

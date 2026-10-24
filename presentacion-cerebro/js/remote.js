@@ -95,7 +95,10 @@
     }
     $("#s-num").textContent = `Diapositiva ${s.i + 1} de ${s.n}`;
     $("#s-title").textContent = s.title;
-    $("#s-notes").textContent = s.notes;
+    // notas: en inglés (lo que decís) + traducción al español abajo
+    const n = s.notes || "";
+    if (typeof n === "string") $("#s-notes").textContent = n;
+    else $("#s-notes").innerHTML = `<div class="en">${esc(n.en)}</div><div class="es">🇦🇷 ${esc(n.es)}</div>`;
     let dots = "";
     for (let k = 1; k <= s.steps; k++) dots += `<i class="${k <= s.step ? "done" : ""}"></i>`;
     $("#s-steps").innerHTML = dots;
@@ -146,9 +149,9 @@
   $("#share-btn").addEventListener("click", async () => {
     if (!state) return;
     const url = state.playUrl;
-    const text = "🧠 ¡Entrá al juego de “Tu cerebro te miente”! Poné tu nombre y esperá:";
+    const text = "🧠 Join the “Your brain is lying to you” game! Type your name and wait:";
     try {
-      if (navigator.share) await navigator.share({ title: "Tu cerebro te miente · Juego", text, url });
+      if (navigator.share) await navigator.share({ title: "Your brain is lying to you · Game", text, url });
       else { await navigator.clipboard.writeText(url); alert("Enlace copiado:\n" + url); }
     } catch (e) {
       // si cancelan el menú de compartir no hacemos nada; si falla, ofrecemos WhatsApp
