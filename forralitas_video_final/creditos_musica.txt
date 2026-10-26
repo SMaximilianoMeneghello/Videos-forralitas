@@ -1,0 +1,31 @@
+CRÉDITOS — Video promocional Forrajería Forralitas
+
+MÚSICA
+"Montauk Point" — Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
+Fuente: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Montauk%20Point.mp3
+Licencias de Incompetech: https://incompetech.com/music/royalty-free/licenses/
+Tramo usado: desde 2:10.17 (aprox. 33 s), con fundido de salida.
+IMPORTANTE: la licencia CC BY 4.0 exige dar crédito. Al publicar, pegá en la descripción del posteo:
+  Música: "Montauk Point" Kevin MacLeod (incompetech.com) — CC BY 4.0
+(Si no querés poner el crédito, Incompetech vende una licencia estándar sin atribución.)
+
+TIPOGRAFÍAS (todas SIL Open Font License 1.1, uso comercial permitido)
+- Anton — Copyright 2020 The Anton Project Authors (Google Fonts)
+- Bebas Neue — Copyright 2019 The Bebas Neue Project Authors (Google Fonts)
+- Montserrat ExtraBold — Copyright 2011 The Montserrat Project Authors (Google Fonts)
+
+LOCUCIÓN
+Voz sintética "es-AR-TomasNeural" (Microsoft Edge TTS, vía la librería edge-tts).
+Ver guion_locucion.txt si preferís grabar tu propia voz.
+
+UPSCALING
+Real-ESRGAN (realesr-general-x4v3), Xintao Wang et al., licencia BSD-3-Clause.
+
+EFECTOS DE SONIDO
+Sintetizados por código (whoosh, impacto, pop); sin material de terceros.
+Sonido ambiente: el de los propios videos de Forralitas.
+
+IMÁGENES
+Todas son fotos y videos propios de Forralitas.
