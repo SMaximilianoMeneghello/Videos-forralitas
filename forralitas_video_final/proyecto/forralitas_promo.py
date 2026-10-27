@@ -564,7 +564,7 @@ def corte_principal():
         ("whip", Toma("bolsa", 4, "calido", ((0.5, 0.55, 1.0), (0.5, 0.5, 1.12)))),
         # ALFA 24–36
         ("flash", Toma("fardos", 6, "verde", ((0.35, 0.55, 1.0), (0.55, 0.5, 1.18)))),
-        ("zoom", Toma("camiones", 6, "noche", ((0.62, 0.5, 1.0), (0.66, 0.52, 1.12)))),
+        ("zoom", Toma("camiones", 6, "noche", ((0.29, 0.47, 1.0), (0.32, 0.42, 1.14)))),
         # PRESENCIA 36–48
         ("whip", Toma("galpon_a", 6, "noche", ((0.25, 0.5, 1.0), (0.62, 0.5, 1.0)), panel=True)),
         ("corte", Toma("galpon_b", 6, "noche", ((0.3, 0.5, 1.35), (0.45, 0.5, 1.0)), panel=True)),
@@ -896,8 +896,8 @@ class Render:
         n = int(round(self.dur * FPS))
         cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{self.W}x{self.H}",
                "-r", str(FPS), "-i", "-", "-i", wav, "-map", "0:v", "-map", "1:a",
-               "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-b:v", "13M", "-maxrate", "16M",
-               "-bufsize", "26M", "-pix_fmt", "yuv420p", "-color_primaries", "bt709", "-color_trc", "bt709",
+               "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-b:v", "14M", "-minrate", "12M", "-maxrate", "16M",
+               "-bufsize", "16M", "-x264-params", "nal-hrd=vbr", "-pix_fmt", "yuv420p", "-color_primaries", "bt709", "-color_trc", "bt709",
                "-colorspace", "bt709", "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-shortest",
                "-movflags", "+faststart", salida]
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE)

@@ -1,0 +1,12 @@
+GUION DE LOCUCIÓN — Forrajería Forralitas (corte principal, ~33 s)
+Voz: masculina, rioplatense, cálida. Ritmo tranquilo, con las pausas indicadas.
+
+[  0.5 s]  ¡Llegó mercadería a Forralitas!
+[  4.6 s]  Maíz, en bolsas de cuarenta y cincuenta kilos.
+[ 12.7 s]  Y alfa para tus animales.
+[ 18.8 s]  Te esperamos en Ruta trescientos cinco, kilómetro siete y medio, Las Talitas.
+[ 25.4 s]  ¡Forrajería Forralitas, con todo para tu campo!
+
+Lectura de números: 40 = cuarenta, 50 = cincuenta, Ruta 305 = trescientos cinco, km 7,5 = siete y medio.
+Si grabás tu propia voz: grabá cada frase por separado, en un lugar silencioso, y reemplazá la voz
+generada (ver README.txt).
