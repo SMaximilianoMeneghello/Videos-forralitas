@@ -249,7 +249,8 @@ class Video:
             if not ok:
                 break
             self.frames.append(cv2.cvtColor(f, cv2.COLOR_BGR2RGB))
-        self.fps, self.t0 = fps, t0
+        real = cap.get(cv2.CAP_PROP_FPS)
+        self.fps, self.t0 = (real if fps == "real" and real else (fps if fps != "real" else 30)), t0
         self.h, self.w = self.frames[0].shape[:2]
 
     def at(self, t):
@@ -278,8 +279,8 @@ CACHE = "cache_previa" if os.environ.get("PREVIA") else "cache"
 def material(nombre):
     if nombre not in _MAT:
         rutas = {
-            "c1": lambda: Video(f"{CACHE}/clip1_ia.mp4", 30, 0.0),
-            "c3": lambda: Video(f"{CACHE}/clip3_ia.mp4", 30, 1.5),
+            "c1": lambda: Video(f"{CACHE}/clip1_ia.mp4", "real", 0.0),
+            "c3": lambda: Video(f"{CACHE}/clip3_ia.mp4", "real", 1.5),
             "c1_lento": lambda: Video(f"{CACHE}/clip1_lento.mp4", 120, 4.9),
             "c3_lento": lambda: Video(f"{CACHE}/clip3_lento.mp4", 120, 6.1),
             "bolsa": lambda: Foto(f"{CACHE}/ia_foto_bolsa_maiz.png"),
