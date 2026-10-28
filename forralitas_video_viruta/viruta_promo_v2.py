@@ -22,6 +22,14 @@ sys.path.insert(0, AQUI)
 import viruta_promo as v1          # noqa: E402  (datos, voz, fotos, cierre; cambia el cwd)
 
 fp = v1.fp
+# locución con la marca: (inicio s, texto voz, subtítulo con *resaltado* y | entre bloques)
+v1.VOZ = [
+    (0.55, "¡Llegó la viruta a Forrajería Forralitas!", "¡Llegó la *viruta* | a Forrajería *Forralitas!*"),
+    (4.75, "¡Ya la tenemos en Forralitas!", "¡Ya la tenemos | en *Forralitas!*"),
+    (8.35, "Y tenemos muchos productos más,", "Y tenemos muchos | *productos* *más,*"),
+    (12.2, "con la mejor calidad y al mejor precio.", "con la *mejor* *calidad* | y al *mejor* *precio.*"),
+    (15.25, "¡Te esperamos en Forralitas!", "*¡Te* *esperamos* | en *Forralitas!*"),
+]
 W, H, FPS, DUR, SR = 1080, 1920, 30, 20.0, 44100
 MUSICA = os.path.join(AQUI, "musica", "Happy_Alley.mp3")
 MUSICA_INICIO, BPM = 12.91, 111.5
@@ -179,8 +187,15 @@ class Video(v1.Video):
         self.card = polaroid(self.cam_card_img, 660, 900)
         self.card_sombra = sombra(self.card)
         v = self.voces
-        self.t_cal = v[2]["t0"] + v[2]["tiempos"][3] - 0.05
-        self.t_pre = v[2]["t0"] + v[2]["tiempos"][7] - 0.05
+        self.t_cal = v[3]["t0"] + v[3]["tiempos"][3] - 0.05
+        self.t_pre = v[3]["t0"] + v[3]["tiempos"][7] - 0.05
+        logo = fp.logo_circular(96)
+        nom = v1.T("FORRALITAS", ANTON, 62, BLANCO)
+        pad = int(62 * 0.35)
+        ancho = 96 + 14 + nom.shape[1] - 2 * pad + 40
+        bug = caja(ancho, 116, 58, (0, 0, 0), 0.45)
+        bug = sobre(bug, logo, 10, 10)
+        self.marca = sobre(bug, nom, 96 + 24 - pad, (116 - nom.shape[0]) // 2 + 4)
         self.virutas = Virutas([
             (0.30, W / 2, H * 0.75, 34, 2300),          # explota con el título
             (beat(4), W * 0.3, H * 0.9, 16, 1900),
@@ -309,6 +324,9 @@ class Video(v1.Video):
         t = min(t, DUR - 1e-3)
         f = np.ascontiguousarray(self.base(t))
         self.virutas.dibujar(f, t)
+        if 0.9 <= t < 15.0:                                   # marca fija arriba
+            q = prog(t, 0.9, 0.4) * (1 - prog(t, 14.6, 0.3))
+            blit(f, self.marca, W / 2, 150 - (1 - e_out(prog(t, 0.9, 0.4))) * 120, alpha=clamp01(q * 3))
         self.subtitulos(f, t)
         if t > DUR - 0.35:
             f = (f.astype(np.float32) * ((DUR - t) / 0.35)).astype(np.uint8)
