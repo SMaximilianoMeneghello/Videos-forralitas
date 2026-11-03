@@ -16,11 +16,13 @@ from scipy.io import wavfile
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
 sys.path.insert(0, os.path.join(RAIZ, "forralitas_video_viruta"))
+sys.path.insert(0, AQUI)
 import viruta_promo as v1          # noqa: E402  (datos del cierre, textos, subtítulos)
 import viruta_promo_v2 as v2       # noqa: E402  (cámara, temblor, flash, partículas)
 import viruta_promo_v3 as v3       # noqa: E402  (luces cálidas, barras)
 import audio as sfxlib             # noqa: E402
 import voz_tts                     # noqa: E402
+from verde_alfa import verde_lindo  # noqa: E402
 
 fp = v1.fp
 W, H, FPS, SR = 1080, 1920, 30, 44100
@@ -111,7 +113,7 @@ class Video:
             img = self.vid[int(np.clip((s0 + (t - a)) * 30, 0, len(self.vid) - 1))]
         else:
             img = self.fotos[src]
-        f = self.grades[src](fp.recorte(img, W, H, cx, cy, z), v1.VIG)
+        f = self.grades[src](verde_lindo(fp.recorte(img, W, H, cx, cy, z)), v1.VIG)
         return (f.astype(np.float32) * v1.GRAD).astype(np.uint8)
 
     def base(self, t):
