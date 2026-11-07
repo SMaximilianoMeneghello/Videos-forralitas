@@ -32,6 +32,9 @@ ENTRADA = "assets_casa/entrada.mp4"
 SALIDA = "videos_salida/casa_rivadavia.mp4"
 DIRECCION = "Rivadavia 2647"
 VOZ = "es-AR-ElenaNeural"
+CONTACTO_NOMBRE = "Dra. Leticia Lourdes Pocar"
+CONTACTO_SUB = "Abogada & Bienes Raíces"
+CONTACTO_TEL = "381 507 2570"
 
 # ------------------------------------------------------------ identidad propia (grafito + dorado)
 NEGRO1 = (36, 32, 27)
@@ -87,7 +90,7 @@ DUR_MIN = 6.0
 L_UBIC = ("A solo cincuenta metros de avenida Francisco de Aguirre, con cuatro líneas de colectivos. "
           "La escuela te queda a cien metros, con todo tipo de comercios cerca.")
 C_UBIC = ["A 50 m de Av. *Francisco de Aguirre*", "4 líneas de *colectivos* · Escuela a *100 m*", "Todo tipo de *comercios* cerca"]
-L_CIERRE = "Consultá ya por este PH."
+L_CIERRE = "Consultá ya por este PH, con la doctora Leticia Pocar."
 DIGITOS = {"0": "cero", "1": "uno", "2": "dos", "3": "tres", "4": "cuatro",
            "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve"}
 
@@ -177,7 +180,9 @@ def escena_ubicacion():
 
 # ------------------------------------------------------------ escena cierre
 def escena_cierre(tel=None):
-    tit = texto("¡CONSULTANOS YA!", 78, DORADO)
+    tit = texto("¡CONSULTANOS YA!", 72, DORADO)
+    nombre = texto_ajustado(CONTACTO_NOMBRE, 46, W - 120, BLANCO, True)
+    sub = texto_ajustado(CONTACTO_SUB, 30, W - 120, GRIS_TXT, False)
     ic_tel = icono("telefono", 150, fondo=DORADO, tinta=NEGRO2)
     if tel:
         num = texto_ajustado(tel, 90, 760, BLANCO, True)
@@ -194,25 +199,30 @@ def escena_cierre(tel=None):
     def fn(t):
         f = fondo_elegante(t, semilla=19)
         p = ease_out_cubic(prog(t, 0.2, 0.7))
-        blit(f, tit, W / 2, 330 + (1 - p) * 40, alpha=p, centro=True)
+        blit(f, tit, W / 2, 260 + (1 - p) * 40, alpha=p, centro=True)
 
-        q = prog(t, 0.6, 0.65)
+        pn = ease_out_cubic(prog(t, 0.45, 0.6))
+        blit(f, nombre, W / 2, 355 + (1 - pn) * 25, alpha=pn, centro=True)
+        ps = ease_out_cubic(prog(t, 0.6, 0.6))
+        blit(f, sub, W / 2, 415 + (1 - ps) * 20, alpha=ps, centro=True)
+
+        q = prog(t, 0.85, 0.65)
         e = ease_out_cubic(q)
         x = (W - 940) / 2
-        blit(f, tarjeta, x, 540 + (1 - e) * 60, alpha=clamp01(q * 2.5))
+        blit(f, tarjeta, x, 560 + (1 - e) * 60, alpha=clamp01(q * 2.5))
         if q > 0.1:
-            fase = (t - 0.9) % 1.7
+            fase = (t - 1.15) % 1.7
             env = max(0.0, 1 - fase / 0.55)
             ang = 18 * np.sin(fase * 50) * env if env > 0 else 0
-            blit(f, rotar_sprite(ic_tel, ang), x + 70, 540 + 110, alpha=clamp01(q * 2.5),
+            blit(f, rotar_sprite(ic_tel, ang), x + 70, 560 + 110, alpha=clamp01(q * 2.5),
                  escala=1 + 0.06 * env, centro=True)
 
-        q2 = prog(t, 1.3, 0.65)
+        q2 = prog(t, 1.55, 0.65)
         e2 = ease_out_cubic(q2)
-        blit(f, tarjeta2, x, 810 + (1 - e2) * 60, alpha=clamp01(q2 * 2.5))
+        blit(f, tarjeta2, x, 830 + (1 - e2) * 60, alpha=clamp01(q2 * 2.5))
 
-        q3 = ease_out_cubic(prog(t, 2.0, 0.7))
-        blit(f, pie, W / 2, 1040 + (1 - q3) * 30, alpha=q3, centro=True)
+        q3 = ease_out_cubic(prog(t, 2.25, 0.7))
+        blit(f, pie, W / 2, 1060 + (1 - q3) * 30, alpha=q3, centro=True)
         return f
     return fn
 
@@ -377,7 +387,7 @@ def main():
     if "--tel-list" in sys.argv:
         tels = sys.argv[sys.argv.index("--tel-list") + 1].split(",")
     else:
-        tels = [None]
+        tels = [CONTACTO_TEL]
 
     cl = lambda t, **kw: voz_tts.clip(t, voz=VOZ, **kw)
     for tel in tels:
