@@ -311,7 +311,53 @@
       reveal(e, null, base + parseFloat(e.dataset.d || 0), ctx.tweens);
     });
 
+    auto.paused = false;
+    scheduleAuto();
     updateHud();
+    sendState();
+  }
+
+  // ---------------------------------------------------------- pasos automáticos
+  // Dentro de una diapositiva cada parte aparece SOLA, después del tiempo que
+  // lleva decir la nota en inglés (≈1,9 palabras por segundo) más una pausa
+  // extra para votar o mirar fijo (hold). Pasar de diapositiva lo hacés vos.
+  const auto = { timer: null, at: 0, left: 0, total: 0, paused: false };
+  const stepsOf = (s) => (s.steps !== undefined ? s.steps : Math.max(0, (s.notes || []).length - 1));
+  function speakSecs(note) {
+    const txt = ((note && note.en) || note || "").replace(/\([^)]*\)/g, " ");
+    return txt.split(/\s+/).filter(Boolean).length / 1.9 + 1.5;
+  }
+  function stepWait(s, k) {
+    const extra = k === 0 ? 1.2 : 0; // la transición de entrada
+    return Math.round((speakSecs((s.notes || [])[k]) + ((s.hold || [])[k] || 0) + extra) * 1000);
+  }
+  function clearAuto() { clearTimeout(auto.timer); auto.timer = null; auto.total = 0; auto.left = 0; }
+  function armAuto() {
+    auto.at = Date.now() + auto.left;
+    auto.timer = setTimeout(() => { auto.timer = null; revealNext(); }, auto.left);
+  }
+  function scheduleAuto() {
+    clearAuto();
+    if (GAME.active || !cur || step >= stepsOf(cur.s)) return;
+    auto.total = auto.left = stepWait(cur.s, step);
+    if (!auto.paused) armAuto();
+  }
+  function revealNext() {
+    if (!started || GAME.active || !cur || step >= stepsOf(cur.s)) return;
+    step++;
+    doStep(step);
+    scheduleAuto();
+    updateHud();
+    sendState();
+  }
+  function togglePause() {
+    if (!auto.paused) {
+      auto.paused = true;
+      if (auto.timer) { clearTimeout(auto.timer); auto.timer = null; auto.left = Math.max(0, auto.at - Date.now()); }
+    } else {
+      auto.paused = false;
+      if (auto.total && cur && step < stepsOf(cur.s)) armAuto();
+    }
     sendState();
   }
 
@@ -326,13 +372,8 @@
   function next() {
     if (!started) { begin(false); return; }
     if (GAME.active) { GAME.next(); return; }
-    const s = SL[idx];
-    if (step < (s.steps || 0)) {
-      step++;
-      doStep(step);
-      updateHud();
-      sendState();
-    } else if (idx < N - 1) {
+    // SIGUIENTE siempre pasa de diapositiva (los pasos internos van solos)
+    if (idx < N - 1) {
       go(idx + 1, { dir: 1 });
     } else {
       GAME.open();
@@ -348,7 +389,7 @@
 
   // ---------------------------------------------------------- HUD
   function updateHud() {
-    const p = GAME.active ? 1 : (idx + (step / ((SL[idx].steps || 0) + 1))) / N;
+    const p = GAME.active ? 1 : (idx + (step / (stepsOf(SL[idx]) + 1))) / N;
     $("#progress i").style.width = `${Math.max(0, p) * 100}%`;
     $("#counter").textContent = GAME.active ? "🎮" : `${idx + 1} / ${N}`;
   }
@@ -453,6 +494,8 @@
     switch (m.c) {
       case "next": next(); break;
       case "prev": prev(); break;
+      case "reveal": revealNext(); break;
+      case "pause": togglePause(); break;
       case "goto": if (started && !GAME.active) go(Math.max(0, Math.min(N - 1, m.i | 0)), { dir: (m.i | 0) < idx ? -1 : 1 }); break;
       case "start": if (!started) begin(false); break;
       case "mute": SFX.setMuted(!SFX.muted); sendState(); break;
@@ -474,8 +517,9 @@
         started,
         mode: GAME.active ? "game" : "slides",
         slide: {
-          i: idx, n: N, title: s.title, step, steps: s.steps || 0,
+          i: idx, n: N, title: s.title, step, steps: stepsOf(s),
           notes: notes[step] || notes[notes.length - 1] || "",
+          facts: s.facts || [],
           next: idx < N - 1 ? SL[idx + 1].title : "🎮 Juego final",
         },
         list: SL.map((x) => x.title),
@@ -483,6 +527,7 @@
         muted: SFX.muted, lite,
         game: GAME.remoteState(),
         playUrl: playUrl(),
+        auto: { inMs: auto.timer ? Math.max(0, auto.at - Date.now()) : auto.left, total: auto.total, paused: auto.paused },
       };
       remotes.forEach((cid) => net.send(cid, msg));
     }, 30);
@@ -544,7 +589,9 @@
   document.addEventListener("keydown", (e) => {
     if (e.target && e.target.tagName === "INPUT") return;
     const k = e.key;
-    if (["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"].includes(k)) { e.preventDefault(); if (!started) begin(true); else next(); }
+    if (["ArrowRight", "ArrowDown", "PageDown", "Enter"].includes(k)) { e.preventDefault(); if (!started) begin(true); else next(); }
+    else if (k === " ") { e.preventDefault(); if (!started) begin(true); else if (GAME.active) next(); else revealNext(); }
+    else if (k === "s" || k === "S") { togglePause(); toast(auto.paused ? "⏸ Auto paused" : "▶ Auto on"); }
     else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(k)) { e.preventDefault(); prev(); }
     else if (k === "f" || k === "F") fullscreen();
     else if (k === "m" || k === "M") { SFX.init(); SFX.toggleMute(); toast(SFX.muted ? "🔇 Sound off" : "🔊 Sound on"); sendState(); }
@@ -570,6 +617,7 @@
     hideSlides() {
       // el juego tapa todo: frenamos las animaciones de la diapositiva para no gastar CPU
       if (cur) cur.ctx.cleanup();
+      clearAuto();
       gsap.to(slidesEl, { opacity: 0, duration: 0.6 });
       updateHud();
     },

@@ -159,180 +159,6 @@
   }
 
   // ----------------------------------------------------------
-  //  TABLERO DE ADELSON (sombra sobre tablero)
-  // ----------------------------------------------------------
-  function adelson(canvas) {
-    const W = canvas.width, H = canvas.height;
-    const g = canvas.getContext("2d");
-    const N = 7, S = 90, SQUASH = 0.62;
-    const cx = W / 2, cy = H / 2 + 40;
-    const LIGHT = 205;
-    const SHADOW = 0.55; // multiplicador de la sombra
-    const A = [1, 0], B = [3, 3];
-    const cyl = [5.5, 1.5];
-
-    // transforma coordenadas del tablero a la pantalla
-    function toScreen(bx, by) {
-      const x = (bx - N / 2) * S, y = (by - N / 2) * S;
-      const rx = x * Math.SQRT1_2 - y * Math.SQRT1_2;
-      const ry = x * Math.SQRT1_2 + y * Math.SQRT1_2;
-      return [cx + rx, cy + ry * SQUASH];
-    }
-    function boardTransform(c) {
-      c.translate(cx, cy);
-      c.scale(1, SQUASH);
-      c.rotate(Math.PI / 4);
-      c.translate(-N / 2 * S, -N / 2 * S);
-    }
-    function squarePath(c, i, j) {
-      const p = [toScreen(i, j), toScreen(i + 1, j), toScreen(i + 1, j + 1), toScreen(i, j + 1)];
-      c.beginPath(); c.moveTo(...p[0]); p.slice(1).forEach((q) => c.lineTo(...q)); c.closePath();
-    }
-
-    // Capa de sombra (blanca con sombra gris difuminada)
-    const sh = document.createElement("canvas");
-    sh.width = W; sh.height = H;
-    const sg = sh.getContext("2d");
-    sg.fillStyle = "#fff"; sg.fillRect(0, 0, W, H);
-    sg.filter = "blur(20px)";
-    sg.save();
-    boardTransform(sg);
-    sg.translate(cyl[0] * S, cyl[1] * S);
-    sg.rotate(Math.atan2(1, -1)); // dirección (-1, +1) en el tablero
-    const v = Math.round(255 * SHADOW);
-    sg.fillStyle = `rgb(${v},${v},${v})`;
-    sg.beginPath();
-    sg.moveTo(0, -0.9 * S);
-    sg.lineTo(5.6 * S, -1.6 * S);
-    sg.lineTo(6.5 * S, 0);
-    sg.lineTo(5.6 * S, 1.6 * S);
-    sg.lineTo(0, 0.9 * S);
-    sg.arc(0, 0, 0.9 * S, Math.PI / 2, -Math.PI / 2);
-    sg.closePath();
-    sg.fill();
-    sg.restore();
-    sg.filter = "none";
-
-    const bC = toScreen(B[0] + 0.5, B[1] + 0.5).map(Math.round);
-    const aC = toScreen(A[0] + 0.5, A[1] + 0.5).map(Math.round);
-    const sVal = sg.getImageData(bC[0], bC[1], 1, 1).data[0];
-
-    function draw(dark) {
-      g.clearRect(0, 0, W, H);
-      // espesor del tablero
-      const L = toScreen(0, N), Bt = toScreen(N, N), R = toScreen(N, 0);
-      const depth = 34;
-      g.fillStyle = "#3b3b44";
-      g.beginPath(); g.moveTo(...L); g.lineTo(...Bt); g.lineTo(Bt[0], Bt[1] + depth); g.lineTo(L[0], L[1] + depth); g.closePath(); g.fill();
-      g.fillStyle = "#2a2a31";
-      g.beginPath(); g.moveTo(...Bt); g.lineTo(...R); g.lineTo(R[0], R[1] + depth); g.lineTo(Bt[0], Bt[1] + depth); g.closePath(); g.fill();
-      // casillas
-      for (let i = 0; i < N; i++) {
-        for (let j = 0; j < N; j++) {
-          const val = (i + j) % 2 === 0 ? LIGHT : dark;
-          g.fillStyle = `rgb(${val},${val},${val})`;
-          squarePath(g, i, j);
-          g.fill();
-          g.strokeStyle = g.fillStyle; g.lineWidth = 1; g.stroke(); // evita líneas finas entre casillas
-        }
-      }
-      // sombra multiplicada solo sobre el tablero
-      g.save();
-      const T = toScreen(0, 0);
-      g.beginPath(); g.moveTo(...T); g.lineTo(...R); g.lineTo(...Bt); g.lineTo(...L); g.closePath(); g.clip();
-      g.globalCompositeOperation = "multiply";
-      g.drawImage(sh, 0, 0);
-      g.restore();
-      g.globalCompositeOperation = "source-over";
-      // cilindro verde
-      const base = toScreen(cyl[0], cyl[1]);
-      const rw = 62, rh = rw * SQUASH * 0.9, hgt = 230;
-      const grd = g.createLinearGradient(base[0] - rw, 0, base[0] + rw, 0);
-      grd.addColorStop(0, "#0f5a2c"); grd.addColorStop(0.35, "#2fa35a"); grd.addColorStop(0.65, "#4cc777"); grd.addColorStop(1, "#1d7a40");
-      g.fillStyle = grd;
-      g.beginPath();
-      g.ellipse(base[0], base[1], rw, rh, 0, 0, Math.PI);
-      g.lineTo(base[0] - rw, base[1] - hgt);
-      g.ellipse(base[0], base[1] - hgt, rw, rh, 0, Math.PI, 0, true);
-      g.closePath(); g.fill();
-      g.fillStyle = "#6fe39a";
-      g.beginPath(); g.ellipse(base[0], base[1] - hgt, rw, rh, 0, 0, Math.PI * 2); g.fill();
-      // letras A y B (corridas para no tapar el centro)
-      g.font = "700 40px 'Space Grotesk', Arial, sans-serif";
-      g.textAlign = "center"; g.textBaseline = "middle";
-      g.fillStyle = "rgba(0,0,0,0.75)";
-      g.fillText("A", aC[0], aC[1] - 2);
-      g.fillText("B", bC[0], bC[1] - 2);
-    }
-
-    // Ajusta el gris oscuro para que A y B sean EXACTAMENTE iguales
-    let dark = Math.round((LIGHT * sVal) / 255);
-    const probe = (p) => g.getImageData(p[0] + 26, p[1] + 8, 1, 1).data[0];
-    for (let k = 0; k < 4; k++) {
-      draw(dark);
-      const vb = probe(bC);
-      const va = probe(aC);
-      if (va === vb) break;
-      dark += vb - va;
-    }
-    const finalGray = probe(bC);
-
-    return {
-      A: aC, B: bC, gray: finalGray,
-      squareA: [toScreen(A[0], A[1]), toScreen(A[0] + 1, A[1]), toScreen(A[0] + 1, A[1] + 1), toScreen(A[0], A[1] + 1)],
-      squareB: [toScreen(B[0], B[1]), toScreen(B[0] + 1, B[1]), toScreen(B[0] + 1, B[1] + 1), toScreen(B[0], B[1] + 1)],
-    };
-  }
-
-  // ----------------------------------------------------------
-  //  SERPIENTES GIRATORIAS (deriva periférica, estilo Kitaoka)
-  // ----------------------------------------------------------
-  function snakes(canvas) {
-    const g = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    g.fillStyle = "#7d8a2e"; // fondo oliva para resaltar
-    g.fillRect(0, 0, W, H);
-    const COLS = ["#000000", "#1d3fe0", "#ffffff", "#f5e400"];
-    const WID = [0.38, 0.12, 0.38, 0.12];
-    function disc(cx, cy, R, dir) {
-      const rings = 5;
-      for (let k = 0; k < rings; k++) {
-        const r1 = R * (1 - k / rings), r0 = R * (1 - (k + 1) / rings);
-        const n = Math.max(8, Math.round(26 * (1 - k / rings)));
-        const period = (Math.PI * 2) / n;
-        const off = k % 2 ? period / 2 : 0;
-        for (let s = 0; s < n; s++) {
-          let a = s * period + off;
-          for (let c = 0; c < 4; c++) {
-            const idx = dir > 0 ? c : 3 - c;
-            const span = period * WID[idx];
-            g.fillStyle = COLS[idx];
-            g.beginPath();
-            g.arc(cx, cy, r1, a, a + span);
-            g.arc(cx, cy, r0, a + span * 0.85, a - span * 0.15, true);
-            g.closePath();
-            g.fill();
-            a += span;
-          }
-        }
-      }
-      g.fillStyle = "#7d8a2e";
-      g.beginPath(); g.arc(cx, cy, R / 5 - 1, 0, Math.PI * 2); g.fill();
-    }
-    const R = 132;
-    let row = 0;
-    for (let y = 150; y < H + R; y += 285) {
-      let col = 0;
-      const shift = row % 2 ? 140 : 0;
-      for (let x = 140 + shift - 280; x < W + R; x += 280) {
-        disc(x, y, R, (row + col) % 2 ? 1 : -1);
-        col++;
-      }
-      row++;
-    }
-  }
-
-  // ----------------------------------------------------------
   //  ESCENA "ENCONTRÁ LA DIFERENCIA" (ceguera al cambio)
   // ----------------------------------------------------------
   function sceneSVG(withTree) {
@@ -387,197 +213,338 @@
   }
 
   // ----------------------------------------------------------
-  //  DESAFÍO DEL GORILA (atención selectiva)
+  //  CAFÉ WALL (Gregory & Heard, 1979)
+  //  Baldosas negras y blancas, "junta" gris, filas corridas
+  //  media baldosa (la ilusión es máxima en ese punto, Bach).
   // ----------------------------------------------------------
-  function gorillaSim(canvas) {
+  function cafeWall(canvas) {
     const g = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
-    const DURATION = 22;
-    const court = { x: 80, y: 60, w: W - 160, h: H - 120 };
-    const r = rng(2024);
-
-    const players = [];
-    for (let i = 0; i < 6; i++) {
-      const team = i < 3 ? "w" : "b";
-      players.push({
-        team,
-        bx: court.x + 170 + (i % 3) * ((court.w - 340) / 2) + (r() - 0.5) * 80,
-        by: court.y + (team === "w" ? 0.35 : 0.68) * court.h + (r() - 0.5) * 60,
-        ax: 110 + r() * 90, ay: 60 + r() * 50,
-        w1: 0.35 + r() * 0.3, w2: 0.3 + r() * 0.35, p1: r() * 6.28, p2: r() * 6.28,
-      });
-    }
-    function pos(p, t) {
-      // siempre dentro de la cancha
-      const x = p.bx + Math.sin(t * p.w1 + p.p1) * p.ax, y = p.by + Math.cos(t * p.w2 + p.p2) * p.ay;
-      return [clamp(x, court.x + 50, court.x + court.w - 50), clamp(y, court.y + 90, court.y + court.h - 90)];
-    }
-    // pases programados: 12 del equipo blanco
-    function schedule(team, count, start, end, seed) {
-      const rr = rng(seed);
-      const ids = players.map((p, i) => (p.team === team ? i : -1)).filter((i) => i >= 0);
-      const list = [];
-      let holder = ids[0];
-      for (let k = 0; k < count; k++) {
-        const t0 = start + (k * (end - start)) / count + rr() * 0.4;
-        let to = holder;
-        while (to === holder) to = ids[Math.floor(rr() * ids.length)];
-        list.push({ from: holder, to, t0, t1: t0 + 0.6, bounce: rr() < 0.5 });
-        holder = to;
-      }
-      return list;
-    }
-    const passesW = schedule("w", 12, 0.8, 20.2, 11);
-    const passesB = schedule("b", 9, 1.3, 20.5, 99);
-    const WHITE_PASSES = passesW.length;
-
-    function ballPos(passes, t) {
-      let holder = passes[0].from;
-      for (const ps of passes) {
-        if (t < ps.t0) break;
-        if (t <= ps.t1) {
-          const k = (t - ps.t0) / (ps.t1 - ps.t0);
-          const a = hand(players[ps.from], t), b = hand(players[ps.to], t);
-          let x = lerp(a[0], b[0], k), y = lerp(a[1], b[1], k);
-          // pase picado (forma de V hacia el piso) o pase de pecho (arco suave)
-          y += ps.bounce ? 70 * (1 - Math.abs(2 * k - 1)) : -Math.sin(Math.PI * k) * 26;
-          return [x, y];
+    const T = 74, M = 4;          // baldosa y junta (mortar)
+    const rows = Math.floor((H - M) / (T + M));
+    const top = (H - rows * (T + M) - M) / 2;
+    let shift = 0.5, guides = 0;
+    function draw() {
+      g.fillStyle = "#7f7f7f"; // junta gris: a mitad de camino entre blanco y negro
+      g.fillRect(0, 0, W, H);
+      for (let r = 0; r < rows; r++) {
+        const y = top + M + r * (T + M);
+        // filas alternas se corren en sentidos opuestos: desfase relativo = shift * T
+        const off = (r % 2 ? 1 : -1) * shift * T / 2;
+        for (let i = -2; i * T < W + 2 * T; i++) {
+          g.fillStyle = (i % 2 === 0) ? "#000" : "#fff";
+          g.fillRect(i * T + off, y, T, T);
         }
-        holder = ps.to;
       }
-      return hand(players[holder], t);
-    }
-    function hand(p, t) { const [x, y] = pos(p, t); return [x + 26, y - 6]; }
-
-    function drawPerson(x, y, team, t, ph) {
-      const body = team === "w" ? "#f7f7f7" : "#1c1c22";
-      const edge = team === "w" ? "#c9c9cf" : "#000";
-      const skin = "#e3b48f";
-      const sw = Math.sin(t * 8 + ph) * 10;
-      g.lineCap = "round";
-      g.strokeStyle = "#3a2f2a"; g.lineWidth = 10;
-      g.beginPath(); g.moveTo(x - 8, y + 36); g.lineTo(x - 10 + sw * 0.6, y + 78); g.stroke();
-      g.beginPath(); g.moveTo(x + 8, y + 36); g.lineTo(x + 10 - sw * 0.6, y + 78); g.stroke();
-      g.fillStyle = body; g.strokeStyle = edge; g.lineWidth = 2;
-      g.beginPath(); g.roundRect(x - 22, y - 22, 44, 62, 14); g.fill(); g.stroke();
-      g.strokeStyle = skin; g.lineWidth = 9;
-      g.beginPath(); g.moveTo(x - 20, y - 10); g.lineTo(x - 30, y + 18 + sw * 0.4); g.stroke();
-      g.beginPath(); g.moveTo(x + 20, y - 10); g.lineTo(x + 28, y - 4); g.stroke();
-      g.fillStyle = skin;
-      g.beginPath(); g.arc(x, y - 40, 17, 0, Math.PI * 2); g.fill();
-      g.fillStyle = "#3a2a1e";
-      g.beginPath(); g.arc(x, y - 46, 17, Math.PI, 0); g.fill();
-    }
-
-    function drawGorilla(x, y, t, thump) {
-      const s = 1.35;
-      g.save(); g.translate(x, y); g.scale(s, s);
-      const sw = Math.sin(t * 6) * 8;
-      g.fillStyle = "#121214";
-      // piernas
-      g.beginPath(); g.ellipse(-14, 50 + Math.abs(sw) * 0.2, 13, 26, 0.1, 0, Math.PI * 2); g.fill();
-      g.beginPath(); g.ellipse(14, 50 + Math.abs(-sw) * 0.2, 13, 26, -0.1, 0, Math.PI * 2); g.fill();
-      // cuerpo
-      g.beginPath(); g.ellipse(0, 6, 34, 44, 0, 0, Math.PI * 2); g.fill();
-      // brazos
-      const up = thump ? Math.abs(Math.sin(t * 14)) : 0;
-      g.lineCap = "round"; g.strokeStyle = "#121214"; g.lineWidth = 18;
-      g.beginPath(); g.moveTo(-26, -18); g.lineTo(thump ? -10 : -44, thump ? 0 - up * 12 : 40 + sw); g.stroke();
-      g.beginPath(); g.moveTo(26, -18); g.lineTo(thump ? 10 : 44, thump ? 0 - (1 - up) * 12 : 40 - sw); g.stroke();
-      // cabeza
-      g.beginPath(); g.arc(0, -48, 24, 0, Math.PI * 2); g.fill();
-      g.fillStyle = "#3d3a3a";
-      g.beginPath(); g.ellipse(0, -42, 15, 12, 0, 0, Math.PI * 2); g.fill();
-      g.fillStyle = "#fff";
-      g.beginPath(); g.arc(-7, -52, 3, 0, Math.PI * 2); g.arc(7, -52, 3, 0, Math.PI * 2); g.fill();
-      g.restore();
-    }
-
-    function gorillaPos(t) {
-      // entra por la derecha, se para en el medio, se golpea el pecho y sale por la izquierda
-      const yy = court.y + court.h * 0.52;
-      if (t < 7.5) return null;
-      if (t < 10.5) return [lerp(W + 80, W / 2, (t - 7.5) / 3), yy, false];
-      if (t < 12.3) return [W / 2, yy, true];
-      if (t < 16) return [lerp(W / 2, -80, (t - 12.3) / 3.7), yy, false];
-      return null;
-    }
-
-    let spotlight = false;
-    function draw(t) {
-      g.clearRect(0, 0, W, H);
-      // piso
-      const fl = g.createLinearGradient(0, court.y, 0, court.y + court.h);
-      fl.addColorStop(0, "#d9dbe2"); fl.addColorStop(1, "#bfc3cc");
-      g.fillStyle = fl;
-      g.beginPath(); g.roundRect(court.x, court.y, court.w, court.h, 26); g.fill();
-      // ascensores de fondo (como en el video original)
-      g.fillStyle = "#a9adb7";
-      g.fillRect(court.x + 120, court.y + 20, 150, 200);
-      g.fillRect(court.x + court.w - 270, court.y + 20, 150, 200);
-      g.fillStyle = "#9ca0aa";
-      g.fillRect(court.x + 194, court.y + 20, 3, 200);
-      g.fillRect(court.x + court.w - 196, court.y + 20, 3, 200);
-
-      const gp = gorillaPos(t);
-      // ordenar por profundidad
-      const items = players.map((p, i) => ({ y: pos(p, t)[1], i }));
-      if (gp) items.push({ y: gp[1], i: -1 });
-      items.sort((a, b) => a.y - b.y);
-      for (const it of items) {
-        if (it.i === -1) drawGorilla(gp[0], gp[1], t, gp[2]);
-        else { const p = players[it.i]; const [x, y] = pos(p, t); drawPerson(x, y, p.team, t, it.i); }
-      }
-      // pelotas
-      [ballPos(passesW, t), ballPos(passesB, t)].forEach(([x, y]) => {
-        g.fillStyle = "#e8742c";
-        g.beginPath(); g.arc(x, y, 11, 0, Math.PI * 2); g.fill();
-        g.strokeStyle = "#7a3510"; g.lineWidth = 2;
-        g.beginPath(); g.arc(x, y, 11, 0, Math.PI * 2); g.moveTo(x - 11, y); g.lineTo(x + 11, y); g.stroke();
-      });
-      // reflector sobre el gorila
-      if (spotlight && gp) {
+      if (guides > 0) {
         g.save();
-        g.beginPath(); g.roundRect(court.x, court.y, court.w, court.h, 26); g.clip();
-        const rg = g.createRadialGradient(gp[0], gp[1] - 10, 90, gp[0], gp[1] - 10, 260);
-        rg.addColorStop(0, "rgba(0,0,0,0)"); rg.addColorStop(1, "rgba(0,0,0,0.78)");
-        g.fillStyle = rg; g.fillRect(0, 0, W, H);
-        g.strokeStyle = "#ffe14d"; g.lineWidth = 6; g.setLineDash([16, 12]);
-        g.beginPath(); g.arc(gp[0], gp[1] - 10, 120, 0, Math.PI * 2); g.stroke();
+        g.globalAlpha = guides;
+        g.strokeStyle = "#ff2d55"; g.lineWidth = 4;
+        g.shadowColor = "#ff2d55"; g.shadowBlur = 12;
+        for (let r = 0; r <= rows; r++) {
+          const y = top + r * (T + M) + M / 2;
+          g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+        }
         g.restore();
       }
     }
-
+    draw();
     return {
-      DURATION, WHITE_PASSES, draw,
-      setSpotlight(v) { spotlight = v; },
-      gorillaWindow: [7.5, 16],
+      set(s, gd) { if (s !== undefined) shift = s; if (gd !== undefined) guides = gd; draw(); },
+      get shift() { return shift; },
     };
   }
 
   // ----------------------------------------------------------
-  //  ONDAS DE SONIDO (fondo animado)
+  //  REJILLA CENTELLEANTE (Bergen 1985; Schrauf et al. 1997)
+  //  Fondo negro, barras grises, discos blancos en los cruces.
+  //  Disco ≈ 1,5 × ancho de barra (28' vs 19' en la réplica de 2012).
+  //  Si las barras se curvan, los puntos negros desaparecen (Bach).
   // ----------------------------------------------------------
-  function waves(canvas) {
+  function scintGrid(canvas) {
     const g = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
-    return function (t) {
-      g.clearRect(0, 0, W, H);
-      for (let k = 0; k < 4; k++) {
+    const S = 104, BAR = 18, DISC = 27;
+    const cols = Math.floor(W / S), rows = Math.floor(H / S);
+    const ox = (W - (cols - 1) * S) / 2, oy = (H - (rows - 1) * S) / 2;
+    const P = 2 * S; // período de la curva
+    function draw(amp = 0) {
+      g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+      g.strokeStyle = "#5e5e5e"; g.lineWidth = BAR; g.lineCap = "butt";
+      for (let r = 0; r < rows; r++) {
+        const y0 = oy + r * S;
         g.beginPath();
-        g.strokeStyle = `hsla(${190 + k * 40} 90% 65% / ${0.5 - k * 0.09})`;
-        g.lineWidth = 3 - k * 0.5;
-        for (let x = 0; x <= W; x += 8) {
-          const env = Math.sin((x / W) * Math.PI);
-          const y = H / 2 +
-            Math.sin(x * 0.012 + t * (1.4 + k * 0.3) + k) * 60 * env * Math.sin(t * 0.7 + k) +
-            Math.sin(x * 0.031 - t * 2.1) * 22 * env;
-          x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+        for (let x = -10; x <= W + 10; x += 6) {
+          const y = y0 + amp * Math.sin((x / P) * Math.PI * 2);
+          x === -10 ? g.moveTo(x, y) : g.lineTo(x, y);
         }
         g.stroke();
       }
-    };
+      for (let c = 0; c < cols; c++) {
+        const x0 = ox + c * S;
+        g.beginPath();
+        for (let y = -10; y <= H + 10; y += 6) {
+          const x = x0 + amp * Math.sin((y / P) * Math.PI * 2);
+          y === -10 ? g.moveTo(x, y) : g.lineTo(x, y);
+        }
+        g.stroke();
+      }
+      g.fillStyle = "#fff";
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const x0 = ox + c * S, y0 = oy + r * S;
+        const x = x0 + amp * Math.sin((y0 / P) * Math.PI * 2);
+        const y = y0 + amp * Math.sin((x0 / P) * Math.PI * 2);
+        g.beginPath(); g.arc(x, y, DISC / 2, 0, Math.PI * 2); g.fill();
+      }
+    }
+    draw(0);
+    return { draw };
   }
 
-  window.ILLUSIONS = { brainParticles, adelson, snakes, sceneSVG, gorillaSim, waves, rng };
+  // ----------------------------------------------------------
+  //  LILAC CHASER (Jeremy Hinton, 2005)
+  //  12 discos lila difuminados en círculo, cruz negra al centro,
+  //  fondo gris; falta un disco por vez y el "hueco" gira.
+  // ----------------------------------------------------------
+  function lilacChaser(canvas) {
+    const g = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    const R = Math.min(W, H) * 0.36, rDisc = Math.min(W, H) * 0.06;
+    // disco difuminado pre-renderizado (se dibuja una vez)
+    const spr = document.createElement("canvas");
+    const sz = Math.ceil(rDisc * 4);
+    spr.width = spr.height = sz;
+    const sg = spr.getContext("2d");
+    sg.filter = `blur(${Math.round(rDisc * 0.45)}px)`;
+    sg.fillStyle = "rgb(222,150,232)";
+    sg.beginPath(); sg.arc(sz / 2, sz / 2, rDisc, 0, Math.PI * 2); sg.fill();
+    let missing = 0;
+    function draw() {
+      g.fillStyle = "rgb(190,190,190)"; g.fillRect(0, 0, W, H);
+      for (let i = 0; i < 12; i++) {
+        if (i === missing) continue;
+        const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+        g.drawImage(spr, W / 2 + Math.cos(a) * R - sz / 2, H / 2 + Math.sin(a) * R - sz / 2);
+      }
+      g.fillStyle = "#000";
+      const c = Math.min(W, H) * 0.03, t = Math.max(3, c * 0.18);
+      g.fillRect(W / 2 - c, H / 2 - t / 2, 2 * c, t);
+      g.fillRect(W / 2 - t / 2, H / 2 - c, t, 2 * c);
+    }
+    draw();
+    return { step() { missing = (missing + 1) % 12; draw(); } };
+  }
+
+  // ----------------------------------------------------------
+  //  ESPIRAL (efecto consecutivo de movimiento, Plateau 1849)
+  //  Se dibuja una vez; el giro se hace rotando el <canvas>.
+  // ----------------------------------------------------------
+  function spiral(canvas) {
+    const g = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    const Rmax = Math.min(W, H) / 2 - 12;
+    g.fillStyle = "#fff";
+    g.beginPath(); g.arc(cx, cy, Rmax, 0, Math.PI * 2); g.fill();
+    // espiral de 2 brazos: el sector se oscurece si sin(2*(θ - k·r)) > 0
+    const img = g.getImageData(0, 0, W, H);
+    const d = img.data;
+    const k = 0.045;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const dx = x - cx, dy = y - cy, r = Math.hypot(dx, dy);
+      if (r > Rmax) continue;
+      const th = Math.atan2(dy, dx);
+      if (Math.sin(2 * (th - k * r)) > 0) { const i = (y * W + x) * 4; d[i] = d[i + 1] = d[i + 2] = 10; }
+    }
+    g.putImageData(img, 0, 0);
+    g.fillStyle = "#e11d48";
+    g.beginPath(); g.arc(cx, cy, 9, 0, Math.PI * 2); g.fill();
+  }
+
+  // ----------------------------------------------------------
+  //  STEPPING FEET (Stuart Anstis, 2001–2003)
+  //  Rayas verticales blanco/negro; un rectángulo azul oscuro y
+  //  otro amarillo claro se mueven JUNTOS a velocidad constante.
+  // ----------------------------------------------------------
+  function steppingFeet(canvas) {
+    const g = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    const STRIPE = 26, FOOT_W = STRIPE * 4, FOOT_H = 64;
+    const SPEED = 110; // px por segundo
+    let stripes = 1;
+    const span = W - FOOT_W - 80;
+    function draw(t) {
+      g.fillStyle = "#808080"; g.fillRect(0, 0, W, H);
+      g.globalAlpha = stripes;
+      for (let x = 0; x < W; x += STRIPE * 2) {
+        g.fillStyle = "#000"; g.fillRect(x, 0, STRIPE, H);
+        g.fillStyle = "#fff"; g.fillRect(x + STRIPE, 0, STRIPE, H);
+      }
+      g.globalAlpha = 1;
+      // ida y vuelta a velocidad constante (onda triangular)
+      const p = (t * SPEED) % (2 * span);
+      const x = 40 + (p < span ? p : 2 * span - p);
+      g.fillStyle = "#1428c8"; g.fillRect(x, H * 0.3 - FOOT_H / 2, FOOT_W, FOOT_H);
+      g.fillStyle = "#fff21e"; g.fillRect(x, H * 0.7 - FOOT_H / 2, FOOT_W, FOOT_H);
+    }
+    return { draw, setStripes(v) { stripes = v; } };
+  }
+
+  // ----------------------------------------------------------
+  //  CEGUERA INDUCIDA POR MOVIMIENTO (Bonneh et al., 2001)
+  //  Cruces azules que giran (12 rpm) + 3 puntos amarillos fijos.
+  // ----------------------------------------------------------
+  function mib(canvas) {
+    const g = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    const R = Math.min(W, H) * 0.47;
+    const STEP = R / 4.2;
+    const crosses = [];
+    for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) {
+      const x = i * STEP, y = j * STEP;
+      if (Math.hypot(x, y) < R - 10) crosses.push([x, y]);
+    }
+    const dots = [[0, -0.42], [-0.37, 0.24], [0.37, 0.24]].map(([a, b]) => [a * R, b * R]);
+    let speed = 1;
+    let angle = 0, last = null;
+    function draw(t) {
+      if (last === null) last = t;
+      angle += ((t - last) / 1000) * speed * (12 / 60) * Math.PI * 2; // 12 rpm
+      last = t;
+      g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+      g.save(); g.translate(cx, cy); g.rotate(angle);
+      g.fillStyle = "#2f54ff";
+      const L = STEP * 0.32, T = Math.max(4, STEP * 0.08);
+      for (const [x, y] of crosses) { g.fillRect(x - L, y - T / 2, 2 * L, T); g.fillRect(x - T / 2, y - L, T, 2 * L); }
+      g.restore();
+      g.fillStyle = "#ffe600";
+      for (const [x, y] of dots) { g.beginPath(); g.arc(cx + x, cy + y, 7, 0, Math.PI * 2); g.fill(); }
+      // punto de fijación que titila (como en la versión de Bach)
+      g.fillStyle = Math.floor(t / 500) % 2 ? "#ff3355" : "#22c55e";
+      g.beginPath(); g.arc(cx, cy, 6, 0, Math.PI * 2); g.fill();
+    }
+    return { draw, setSpeed(v) { speed = v; } };
+  }
+
+  // ----------------------------------------------------------
+  //  ROTACIÓN AMBIGUA (estructura a partir del movimiento)
+  //  Puntos en superficies 3D, proyección ortográfica y SIN
+  //  pistas de profundidad: el sentido de giro es ambiguo.
+  //  kind: "cube" | "cylinder" | "sphere"
+  // ----------------------------------------------------------
+  function spin3d(canvas, kind) {
+    const g = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    const r = rng(kind.length * 97);
+    const S = Math.min(W, H) * 0.3;
+    const TILT = kind === "sphere" ? 0.18 : kind === "cylinder" ? 0 : 0.32; // vista levemente desde arriba
+    const SWAP = kind === "cylinder"; // el tambor gira sobre un eje horizontal
+    const dots = []; // [x,y,z,color]
+    const lines = []; // [[x,y,z]...], color, width
+    const fills = []; // polígonos (flechas) [[pts], color]
+
+    if (kind === "cube") {
+      for (let f = 0; f < 6; f++) for (let i = 0; i < 520; i++) {
+        const a = (r() * 2 - 1) * S, b = (r() * 2 - 1) * S;
+        const p = [[S, a, b], [-S, a, b], [a, S, b], [a, -S, b], [a, b, S], [a, b, -S]][f];
+        dots.push([...p, "rgba(235,235,245,0.85)"]);
+      }
+      const v = [-S, S];
+      for (const a of v) for (const b of v) {
+        lines.push([[[-S, a, b], [S, a, b]], "#f2f2ff", 2.2]);
+        lines.push([[[a, -S, b], [a, S, b]], "#f2f2ff", 2.2]);
+        lines.push([[[a, b, -S], [a, b, S]], "#f2f2ff", 2.2]);
+      }
+      // flechas que dan la vuelta por las 4 caras laterales (a media altura)
+      const arrow = (face) => {
+        const L = S * 0.75, hw = S * 0.07, hh = S * 0.17, hl = S * 0.28;
+        const pts2 = [[-L, -hw], [L - hl, -hw], [L - hl, -hh], [L, 0], [L - hl, hh], [L - hl, hw], [-L, hw]];
+        return pts2.map(([u, w]) => face(u, w));
+      };
+      fills.push([arrow((u, w) => [-u, w, S]), "rgba(255,190,40,0.9)"]);
+      fills.push([arrow((u, w) => [S, w, u]), "rgba(255,190,40,0.9)"]);
+      fills.push([arrow((u, w) => [u, w, -S]), "rgba(255,190,40,0.9)"]);
+      fills.push([arrow((u, w) => [-S, w, -u]), "rgba(255,190,40,0.9)"]);
+    } else if (kind === "cylinder") {
+      // tambor que gira sobre un eje HORIZONTAL, con una flecha pintada en su
+      // superficie (como en el video): la flecha baja por adelante y sube por
+      // atrás, pero en pantalla no se sabe cuál es cuál.
+      const R = S * 1.2, HH = S * 0.5;
+      const inArrow = (phi, y) => {
+        const yy = Math.abs(y / HH);
+        if (phi > -0.15 && phi < 1.35) return yy < 0.36;                 // cuerpo
+        if (phi <= -0.15 && phi > -1.25) return yy < 0.86 * (phi + 1.25) / 1.1; // punta
+        return false;
+      };
+      for (let i = 0; i < 4200; i++) {
+        const phi = (r() * 2 - 1) * Math.PI, y = (r() * 2 - 1) * HH;
+        const on = inArrow(phi, y);
+        dots.push([R * Math.sin(phi), y, R * Math.cos(phi), on ? "rgba(255,80,80,0.95)" : "rgba(255,60,60,0.32)"]);
+      }
+      const rim = (y) => { const p = []; for (let k = 0; k <= 72; k++) { const a = (k / 72) * Math.PI * 2; p.push([R * Math.sin(a), y, R * Math.cos(a)]); } return p; };
+      lines.push([rim(-HH), "#4d6bff", 2]); lines.push([rim(HH), "#4d6bff", 2]);
+      const out = [];
+      const add = (phi, yy) => out.push([R * Math.sin(phi), yy * HH, R * Math.cos(phi)]);
+      for (let p = 1.35; p >= -0.15; p -= 0.04) add(p, -0.36);
+      add(-0.15, -0.86);
+      for (let k = 0; k <= 24; k++) { const p = -0.15 - 1.1 * k / 24; add(p, -0.86 * (1 - k / 24)); }
+      for (let k = 0; k <= 24; k++) { const p = -1.25 + 1.1 * k / 24; add(p, 0.86 * k / 24); }
+      add(-0.15, 0.36);
+      for (let p = -0.15; p <= 1.35; p += 0.04) add(p, 0.36);
+      add(1.35, -0.36);
+      lines.push([out, "#7b8cff", 2.4]);
+    } else {
+      const R = S * 1.15;
+      for (let i = 0; i < 4200; i++) {
+        const u = r() * 2 - 1, th = r() * Math.PI * 2, s = Math.sqrt(1 - u * u);
+        dots.push([R * s * Math.cos(th), R * u, R * s * Math.sin(th), "rgba(160,90,255,0.7)"]);
+      }
+      // disco interior inclinado (gira con la esfera)
+      const RD = R * 0.62, tiltD = 0.9;
+      // disco en un plano inclinado, corrido hacia la superficie de la esfera
+      const disc = (a, rr) => { const x = rr * Math.cos(a), y = rr * Math.sin(a); return [x, y * Math.cos(tiltD), y * Math.sin(tiltD) + R * 0.38]; };
+      for (let i = 0; i < 900; i++) dots.push([...disc(r() * Math.PI * 2, RD * Math.sqrt(r())), "rgba(255,240,140,0.9)"]);
+      const rim = []; for (let k = 0; k <= 72; k++) rim.push(disc((k / 72) * Math.PI * 2, RD));
+      lines.push([rim, "#e8f060", 2.4]);
+    }
+
+    let depth = 0; // 0 = sin pistas (ambiguo); 1 = puntos de adelante más grandes
+    const ct = Math.cos(TILT), st = Math.sin(TILT);
+    function proj(p, ca, sa) {
+      const x = p[0] * ca + p[2] * sa, z = -p[0] * sa + p[2] * ca;
+      const y = p[1] * ct - z * st, z2 = p[1] * st + z * ct;
+      return SWAP ? [cx + y, cy + x, z2] : [cx + x, cy + y, z2];
+    }
+    function draw(t) {
+      const a = (t / 1000) * (Math.PI * 2 / 7); // una vuelta cada 7 s
+      const ca = Math.cos(a), sa = Math.sin(a);
+      g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+      for (const [pts, col] of fills) {
+        g.fillStyle = col;
+        g.beginPath();
+        pts.forEach((p, i) => { const q = proj(p, ca, sa); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); });
+        g.closePath(); g.fill();
+      }
+      for (const d of dots) {
+        const q = proj(d, ca, sa);
+        let s = 2.2;
+        if (depth > 0) {
+          const k = (q[2] / (S * 1.3) + 1) / 2; // 0 atrás … 1 adelante
+          s = 2.2 + depth * (k * 3.2 - 1.2);
+          g.globalAlpha = 1 - depth * (1 - k) * 0.8;
+        }
+        g.fillStyle = d[3];
+        g.fillRect(q[0] - s / 2, q[1] - s / 2, s, s);
+      }
+      g.globalAlpha = 1;
+      for (const [pts, col, w] of lines) {
+        g.strokeStyle = col; g.lineWidth = w;
+        g.beginPath();
+        pts.forEach((p, i) => { const q = proj(p, ca, sa); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); });
+        g.stroke();
+      }
+    }
+    return { draw, setDepth(v) { depth = v; } };
+  }
+
+  window.ILLUSIONS = { rng, brainParticles, sceneSVG, cafeWall, scintGrid, lilacChaser, spiral, steppingFeet, mib, spin3d };
 })();

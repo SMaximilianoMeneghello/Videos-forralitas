@@ -4,9 +4,10 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 
 📘 **Guía de estudio** (guion en inglés con traducción, pronunciación, datos y preguntas): [`guia.html`](guia.html). Publicada en: https://smaximilianomeneghello.github.io/Videos-forralitas/presentacion-cerebro/guia.html
 
-- **20 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido.
-- **9 momentos interactivos**: punto ciego, líneas de Müller-Lyer, tablero de Adelson, el vestido, la bandera fantasma, el efecto Stroop, el desafío del gorila, encontrá la diferencia y el efecto Mandela.
-- **Control remoto en tu celular**: botones grandes, qué decir en cada paso (en inglés, con la traducción abajo), cronómetro y lista de diapositivas.
+- **15 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido. En pantalla van solo palabras clave: la explicación la das vos.
+- **9 ilusiones comprobadas** (documentadas por el científico de la visión Michael Bach y en la literatura): Café wall, círculos de Ebbinghaus, rejilla centelleante, Lilac chaser, la bandera fantasma (postimagen), la espiral (efecto consecutivo de movimiento), Stepping feet, ceguera inducida por movimiento y tres rotaciones ambiguas (cubo, flecha en tambor y esfera, como en los videos). Después vienen memoria y efecto Mandela.
+- **Partes automáticas**: dentro de cada diapositiva todo aparece solo, con el tiempo calculado según lo que tenés que decir. Vos solo pasás de diapositiva.
+- **Control remoto en tu celular**: qué decir (en inglés, con la traducción abajo), datos clave de cada diapositiva, cuenta regresiva de la próxima parte con ⏸ Pausar y ⏩ Ya, cronómetro y lista de diapositivas.
 - **Juego final**: tus compañeros entran con un QR o un enlace, ponen su nombre y responden 12 preguntas con 40 segundos cada una. Hay puntos por velocidad, rachas, ranking y podio con confeti.
 
 ---
@@ -31,7 +32,8 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 3. Con tu celular **escaneá el QR** de la derecha y escribí el **PIN de 4 números**.
 4. En la netbook tocá **▶ START PRESENTATION**: se pone en pantalla completa.
 5. Desde ahí manejás todo con el celular:
-   - **SIGUIENTE** avanza. En las diapositivas interactivas cada toque revela la próxima parte.
+   - Las partes de cada diapositiva aparecen **solas**. Arriba de las notas ves cuánto falta para la próxima; **⏸ Pausar** la frena y **⏩ Ya** la muestra en el momento.
+   - **SIGUIENTE DIAPO** pasa a la próxima diapositiva (eso lo hacés siempre vos).
    - En la tarjeta **🎤 What to say** tenés el texto en inglés para cada momento, con la traducción abajo.
    - **☰ Diapos** salta a cualquier diapositiva.
 6. Al terminar la última diapositiva se abre el **juego**:
@@ -44,7 +46,9 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 
 | Tecla | Qué hace |
 |---|---|
-| `→` / `Espacio` | Siguiente |
+| `→` | Siguiente diapositiva |
+| `Espacio` | Mostrar ya la próxima parte |
+| `S` | Pausar o seguir las partes automáticas |
 | `←` | Anterior |
 | `F` | Pantalla completa |
 | `M` | Prender o apagar el sonido |
@@ -77,6 +81,6 @@ Abrí `index.html?local=1` en una pestaña. Copiá el enlace del control que apa
 
 ## Créditos
 
-Ilusiones basadas en trabajos de Franz Müller-Lyer (1889), Edward H. Adelson (1995), J. R. Stroop (1935), Simons y Chabris (1999), Akiyoshi Kitaoka y Elizabeth Loftus. Todas están redibujadas con código.
+Ilusiones basadas en trabajos de Richard Gregory y Priscilla Heard (Café wall, 1979), Hermann Ebbinghaus y E. B. Titchener (1901), Bergen y Schrauf (rejilla centelleante), Jeremy Hinton (Lilac chaser, 2005), Joseph Plateau (espiral, 1849), Stuart Anstis (Stepping feet), Bonneh, Cooperman y Sagi (ceguera inducida por movimiento, 2001), el efecto de profundidad cinética y Elizabeth Loftus. Los parámetros se tomaron de las páginas de Michael Bach (https://michaelbach.de/ot/). Todas están redibujadas con código.
 
 Librerías: GSAP, PeerJS, qrcode-generator y canvas-confetti (están incluidas en `js/vendor/`).
