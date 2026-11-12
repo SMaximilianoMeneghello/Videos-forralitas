@@ -51,6 +51,7 @@ def clip(texto, voz=None, rate=None):
     """Devuelve la locución de `texto` como array float mono (SR Hz), sin silencios en los bordes."""
     voz, rate = voz or VOZ, rate or RATE
     h = hashlib.md5(f"{voz}|{rate}|{texto}".encode()).hexdigest()[:12]
+    os.makedirs("voz", exist_ok=True)
     mp3, wav = f"voz/cache_{h}.mp3", f"voz/cache_{h}.wav"
     if not os.path.exists(wav):
         sintetizar(texto, voz, mp3, rate=rate)
@@ -66,6 +67,7 @@ def clip_palabras(texto, voz=None, rate=None):
     import json
     voz, rate = voz or VOZ, rate or RATE
     h = hashlib.md5(f"{voz}|{rate}|{texto}|wb".encode()).hexdigest()[:12]
+    os.makedirs("voz", exist_ok=True)
     mp3, wav, js = f"voz/cache_{h}.mp3", f"voz/cache_{h}.wav", f"voz/cache_{h}.json"
     if not (os.path.exists(wav) and os.path.exists(js)):
         marcas = sintetizar(texto, voz, mp3, rate=rate, boundary="WordBoundary")
