@@ -162,7 +162,10 @@ def sello(precio):
 # ============================================================ video
 class Video:
     def __init__(self):
-        self.src = Fuente(os.path.join(AQUI, "material", "video.mp4"))
+        self.s6 = self._still("f6_ia.png")       # los dos montículos de $6.000 (Calidad 1)
+        self.s5 = self._still("f5_ia.png")       # el montículo del final, $5.000 (Calidad 2)
+        self.tag1 = self._etiqueta("CALIDAD 1")
+        self.tag2 = self._etiqueta("CALIDAD 2")
         # ---- voz y tiempos
         self.voces = {}
         for clave, txt, sub in VOZ:
@@ -202,6 +205,25 @@ class Video:
         self._cierre_piezas()
         self._subs = {}
 
+    @staticmethod
+    def _still(nombre):
+        """Cuadro más nítido del video, ampliado con IA (preparar_cuadros.py) y con el verde realzado."""
+        rgb = cv2.cvtColor(cv2.imread(os.path.join(AQUI, "cache", nombre)), cv2.COLOR_BGR2RGB)
+        rgb = verde_lindo(rgb, 0.8)
+        return np.clip(rgb.astype(np.float32) * 1.08 + 4, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _etiqueta(txt):
+        p = pastilla(txt, 46, VERDE, BLANCO, ANTON)
+        w, h = p.shape[1], p.shape[0]
+        out = np.zeros((h + 22, w, 4), np.float32)
+        out = sobre(out, p, 0, 0)
+        tri = np.zeros((24, 34), np.uint8)
+        cv2.fillPoly(tri, [np.array([[0, 0], [33, 0], [17, 23]])], 255, cv2.LINE_AA)
+        a = tri.astype(np.float32)[..., None] / 255
+        tri4 = np.dstack([np.array(VERDE, np.float32) * a, a[..., 0]])
+        return sobre(out, tri4, w // 2 - 17, h - 2)
+
     def tw(self, clave, i):
         v = self.voces[clave]
         return v["t0"] + v["tiempos"][i]
@@ -215,35 +237,54 @@ class Video:
         return np.clip(f, 0, 255).astype(np.uint8)
 
     # ---------------------------------------------------------------- video en pantalla
-    def tiempo_fuente(self, t):
-        if t < self.t_promo:
-            return ida_vuelta(t, 0.15, 4.35, 0.55)
-        return 6.05 + min((t - self.t_promo) * 0.36, 1.8)
-
     def cuadro_vertical(self, t):
-        img = self.src.at(self.tiempo_fuente(t))
-        cx = 0.36 + 0.24 * e_inout(clamp01(t / 4.6))
-        return fp.recorte(img, W, H, cx, 0.5, 1.0 + 0.06 * t / 4.6)
+        e = e_inout(clamp01(t / 4.6))
+        return fp.recorte(self.s6, W, H, 0.28 + 0.32 * e, 0.55, 1.10 - 0.10 * e)
+
+    def cam_banda(self, t):
+        """(imagen, cx, cy, zoom) de la franja: Calidad 1 hasta que se nombra la Calidad 2."""
+        if t < self.k["c2"]:
+            p = clamp01((t - self.t_split) / (self.k["c2"] - self.t_split))
+            return self.s6, 0.5, 0.52, 1.0 + 0.08 * e_inout(p)
+        p = clamp01((t - self.k["c2"]) / (self.t_cierre - self.k["c2"]))
+        return self.s5, 0.5, 0.55, 1.02 + 0.12 * e_inout(p)
 
     def cuadro_banda(self, t, w=W - 60, h=BAND_H):
-        img = self.src.at(self.tiempo_fuente(t))
-        if t < self.t_promo:
-            return fp.recorte(img, w, h, 0.5, 0.5, 1.04 + 0.04 * np.sin(t * 0.4))
-        # toma desde arriba: se recorta del lado izquierdo para dejar afuera las bolsas
-        sub = img[:, :1050]
-        return fp.recorte(sub, w, h, 0.5, 0.45, 1.05)
+        img, cx, cy, z = self.cam_banda(t)
+        return fp.recorte(img, w, h, cx, cy, z)
+
+    def punto_banda(self, t, nx, ny, w=W - 60, h=BAND_H):
+        """Posición en pantalla de un punto (nx, ny) de la imagen de la franja."""
+        img, cx, cy, z = self.cam_banda(t)
+        sh, sw = img.shape[:2]
+        s = max(w / sw, h / sh) * z
+        vw, vh = w / s, h / s
+        x0 = np.clip(cx * sw - vw / 2, 0, sw - vw)
+        y0 = np.clip(cy * sh - vh / 2, 0, sh - vh)
+        return 30 + (nx * sw - x0) * s, BAND_Y + (ny * sh - y0) * s
 
     def banda(self, f, t, y=BAND_Y):
         img = self.cuadro_banda(t)
-        if self.t_promo - 0.2 <= t < self.t_promo + 0.2:           # cambio de toma con destello
-            p = (t - (self.t_promo - 0.2)) / 0.4
-            a = fp.recorte(self.src.at(ida_vuelta(self.t_promo, 0.15, 4.35, 0.55)), W - 60, BAND_H, 0.5, 0.5, 1.05)
-            img = a if p < 0.5 else img
+        tc = self.k["c2"]
+        if tc - 0.2 <= t < tc + 0.2:                               # cambio de montículo con destello
+            p = (t - (tc - 0.2)) / 0.4
+            img = self.cuadro_banda(tc - 0.01) if p < 0.5 else self.cuadro_banda(tc)
             fl = 0.7 * np.exp(-((p - 0.5) / 0.2) ** 2)
             img = cv2.addWeighted(img, 1 - fl, np.full_like(img, 255), fl, 0)
         spr = np.dstack([img.astype(np.float32) * self.mascara_banda[..., None], self.mascara_banda])
         blit(f, sombra(spr, 20, 0.35), W / 2, y + BAND_H / 2 + 14)
         blit(f, spr, W / 2, y + BAND_H / 2)
+        # etiquetas sobre cada montículo
+        if self.k["c1"] - 0.1 <= t < self.k["c2"]:
+            for i, (nx, ny) in enumerate(((0.33, 0.56), (0.76, 0.58))):
+                q = prog(t, self.k["c1"] + 0.1 + 0.15 * i, 0.35)
+                x, yy = self.punto_banda(t, nx, ny)
+                blit(f, self.tag1, x, yy - 40 - (1 - e_out(q)) * 40, alpha=clamp01(q * 3),
+                     escala=max(e_back(q, 2.2), 0.01))
+        elif t >= self.k["c2"]:
+            q = prog(t, self.k["c2"] + 0.15, 0.35)
+            x, yy = self.punto_banda(t, 0.52, 0.58)
+            blit(f, self.tag2, x, yy - 40 - (1 - e_out(q)) * 40, alpha=clamp01(q * 3), escala=max(e_back(q, 2.2), 0.01))
 
     # ---------------------------------------------------------------- escenas
     def intro(self, t):
@@ -270,10 +311,10 @@ class Video:
         cx0, cy0 = x0 + (X0 - x0) * p, y0 + (Y0 - y0) * p
         cx1, cy1 = x1 + (X1 - x1) * p, y1 + (Y1 - y1) * p
         w, h = int(cx1 - cx0), int(cy1 - cy0)
-        img = self.src.at(self.tiempo_fuente(t))
+        img = self.s6
         # el recorte de la fuente pasa de vertical (9:16) a horizontal
         hh = img.shape[0]
-        wv, wh = hh * 9 / 16, img.shape[1]
+        wv, wh = hh * 9 / 16, min(img.shape[1], hh * (W - 60) / BAND_H)
         cw = wv + (wh - wv) * p
         cxs = img.shape[1] * (0.6 + (0.5 - 0.6) * p)
         xs0 = int(np.clip(cxs - cw / 2, 0, img.shape[1] - cw))
