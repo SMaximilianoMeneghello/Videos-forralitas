@@ -14,3 +14,7 @@ forralitas_video_alfa2/previas/
 voz/
 forralitas_video_final/proyecto/voz/
 forralitas_video_alfa2/cache/
+forralitas_categorias/previas/
+forralitas_categorias/logs/
+forralitas_categorias/videos/*_video.mp4
+forralitas_categorias/videos/*.wav
