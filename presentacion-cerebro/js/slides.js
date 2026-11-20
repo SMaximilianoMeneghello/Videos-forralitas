@@ -83,7 +83,7 @@
     ],
     facts: [
       "Tema: las ilusiones muestran los ATAJOS que usa el cerebro para ver rápido.",
-      "Plan: 9 ilusiones en vivo + memoria + juego final con los celulares.",
+      "Plan: 8 ilusiones en vivo + memoria + juego final con los celulares.",
     ],
     html: (cfg) => `
       <canvas class="fill brain-cv" width="1600" height="900"></canvas>
@@ -91,7 +91,7 @@
         <div class="kicker" data-in="fade" data-d="1.4">${cfg.materia ? cfg.materia + " · " : ""}Presentation</div>
         <h1 class="h-xl" data-in="letters" data-d="1.8">YOUR BRAIN</h1>
         <h1 class="h-xl accent glitch" data-text="IS LYING TO YOU" data-in="letters" data-d="2.3">IS LYING TO YOU</h1>
-        <p class="lead" data-in="up" data-d="3.1">9 live illusions · 1 final game</p>
+        <p class="lead" data-in="up" data-d="3.1">8 live illusions · 1 final game</p>
         <div class="presenter" data-in="fade" data-d="3.7">Presented by <b>${cfg.presentador}</b></div>
       </div>`,
     enter(ctx) {
@@ -517,69 +517,6 @@
     },
   });
 
-  // 11 ────────────────────────────────────────────── ROTACIÓN AMBIGUA
-  S.push({
-    id: "giro", title: "9 · Which way is it spinning?", hue: 45, transition: "glitch",
-    notes: [
-      { en: "Last illusion. Which way is this cube spinning: to the left, or to the right? … Some of you say left, some say right! Keep looking: it can change direction in your head!",
-        es: "Última ilusión. ¿Para qué lado gira este cubo: a la izquierda o a la derecha? … ¡Algunos dicen izquierda y otros derecha! Sigan mirando: ¡puede cambiar de sentido en tu cabeza!" },
-      { en: "Now this arrow on a tube. Is it pointing up or down? Which way is it turning? Look again… it changes!",
-        es: "Ahora esta flecha sobre un tubo. ¿Apunta para arriba o para abajo? ¿Para qué lado gira? Miren otra vez… ¡cambia!" },
-      { en: "And this ball. Which way is the yellow circle turning?",
-        es: "Y esta pelota. ¿Para qué lado gira el círculo amarillo?" },
-      { en: "The truth is: both answers are correct! These are just dots moving on a flat screen. There is no information about what is in front and what is behind, so your brain has to guess. Now I add depth: the dots in front are bigger. Now everybody sees the same direction!",
-        es: "La verdad: ¡las dos respuestas son correctas! Son solo puntos moviéndose en una pantalla plana. No hay información de qué está adelante y qué está atrás, así que tu cerebro tiene que adivinar. Ahora agrego profundidad: los puntos de adelante son más grandes. ¡Ahora todos ven el mismo sentido!" },
-    ],
-    hold: [7, 6, 5, 2],
-    facts: [
-      "Ilusiones de rotación ambigua (biestables): 'estructura a partir del movimiento' / efecto de profundidad cinética.",
-      "Sin pistas de profundidad hay DOS interpretaciones igual de válidas; el cerebro elige una y a veces cambia sola.",
-      "Es la misma familia que el cubo de Necker (Louis Necker, 1832).",
-      "Al agregar profundidad (puntos de adelante más grandes) la ambigüedad desaparece.",
-    ],
-    html: () => `
-      <div class="ill">
-        <div class="ill-head"><div class="kicker" data-in="fade">Illusion 9 · Bistable motion</div>
-          <h2 class="h-m" data-in="letters" data-d=".2">Which way is it <span class="accent">spinning?</span></h2></div>
-        <div class="ill-row">
-          <div class="side">
-            <div class="pt big" data-in="left" data-d=".8"><i>⟲</i><span>To the <b>left?</b></span></div>
-            <div class="pt big" data-in="left" data-d="1"><i>⟳</i><span>To the <b>right?</b></span></div>
-            <div class="pt obj-name" data-in="left" data-d="1.2"><i>🧊</i><span>A cube</span></div>
-          </div>
-          <div class="ill-stage sq dark" data-in="zoom" data-d=".5"><canvas class="spin-cv" width="580" height="580"></canvas></div>
-          <div class="side">
-            <div class="pt" data-step="3" data-in="right"><i>✌️</i><span><b>Both</b> are correct</span></div>
-            <div class="pt" data-step="3" data-in="right" data-d=".3"><i>🫥</i><span>No depth → the brain <b>guesses</b></span></div>
-            <div class="pt" data-step="3" data-in="right" data-d=".6"><i>👓</i><span>Add depth → <b>one</b> answer</span></div>
-          </div>
-        </div>
-      </div>`,
-    enter(ctx) {
-      const cv = ctx.$(".spin-cv");
-      ctx.data.obj = I.spin3d(cv, "cube");
-      ctx.raf((t) => ctx.data.obj.draw(t));
-    },
-    step(ctx, n) {
-      const cv = ctx.$(".spin-cv");
-      const names = { 1: ["🧪", "An arrow on a tube"], 2: ["🔮", "A ball with a disc"] };
-      if (n === 1 || n === 2) {
-        ctx.tween(cv, { opacity: 0, duration: 0.35, onComplete: () => {
-          ctx.data.obj = I.spin3d(cv, n === 1 ? "cylinder" : "sphere");
-          ctx.tween(cv, { opacity: 1, duration: 0.5 });
-        } });
-        const nm = ctx.$(".obj-name");
-        nm.innerHTML = `<i>${names[n][0]}</i><span>${names[n][1]}</span>`;
-        ctx.tween(nm, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2)" });
-        ctx.sfx.whoosh(0.5);
-      }
-      if (n === 3) {
-        const o = { d: 0 };
-        ctx.tween(o, { d: 1, duration: 2, delay: 1, onUpdate: () => ctx.data.obj.setDepth(o.d) });
-      }
-    },
-  });
-
   // 12 ────────────────────────────────────────────── MEMORIA
   S.push({
     id: "memoria", title: "Your memory lies too", hue: 330, transition: "dive",
@@ -642,44 +579,6 @@
     },
   });
 
-  // 13 ────────────────────────────────────────────── EFECTO MANDELA
-  S.push({
-    id: "mandela", title: "The Mandela effect (vote)", hue: 270, transition: "glitch",
-    notes: [
-      { en: "Three quick questions. Vote with your hands! First: does Pikachu have a black tip on its tail?",
-        es: "Tres preguntas rápidas. ¡Voten con la mano! Primera: ¿Pikachu tiene la punta de la cola negra?" },
-      { en: "NO! Its tail is yellow, with a brown part at the bottom. It was never black. Second: does the Monopoly man wear a monocle?",
-        es: "¡NO! Su cola es amarilla, con una parte marrón abajo. Nunca fue negra. Segunda: ¿el señor del Monopoly usa monóculo?" },
-      { en: "NO! He never had a monocle. Third: does Darth Vader say “Luke, I am your father”?",
-        es: "¡NO! Nunca tuvo monóculo. Tercera: ¿Darth Vader dice “Luke, yo soy tu padre”?" },
-      { en: "NO! He says: “No, I am your father.” He never says “Luke”.",
-        es: "¡NO! Dice: “No, yo soy tu padre”. Nunca dice “Luke”." },
-      { en: "When lots of people remember the same thing wrong, it's called the Mandela effect. Many people “remembered” that Nelson Mandela died in prison in the 1980s… but he was freed in 1990 and became president of South Africa.",
-        es: "Cuando muchísima gente recuerda lo mismo de forma equivocada, se llama efecto Mandela. Mucha gente “recordaba” que Nelson Mandela murió en la cárcel en los 80… pero lo liberaron en 1990 y llegó a presidente de Sudáfrica." },
-    ],
-    hold: [5, 5, 5, 1, 0],
-    facts: [
-      "El nombre lo inventó Fiona Broome (≈2009): mucha gente 'recordaba' que Mandela murió preso en los 80.",
-      "Realidad: Mandela salió libre en 1990, fue presidente de Sudáfrica (1994–1999) y murió en 2013.",
-      "Pikachu: cola amarilla con base marrón (las orejas sí tienen puntas negras). Monopoly: sin monóculo. Vader: “No, I am your father”.",
-    ],
-    html: () => `
-      <div class="col center wrap">
-        <div class="live-tag" data-in="pop">⚡ VOTE</div>
-        <h2 class="h-l" data-in="letters" data-d=".2">The <span class="accent">Mandela</span> effect</h2>
-        <div class="row mandela">
-          <div class="card mq" data-in="up" data-d=".7"><div class="mq-ico">⚡</div><p>Pikachu’s tail: <b>black tip?</b></p>
-            <div class="mq-a" data-step="1" data-in="stamp"><b>NO</b> · yellow + brown base</div></div>
-          <div class="card mq" data-in="up" data-d=".9"><div class="mq-ico">🎩</div><p>Monopoly man: <b>monocle?</b></p>
-            <div class="mq-a" data-step="2" data-in="stamp"><b>NO</b> · never</div></div>
-          <div class="card mq" data-in="up" data-d="1.1"><div class="mq-ico">🎬</div><p>“<b>Luke</b>, I am your father”?</p>
-            <div class="mq-a" data-step="3" data-in="stamp"><b>NO</b> · “No, I am your father”</div></div>
-        </div>
-        <p class="punch small" data-step="4" data-in="up">Many people · same <span class="accent">wrong</span> memory</p>
-      </div>`,
-    step(ctx, n) { if (n <= 3) ctx.sfx.wrong(); },
-  });
-
   // 14 ────────────────────────────────────────────── POR QUÉ PASA
   S.push({
     id: "prediccion", title: "Why does this happen?", hue: 250, transition: "warp",
@@ -688,13 +587,13 @@
         es: "Entonces, ¿por qué el cerebro hace todo esto? Miren este circuito: los sentidos mandan poca información, y con eso el cerebro arma una predicción del mundo." },
       { en: "Your brain is not a camera: it's a prediction machine. It guesses, to be fast and to save energy.",
         es: "Tu cerebro no es una cámara: es una máquina de predicciones. Adivina, para ser rápido y ahorrar energía." },
-      { en: "Most of the time it's right… that's why we're alive! But when it makes a mistake… you get an illusion. And today you saw nine of them.",
-        es: "Casi siempre acierta… ¡por eso estamos vivos! Pero cuando se equivoca… aparece una ilusión. Y hoy vieron nueve." },
+      { en: "Most of the time it's right… that's why we're alive! But when it makes a mistake… you get an illusion. And today you saw eight of them.",
+        es: "Casi siempre acierta… ¡por eso estamos vivos! Pero cuando se equivoca… aparece una ilusión. Y hoy vieron ocho." },
     ],
     hold: [1, 1, 0],
     facts: [
       "Neurociencia actual: 'procesamiento predictivo'. El cerebro predice y compara con lo que llega; procesa a fondo solo las diferencias.",
-      "Resumen: contexto (Ebbinghaus), bordes (Café wall), células cansadas (bandera, lilac, espiral), contraste (pasos), atención (puntos amarillos), adivinar la profundidad (giro).",
+      "Resumen: contexto (Ebbinghaus), bordes (Café wall), células cansadas (bandera, lilac, espiral), contraste (pasos), atención (puntos amarillos).",
     ],
     html: () => `
       <div class="col center wrap">

@@ -47,19 +47,9 @@ window.QUESTIONS = [
     ok: 2,
   },
   {
-    q: "Which way was the dotted cube really spinning?",
-    a: ["Only left", "Only right", "It wasn’t moving", "Both answers were possible"],
-    ok: 3,
-  },
-  {
     q: "About how much of your body’s energy does your brain use?",
     a: ["20%", "2%", "50%", "5%"],
     ok: 0,
-  },
-  {
-    q: "What is the “Mandela effect”?",
-    a: ["Seeing colors that don’t exist", "When lots of people remember the same thing wrong", "A dot that disappears", "A spinning illusion"],
-    ok: 1,
   },
   {
     q: "According to the presentation, your brain works like…",

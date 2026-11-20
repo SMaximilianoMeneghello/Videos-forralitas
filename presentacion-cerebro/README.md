@@ -4,11 +4,11 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 
 📘 **Guía de estudio** (guion en inglés con traducción, pronunciación, datos y preguntas): [`guia.html`](guia.html). Publicada en: https://smaximilianomeneghello.github.io/Videos-forralitas/presentacion-cerebro/guia.html
 
-- **15 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido. En pantalla van solo palabras clave: la explicación la das vos.
-- **9 ilusiones comprobadas** (documentadas por el científico de la visión Michael Bach y en la literatura): Café wall, círculos de Ebbinghaus, rejilla centelleante, Lilac chaser, la bandera fantasma (postimagen), la espiral (efecto consecutivo de movimiento), Stepping feet, ceguera inducida por movimiento y tres rotaciones ambiguas (cubo, flecha en tambor y esfera, como en los videos). Después vienen memoria y efecto Mandela.
+- **13 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido. En pantalla van solo palabras clave: la explicación la das vos.
+- **8 ilusiones comprobadas** (documentadas por el científico de la visión Michael Bach y en la literatura): Café wall, círculos de Ebbinghaus, rejilla centelleante, Lilac chaser, la bandera fantasma (postimagen), la espiral (efecto consecutivo de movimiento), Stepping feet y ceguera inducida por movimiento. Después viene la memoria.
 - **Partes automáticas**: dentro de cada diapositiva todo aparece solo, con el tiempo calculado según lo que tenés que decir. Vos solo pasás de diapositiva.
 - **Control remoto en tu celular**: qué decir (en inglés, con la traducción abajo), datos clave de cada diapositiva, cuenta regresiva de la próxima parte con ⏸ Pausar y ⏩ Ya, cronómetro y lista de diapositivas.
-- **Juego final**: tus compañeros entran con un QR o un enlace, ponen su nombre y responden 12 preguntas con 40 segundos cada una. Hay puntos por velocidad, rachas, ranking y podio con confeti.
+- **Juego final**: tus compañeros entran con un QR o un enlace, ponen su nombre y responden 10 preguntas con 40 segundos cada una. Hay puntos por velocidad, rachas, ranking y podio con confeti.
 
 ---
 
