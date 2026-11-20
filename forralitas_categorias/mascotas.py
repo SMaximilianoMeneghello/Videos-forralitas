@@ -25,14 +25,12 @@ ITEMS = [  # (clave, tipo, fuente(s), foco/zoom, nombre, detalle)
     ("wenuy", "foto", "fotos/02_perros_gatos.jpg", (0.41, 0.42, 2.6), "WENUY", "Cachorros y adultos"),
     ("gatos", "png", ["assets/oferta/sabrositos_mix_bolsa.png", "assets/oferta/sabrositos_pescado_bolsa.png"], None,
      "SABROSITOS GATO", "Sabor mix y pescado"),
-    ("piedras", "png", ["assets/oferta/piedras_rec.png"], None, "PIEDRAS SANITARIAS", "Bolsa de 1 kg"),
 ]
 GUION = [
     ("intro", "¡Para tus mascotas, lo mejor!", "¡Para tus *mascotas,* | lo *mejor!*"),
     ("sabrositos", "Sabrositos, para perros.", "*Sabrositos,* para *perros.*"),
     ("wenuy", "Güenuy, para cachorros y adultos.", "*Wenuy,* | para *cachorros* y *adultos.*"),
-    ("gatos", "Sabrositos para gatos, sabor mix y pescado.", "*Sabrositos* para *gatos,* | sabor *mix* y *pescado.*"),
-    ("piedras", "Y piedras sanitarias, en bolsa de un kilo.", "Y *piedras* *sanitarias,* | en bolsa de *1* *kilo.*"),
+    ("gatos", "Y Sabrositos para gatos, sabor mix y pescado.", "Y *Sabrositos* para *gatos,* | sabor *mix* y *pescado.*"),
     ("fin", "Todo para tus mascotas, en Forralitas. ¡Te esperamos!",
      "Todo para tus *mascotas,* | en *Forralitas.* | *¡Te* *esperamos!*"),
 ]
