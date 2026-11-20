@@ -21,20 +21,18 @@ BARRA = 200
 PRODUCTOS = [  # (clave, foto, cámara (cx, cy, zoom) inicio → fin, nombre en pantalla, detalle)
     ("alfa", "fotos_presentacion/01_alfa.jpg", ((0.50, 0.45, 1.25), (0.50, 0.55, 1.05)), "ALFA VERDE", "En fardos"),
     ("mezcla", "fotos_presentacion/03_mezcla_caballo.jpg", ((0.40, 0.50, 1.05), (0.60, 0.50, 1.25)),
-     "MEZCLA PARA CABALLO", "Bolsa de 35 kg y suelto"),
-    ("avena", "assets/flyer/avena.jpg", ((0.50, 0.40, 1.30), (0.50, 0.60, 1.08)), "AVENA", "Bolsa de 30 kg"),
-    ("maiz", "fotos_presentacion/06_maiz_quebrado.jpg", ((0.55, 0.55, 1.05), (0.45, 0.45, 1.28)),
-     "MAÍZ QUEBRADO", "Bolsa de 40 kg y suelto"),
+     "MEZCLA PARA CABALLO", "Preparada · Bolsa de 35 kg y suelto"),
+    ("alto", "assets/nuevas/alto_rendimiento.jpg", ((0.45, 0.50, 1.25), (0.58, 0.48, 1.05)), "ALTO RENDIMIENTO", ""),
+    ("yegua", "assets/nuevas/yegua_con_cria.jpg", ((0.58, 0.45, 1.05), (0.45, 0.50, 1.25)), "YEGUA CON CRÍA", ""),
 ]
 GUION = [
     ("intro", "¿Tenés caballos? Mirá todo lo que tenemos para ellos.",
      "¿Tenés *caballos?* | Mirá todo lo que | tenemos para ellos."),
     ("alfa", "Alfa verde, en fardos.", "*Alfa* *verde,* en fardos."),
-    ("mezcla", "Mezcla para caballo, en bolsa de treinta y cinco kilos y suelto.",
-     "*Mezcla* *para* *caballo,* | en bolsa de *35* _ _ *kilos* | y suelto."),
-    ("avena", "Avena, en bolsa de treinta kilos.", "*Avena,* | en bolsa de *30* *kilos.*"),
-    ("maiz", "Y maíz quebrado, en bolsa de cuarenta kilos y suelto.",
-     "Y *maíz* *quebrado,* | en bolsa de *40* *kilos* | y suelto."),
+    ("mezcla", "Mezcla para caballo preparada, en bolsa de treinta y cinco kilos y suelto.",
+     "*Mezcla* *para* *caballo* | *preparada,* en bolsa | de *35* _ _ *kilos* y suelto."),
+    ("alto", "Alto rendimiento.", "*Alto* *rendimiento.*"),
+    ("yegua", "Y alimento para yegua con cría.", "Y *alimento* para | *yegua* *con* *cría.*"),
     ("fin", "Todo para tus caballos, en Forralitas. ¡Te esperamos!",
      "Todo para tus *caballos,* | en *Forralitas.* | *¡Te* *esperamos!*"),
 ]
@@ -65,8 +63,11 @@ def cartel(nombre, detalle):
         cv2.line(costura, (x, h - 22), (x + 13, h - 22), 255, 3, cv2.LINE_AA)
     a = costura.astype(np.float32) / 255 * 0.7
     base = sobre(base, a_sprite(np.full((h, w, 3), ORO, np.float32), a), 0, 0)
-    base = centrar(base, T(nombre, RYE, tam, CREMA, sombra=0.35), w / 2, 92)
-    base = centrar(base, T(detalle, MONT, 44, ORO), w / 2, 165)
+    if detalle:
+        base = centrar(base, T(nombre, RYE, tam, CREMA, sombra=0.35), w / 2, 92)
+        base = centrar(base, T(detalle, MONT, ajustar(detalle, MONT, 44, w - 90), ORO), w / 2, 165)
+    else:
+        base = centrar(base, T(nombre, RYE, tam, CREMA, sombra=0.35), w / 2, h / 2 + 4)
     return base
 
 

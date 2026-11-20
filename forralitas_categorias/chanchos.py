@@ -1,4 +1,4 @@
-"""Video "Para tus chanchos" — estilo mosaico rosa: fotos en recuadros redondeados que se reacomodan;
+"""Video "Para tus cerdos" — estilo mosaico rosa: fotos en recuadros redondeados que se reacomodan;
 el producto que se nombra pasa al recuadro grande.   python chanchos.py  |  python chanchos.py --cuadros 1 5"""
 import os
 import sys
@@ -18,20 +18,19 @@ CORAL = (236, 92, 104)
 BLANCO = (255, 255, 255)
 
 ITEMS = [  # (clave, foto, foco (cx, cy), nombre, detalle)
-    ("intro", "assets/nuevas/n02.png", (0.52, 0.45), "¿CRIÁS CHANCHOS?", ""),
-    ("mezcla", "fotos_presentacion/02_engorde_cerdo.jpg", (0.5, 0.5), "MEZCLA PARA CERDO", "Preparada"),
-    ("pellet", "assets/nuevas/n09.jpg", (0.5, 0.45), "PELLET CON MAÍZ", "Bolsa de 30 kg y suelto"),
-    ("harina", "assets/nuevas/harina_carne.jpg", (0.5, 0.5), "ENGORDE", "Con harina de carne"),
+    ("intro", "assets/nuevas/n02.png", (0.52, 0.45), "¿TENÉS CERDOS?", ""),
+    ("alimento", "fotos_presentacion/02_engorde_cerdo.jpg", (0.5, 0.5), "ALIMENTO DE CERDO",
+     "Preparado · Bolsa de 30 kg y suelto"),
+    ("engorde", "assets/nuevas/harina_carne.jpg", (0.5, 0.5), "ENGORDE DE CERDO", "Con harina de carne"),
 ]
 GUION = [
-    ("intro", "¿Criás chanchos? Esto es lo que tenemos para vos.",
-     "¿Criás *chanchos?* | Esto es lo que | tenemos para vos."),
-    ("mezcla", "Mezcla para cerdo preparada.", "*Mezcla* para cerdo *preparada.*"),
-    ("pellet", "Pélet con maíz, en bolsa de treinta kilos y suelto.",
-     "*Pellet* con *maíz,* | en bolsa de *30* *kilos* | y suelto."),
-    ("harina", "Y engorde con harina de carne.", "Y *engorde* con | *harina* de *carne.*"),
-    ("fin", "Todo para tus chanchos, en Forralitas. ¡Te esperamos!",
-     "Todo para tus *chanchos,* | en *Forralitas.* | *¡Te* *esperamos!*"),
+    ("intro", "¿Tenés cerdos? Esto es lo que tenemos para ofrecerte.",
+     "¿Tenés *cerdos?* | Esto es lo que | tenemos para *ofrecerte.*"),
+    ("alimento", "Alimento de cerdo preparado, en bolsa de treinta kilos y suelto.",
+     "*Alimento* de *cerdo* *preparado,* | en bolsa de *30* *kilos* | y suelto."),
+    ("engorde", "Y engorde de cerdo con harina de carne.", "Y *engorde* de *cerdo* | con *harina* de *carne.*"),
+    ("fin", "Todo para tus cerdos, en Forralitas. ¡Te esperamos!",
+     "Todo para tus *cerdos,* | en *Forralitas.* | *¡Te* *esperamos!*"),
 ]
 GRANDE = (60, 300, 960, 840)          # x, y, w, h
 FILA_Y, FILA_H, FILA_W, GAP = 1300, 210, 290, 45
@@ -58,7 +57,7 @@ class Video:
         g["fin"]["t0"] = t + 0.5
         self.dur = round(max(t + 8.0, g.fin("fin") + 4.5), 2)
         # ---- piezas
-        self.titulo = T("PARA TUS CHANCHOS", LILITA, 76, CIRUELA)
+        self.titulo = T("PARA TUS CERDOS", LILITA, 76, CIRUELA)
         self.marca = T("FORRALITAS", FREDOKA, 34, CORAL)
         self.nombres, self.detalles = {}, {}
         for k, _, _, n, d in ITEMS:
@@ -66,7 +65,7 @@ class Video:
             pad = int(76 * 0.35)
             w, h = s.shape[1] - 2 * pad + 90, 120
             self.nombres[k] = centrar(caja(w, h, 60, CORAL), s, w / 2, h / 2 + 4)
-            self.detalles[k] = T(d, FREDOKA, 50, CIRUELA) if d else None
+            self.detalles[k] = T(d, FREDOKA, ajustar(d, FREDOKA, 50, 960), CIRUELA) if d else None
         self.sh_nombre = {k: sombra(v, 12, 0.3) for k, v in self.nombres.items()}
         self.badges = {}
         for i, k in enumerate(self.orden):
@@ -190,4 +189,4 @@ class Video:
 
 
 if __name__ == "__main__":
-    ejecutar(Video(), "forralitas_chanchos")
+    ejecutar(Video(), "forralitas_cerdos")
