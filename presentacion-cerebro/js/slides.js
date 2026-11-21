@@ -8,14 +8,14 @@
 //   notes[]      -> qué decir en cada parte: en (inglés) + es (traducción).
 //                   Hay una nota por cada parte: la 0 al entrar, la 1 cuando
 //                   aparece la parte 1, etc. Solo se ven en tu celular.
-//   hold[]       -> segundos EXTRA de espera en cada parte (para votar o
-//                   mirar fijo). El tiempo total de cada parte se calcula
-//                   solo: lo que tarda decir la nota + hold.
+//   hold[]       -> segundos extra estimados por parte (para votar o mirar
+//                   fijo); solo se usan para calcular los tiempos de la guía.
 //   facts[]      -> datos clave para tu celular (por si te olvidás algo)
 //   html         -> contenido (en pantalla van solo puntos clave)
 //   enter / step -> animaciones especiales
 //
-//  Las partes avanzan SOLAS. El botón SIGUIENTE pasa de diapositiva.
+//  Las partes aparecen con el botón SIGUIENTE PARTE del celular (o Espacio).
+//  SIGUIENTE DIAPO pasa de diapositiva.
 //
 //  Atributos de animación en el HTML:
 //   data-in="up|down|left|right|zoom|fade|letters|blur|pop|slowmo|stamp|flip|draw"

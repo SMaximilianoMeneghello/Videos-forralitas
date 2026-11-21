@@ -58,7 +58,6 @@
       } else if (m.t === "state") {
         state = m;
         elapsedBase = m.elapsed; elapsedAt = Date.now();
-        if (m.auto) { autoBase = m.auto.inMs; autoAt = Date.now(); }
         render();
       }
     },
@@ -90,49 +89,51 @@
       $("#s-title").textContent = "Tocá COMENZAR";
       $("#s-notes").innerHTML = "Lo ideal es tocar <b>COMENZAR</b> en la netbook (así se pone en pantalla completa). Si ya está todo listo, también podés empezar desde acá.";
       $("#s-steps").innerHTML = "";
-      $("#s-next").textContent = state.list[0] || "";
+      $("#part-btn").disabled = true;
+      $("#part-main").textContent = "SIGUIENTE PARTE";
+      $("#part-sub").textContent = "Primero empezá la presentación";
       $("#next-sub").textContent = "COMENZAR";
       return;
     }
     $("#s-num").textContent = `Diapositiva ${s.i + 1} de ${s.n}`;
     $("#s-title").textContent = s.title;
-    // notas: en inglés (lo que decís) + traducción al español abajo
-    const n = s.notes || "";
-    const facts = (s.facts || []).map((f) => `<li>${esc(f)}</li>`).join("");
-    const factsHtml = facts ? `<div class="facts"><div class="facts-t">📌 Datos clave</div><ul>${facts}</ul></div>` : "";
-    if (typeof n === "string") $("#s-notes").innerHTML = esc(n) + factsHtml;
-    else $("#s-notes").innerHTML = `<div class="en">${esc(n.en)}</div><div class="es">🇦🇷 ${esc(n.es)}</div>${factsHtml}`;
-    // solo vuelve arriba cuando cambia la nota (si no, no te mueve el scroll mientras leés)
-    const key = s.i + ":" + s.step;
-    if (lastKey !== key) { $("#s-notes").scrollTop = 0; lastKey = key; }
+    renderNotes(s);
     let dots = "";
     for (let k = 1; k <= s.steps; k++) dots += `<i class="${k <= s.step ? "done" : ""}"></i>`;
     $("#s-steps").innerHTML = dots;
     $("#next-sub").textContent = "SIGUIENTE DIAPO";
-    $("#s-next").textContent = s.next;
-    renderAuto();
+    // botón de las partes (lo que va apareciendo dentro de la diapositiva)
+    const pb = $("#part-btn");
+    if (!s.steps) { pb.disabled = true; $("#part-main").textContent = "SIN PARTES"; $("#part-sub").textContent = "Esta diapositiva no tiene partes"; }
+    else if (s.step >= s.steps) { pb.disabled = true; $("#part-main").textContent = "✅ PARTES COMPLETAS"; $("#part-sub").textContent = "Tocá SIGUIENTE DIAPO"; }
+    else { pb.disabled = false; $("#part-main").textContent = "SIGUIENTE PARTE"; $("#part-sub").textContent = `Mostrar parte ${s.step + 1} de ${s.steps}`; }
     $("#lite-btn").textContent = state.lite ? "✨ Efectos" : "🪶 Liviano";
   }
 
-  // cuenta regresiva de la próxima parte automática
+  // Notas: todas las partes de esta diapositiva (la de AHORA resaltada),
+  // los datos clave y, más abajo, lo que vas a decir en la diapositiva siguiente.
   let lastKey = "";
-  let autoBase = 0, autoAt = 0;
-  function renderAuto() {
-    const s = state && state.slide, a = state && state.auto;
-    const box = $("#auto");
-    if (!s || !a || !state.started || s.step >= s.steps || !a.total) {
-      box.classList.add("done");
-      $("#auto-txt").textContent = s && s.steps ? "✅ Diapositiva completa · tocá SIGUIENTE" : "Esta diapositiva no tiene partes automáticas";
-      $("#auto-bar").style.width = "100%";
-      return;
+  function renderNotes(s) {
+    const box = $("#s-notes");
+    const part = (n, k, cls, label) => `<div class="np ${cls}"><div class="np-h">${label}</div>
+      <div class="en">${esc(n.en || n)}</div>${n.es ? `<div class="es">🇦🇷 ${esc(n.es)}</div>` : ""}</div>`;
+    const notes = s.allNotes || (s.notes ? [s.notes] : []);
+    let h = notes.map((n, k) => part(n, k, k < s.step ? "done" : k === s.step ? "now" : "later",
+      (k === 0 ? "Al entrar" : `Parte ${k}`) + (k === s.step ? " · AHORA" : ""))).join("");
+    const facts = (s.facts || []).map((f) => `<li>${esc(f)}</li>`).join("");
+    if (facts) h += `<div class="facts"><div class="facts-t">📌 Datos clave</div><ul>${facts}</ul></div>`;
+    const nx = s.nextNotes || [];
+    h += `<div class="nx-h">⬇ Después · ${s.i + 2 <= s.n ? `Diapositiva ${s.i + 2}: ` : ""}${esc(s.next)}</div>`;
+    h += nx.map((n, k) => part(n, k, "nx", k === 0 ? "Al entrar" : `Parte ${k}`)).join("");
+    box.innerHTML = h;
+    // al cambiar de diapositiva o de parte, la parte de AHORA queda arriba
+    const key = s.i + ":" + s.step;
+    if (lastKey !== key) {
+      lastKey = key;
+      const now = box.querySelector(".np.now");
+      box.scrollTop = now && s.step > 0 ? now.offsetTop - box.offsetTop - 6 : 0;
     }
-    box.classList.remove("done");
-    const left = a.paused ? a.inMs : Math.max(0, autoBase - (Date.now() - autoAt));
-    $("#auto-txt").textContent = a.paused ? `⏸ En pausa · parte ${s.step + 1}/${s.steps}` : `⏱ Parte ${s.step + 1}/${s.steps} en ${Math.ceil(left / 1000)} s`;
-    $("#auto-bar").style.width = `${100 - (left / a.total) * 100}%`;
-    $("#pause-btn").textContent = a.paused ? "▶ Seguir" : "⏸ Pausar";
   }
-  setInterval(() => { if (state && state.mode === "slides") renderAuto(); }, 250);
 
   const PHASES = { lobby: "Sala de espera", intro: "Mostrando pregunta", question: "⏱ Respondiendo", reveal: "Respuesta correcta", board: "Ranking", podium: "🏆 Podio final" };
   function renderGame(g) {
@@ -166,8 +167,7 @@
   // ---------- botones ----------
   $("#next-btn").addEventListener("click", () => { if (state && !state.started) cmd("start"); else cmd("next"); });
   $("#prev-btn").addEventListener("click", () => cmd("prev"));
-  $("#pause-btn").addEventListener("click", () => cmd("pause"));
-  $("#reveal-btn").addEventListener("click", () => cmd("reveal"));
+  $("#part-btn").addEventListener("click", () => cmd("reveal"));
   $("#mute-btn").addEventListener("click", () => cmd("mute"));
   $("#lite-btn").addEventListener("click", () => cmd("lite"));
   $("#game-btn").addEventListener("click", () => { if (confirm("¿Abrir la sala del juego ahora?")) cmd("game-open"); });

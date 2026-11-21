@@ -6,8 +6,8 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 
 - **13 diapositivas** con transiciones cinematográficas, cámara lenta, luces, partículas y sonido. En pantalla van solo palabras clave: la explicación la das vos.
 - **8 ilusiones comprobadas** (documentadas por el científico de la visión Michael Bach y en la literatura): Café wall, círculos de Ebbinghaus, rejilla centelleante, Lilac chaser, la bandera fantasma (postimagen), la espiral (efecto consecutivo de movimiento), Stepping feet y ceguera inducida por movimiento. Después viene la memoria.
-- **Partes automáticas**: dentro de cada diapositiva todo aparece solo, con el tiempo calculado según lo que tenés que decir. Vos solo pasás de diapositiva.
-- **Control remoto en tu celular**: qué decir (en inglés, con la traducción abajo), datos clave de cada diapositiva, cuenta regresiva de la próxima parte con ⏸ Pausar y ⏩ Ya, cronómetro y lista de diapositivas.
+- **Todo lo controlás vos**: el botón celeste **SIGUIENTE PARTE** muestra lo que se va agregando en cada diapositiva y el botón grande **SIGUIENTE DIAPO** pasa de diapositiva.
+- **Control remoto en tu celular**: qué decir (en inglés, con la traducción abajo), datos clave de cada diapositiva, adelanto de lo que vas a decir en la siguiente, cronómetro y lista de diapositivas.
 - **Juego final**: tus compañeros entran con un QR o un enlace, ponen su nombre y responden 10 preguntas con 40 segundos cada una. Hay puntos por velocidad, rachas, ranking y podio con confeti.
 
 ---
@@ -32,7 +32,7 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 3. Con tu celular **escaneá el QR** de la derecha y escribí el **PIN de 4 números**.
 4. En la netbook tocá **▶ START PRESENTATION**: se pone en pantalla completa.
 5. Desde ahí manejás todo con el celular:
-   - Las partes de cada diapositiva aparecen **solas**. Arriba de las notas ves cuánto falta para la próxima; **⏸ Pausar** la frena y **⏩ Ya** la muestra en el momento.
+   - **▶ SIGUIENTE PARTE** (celeste) muestra la próxima parte de la diapositiva. En las notas, la parte que tenés que decir aparece resaltada y, más abajo, ves lo de la diapositiva siguiente para repasar.
    - **SIGUIENTE DIAPO** pasa a la próxima diapositiva (eso lo hacés siempre vos).
    - En la tarjeta **🎤 What to say** tenés el texto en inglés para cada momento, con la traducción abajo.
    - **☰ Diapos** salta a cualquier diapositiva.
@@ -47,8 +47,7 @@ Presentación interactiva **en inglés** sobre ilusiones ópticas y trucos de la
 | Tecla | Qué hace |
 |---|---|
 | `→` | Siguiente diapositiva |
-| `Espacio` | Mostrar ya la próxima parte |
-| `S` | Pausar o seguir las partes automáticas |
+| `Espacio` | Siguiente parte |
 | `←` | Anterior |
 | `F` | Pantalla completa |
 | `M` | Prender o apagar el sonido |
