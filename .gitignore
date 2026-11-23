@@ -19,3 +19,7 @@ forralitas_categorias/logs/
 forralitas_categorias/videos/*_video.mp4
 forralitas_categorias/videos/*.wav
 forralitas_categorias/videos/
+forralitas_maiz3/cache/
+forralitas_maiz3/previas/
+forralitas_maiz3/logs/
+forralitas_maiz3/videos/
