@@ -370,7 +370,7 @@ class Linea:
 
     def audio(self):
         partes = []
-        fade = int(0.006 * SR)
+        fade = int(0.003 * SR)
         for p in PLAN:
             if p[0] == "src":
                 x = self.f.tramo_audio(p[1], p[2])
@@ -386,11 +386,14 @@ class Linea:
                 x = np.concatenate([self.f.tramo_audio(blk, blk + 2.5)] + [loop] * int(round(extra / l))
                                    + [self.f.tramo_audio(blk + 2.5, blk + 3.0)])
             partes.append(x.copy())
-        out = partes[0]
-        for x in partes[1:]:                               # unión con microfundido (cortes sobre el pulso)
-            r = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
-            x[:fade] = x[:fade] * r + out[-fade:] * (1 - r) if len(out) >= fade else x[:fade]
-            out = np.concatenate([out[:-fade], x])
+        # unión sin perder muestras (los cortes caen sobre el pulso): micro fundido de salida y de entrada
+        r = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
+        for i, x in enumerate(partes):
+            if i > 0:
+                x[:fade] *= r
+            if i < len(partes) - 1:
+                x[-fade:] *= r[::-1]
+        out = np.concatenate(partes)
         return out
 
 
@@ -495,10 +498,14 @@ def main():
     p.stdin.close()
     p.wait()
     final = os.path.join(SALIDA, "intro_18_ignacio_azafata.mp4")
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-i", wav, "-map", "0:v", "-map", "1:a",
-                    "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p",
-                    "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-shortest", "-movflags", "+faststart",
-                    final], check=True)
+    comun = ["-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-b:v", "2900k", "-maxrate", "4500k",
+             "-bufsize", "6000k", "-pix_fmt", "yuv420p", "-r", str(FPS)]
+    log = os.path.join(AQUI, "cache", "x264pass")
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp] + comun + ["-pass", "1", "-passlogfile", log, "-an",
+                    "-f", "mp4", os.devnull], check=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-i", wav, "-map", "0:v", "-map", "1:a"] + comun +
+                   ["-pass", "2", "-passlogfile", log, "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+                    "-movflags", "+faststart", final], check=True)
     print("Listo:", final)
 
 
